@@ -21,5 +21,6 @@
         "flowbite-svelte": "^0.44.24",
         "tailwind-merge": "^2.2.2",
         "zod": "^3.22.4"
-    }
+    },
+    "packageManager": "pnpm@8.15.4+sha1.c85a4305534f76d461407b59277b954bac97b5c4"
 }
