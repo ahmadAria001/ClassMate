@@ -18,7 +18,8 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('username', 50)->nullable();
-            $table->enum('role', ['RT', 'RW', 'Warga'])->nullable();
+            $table->string('password');
+            $table->enum('role', ['RT', 'RW', 'Warga', 'Admin'])->nullable();
             $table->unsignedBigInteger('civilian_id')->index('fk_users_civilian')->nullable();
             $table->bigInteger('created_at');
             $table->unsignedBigInteger('created_by')->index('fk_user')->nullable();

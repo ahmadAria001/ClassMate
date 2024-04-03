@@ -51,19 +51,5 @@ $app->singleton(
 | from the actual running of the application and sending responses.
 |
 */
-$serverHost = $_SERVER['HTTP_HOST'];
-$envFile = null;
-
-error_log($serverHost);
-
-if (str_contains('.com', $serverHost)) {
-    $envFile = '.env.production';
-} else if (str_contains('127.0.0.1', $serverHost) || str_contains('localhost', $serverHost)) {
-    $envFile = '.env';
-} else {
-    $envFile = '.env.dev';
-}
-
-$app->loadEnvironmentFrom($envFile);
 
 return $app;

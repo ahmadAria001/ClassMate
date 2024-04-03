@@ -17,6 +17,7 @@ use App\Models\RT;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class TableSeeder extends Seeder
 {
@@ -44,25 +45,53 @@ class TableSeeder extends Seeder
         }
 
 
-        for ($i = 1; $i <= 5; $i++) {
-            Civilian::create([
-                'fullName' => $faker->sentence(3),
-                'birthplace' => $faker->city(),
-                'birthdate' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
-                'family_id' => $i,
-                'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
-                'created_by' => $i,
-            ]);
+        for ($i = 1; $i <= 6; $i++) {
+            if ($i < 6) {
+                Civilian::create([
+                    'nik' => $i,
+                    'fullName' => $faker->sentence(3),
+                    'residentstatus' => $faker->randomElement(['ContractResident', 'PermanentResident']),
+                    'birthplace' => $faker->city(),
+                    'birthdate' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
+                    'family_id' => $i,
+                    'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
+                    'created_by' => $i,
+                ]);
+            } else {
+
+                Civilian::create([
+                    'nik' => 6,
+                    'fullName' => 'admin',
+                    'residentstatus' => 'PermanentResident',
+                    'birthplace' => 'MLG',
+                    'birthdate' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
+                    'family_id' => 2,
+                    'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
+                    'created_by' => 1,
+                ]);
+            }
         }
 
-        for ($i = 1; $i <= 5; $i++) {
-            User::create([
-                'username' => $faker->word(),
-                'role' => $faker->randomElement(['RT', 'Warga']),
-                'civilian_id' => $i,
-                'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
-                'created_by' => $i,
-            ]);
+        for ($i = 1; $i <= 6; $i++) {
+            if ($i < 6) {
+                User::create([
+                    'username' => $faker->word(),
+                    'role' => $faker->randomElement(['RT', 'Warga']),
+                    'password' => Hash::make('123'),
+                    'civilian_id' => $i,
+                    'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
+                    'created_by' => $i,
+                ]);
+            } else {
+                User::create([
+                    'username' => 'admin',
+                    'role' => 'Admin',
+                    'password' => Hash::make('123'),
+                    'civilian_id' => 6,
+                    'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
+                    'created_by' => 1,
+                ]);
+            }
         }
 
         $duesType = ['Security', 'TrashManagement', 'Event'];
