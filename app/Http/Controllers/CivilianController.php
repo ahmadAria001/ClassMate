@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CivilianRequest;
+use App\Http\Requests\Resources\DeleteCiviliant;
 use App\Http\Requests\UpdateCivilianRequest;
 use App\Models\Civilian;
 use Carbon\Carbon;
@@ -74,12 +75,12 @@ class CivilianController extends Controller
         }
     }
 
-    public function edit(UpdateCivilianRequest $req)
+    public function edit(UpdateCivilianRequest $req): JsonResponse
     {
         $payload = $req->safe()->all();
 
         try {
-            $data = Civilian::find(['id' => $payload['id']])->first();
+            $data = Civilian::withTrashed()->find(['id' => $payload['id']])->first();
 
             if ($data) {
                 // error_log($data);
@@ -90,20 +91,69 @@ class CivilianController extends Controller
                     'birthdate' => $req->birthdate,
                     'residentstatus' => $req->residentstatus,
                     'family_id' => $req->family_id,
+                    'updated_by' => Auth::id()
                 ]);
 
-                $data->updated_at = Carbon::now()->timestamp;
+                // $data->updated_at = Carbon::now()->timestamp;
 
-                if (str_contains($req->url(), 'api')) {
-                    $token = $req->bearerToken();
-                    $pat = PersonalAccessToken::findToken($token);
+                // if (str_contains($req->url(), 'api')) {
+                //     $token = $req->bearerToken();
+                //     $pat = PersonalAccessToken::findToken($token);
 
-                    $model = $pat->tokenable();
+                //     $model = $pat->tokenable();
 
-                    $data->updated_by = ($model->get('id'))[0]->id;
-                }
+                //     $data->updated_by = ($model->get('id'))[0]->id;
+                // }
 
-                $data->updated_by = Auth::id();
+                // $data->updated_by = Auth::id();
+
+                $data->save();
+
+                return Response()->json([
+                    'status' => true,
+                    'message' => 'Data Updated'
+                ]);
+            } else {
+                $token = $req->bearerToken();
+                $pat = PersonalAccessToken::findToken($token);
+                $model = $pat->tokenable();
+                error_log(($model->get('id'))[0]->id);
+
+                return Response()->json([
+                    'status' => false,
+                    'message' => 'Data Not found'
+                ]);
+            }
+        } catch (\Throwable $th) {
+            error_log($th);
+        }
+    }
+
+    public function destroy(DeleteCiviliant $req): JsonResponse
+    {
+        $payload = $req->safe()->all();
+
+        try {
+            $data = Civilian::withTrashed()->find(['id' => $payload['id']])->first();
+
+            if ($data) {
+                // error_log($data);
+
+                $data->update([
+                    'deleted_by' => Auth::id()
+                ]);
+
+                // if (str_contains($req->url(), 'api')) {
+                //     $token = $req->bearerToken();
+                //     $pat = PersonalAccessToken::findToken($token);
+
+                //     $model = $pat->tokenable();
+
+                //     $data->deleted_by = ($model->get('id'))[0]->id;
+                // } else
+                //     $data->deleted_by = Auth::id();
+
+                $data->delete();
 
                 $data->save();
 
