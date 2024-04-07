@@ -20,3 +20,6 @@ Route::get('/', function () {
 Route::get('/login', function () {
     return Inertia::render('Login');
 })->name('login');
+Route::get('/civilian', function () {
+    return Inertia::render('Auth/Civilian');
+})->name('civilian');

@@ -23,6 +23,7 @@ class UpdateCiviliant
         }
 
         $pat = PersonalAccessToken::findToken($token);
+        if (!$pat) abort(401, 'Unauthorized');;
 
         if ($pat->cant([\App\Http\Controllers\CivilianController::class, 'edit']) && !($pat->can('*'))) {
             return $next(null);

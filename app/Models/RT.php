@@ -5,10 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class RT extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
     protected $table = 'rt';
     protected $fillable = [
         'leader_id',
@@ -22,22 +25,32 @@ class RT extends Model
 
     protected $dateFormat = 'U';
 
-    protected function leader_id(): BelongsTo
+    public function leader_id(): BelongsTo
     {
         return $this->belongsTo(User::class, 'leader_id', 'id');
     }
 
-    protected function created_by(): BelongsTo
+    public function family(): HasMany
+    {
+        return $this->hasMany(Family::class, 'rt_id', 'id');
+    }
+
+    public function civils(): HasManyThrough
+    {
+        return $this->hasManyThrough(Civilian::class, Family::class, 'rt_id', 'family_id');
+    }
+
+    public function created_by(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by', 'id');
     }
 
-    protected function updated_by(): BelongsTo
+    public function updated_by(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by', 'id');
     }
 
-    protected function deleted_by(): BelongsTo
+    public function deleted_by(): BelongsTo
     {
         return $this->belongsTo(User::class, 'deleted_by', 'id');
     }

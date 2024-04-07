@@ -19,8 +19,8 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->enum('typeDues', ['Security', 'TrashManagement', 'Event'])->nullable();
             $table->text('description')->nullable();
-            $table->integer('amt_dues')->nullable();
-            $table->integer('amt_fund')->nullable();
+            $table->decimal('amt_dues', 13, 2)->nullable();
+            $table->decimal('amt_fund', 13, 2)->nullable();
             $table->boolean('status')->nullable();
             $table->unsignedBigInteger('rt_id')->index('fk_dues_rt');
             $table->bigInteger('created_at');
