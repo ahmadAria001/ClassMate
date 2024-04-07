@@ -51,7 +51,7 @@ class FamilyController extends Controller
 
             $data = Family::firstOrCreate([
                 'nkk' => $payload->get('nkk'),
-                'residentstatus' => $payload->get('residentstatus'),
+                'residentstatus' => $payload->get('residentstatus') == 'PermanentResident' ? 'PermanentResident' : 'ContractResident',
                 'rt_id' => $payload->get('rt_id'),
             ]);
 
@@ -97,7 +97,7 @@ class FamilyController extends Controller
                 if (Auth::guard('web')->check()) {
                     $data->update([
                         'nkk' => $payload->get('nkk'),
-                        'residentstatus' => $payload->get('residentstatus'),
+                        'residentstatus' => $payload->get('residentstatus') == 'PermanentResident' ? 'PermanentResident' : 'ContractResident',
                         'rt_id' => $payload->get('rt_id'),
                         'updated_by' => Auth::id()
                     ]);
@@ -108,7 +108,7 @@ class FamilyController extends Controller
 
                     $data->update([
                         'nkk' => $payload->get('nkk'),
-                        'residentstatus' => $payload->get('residentstatus'),
+                        'residentstatus' => $payload->get('residentstatus') == 'PermanentResident' ? 'PermanentResident' : 'ContractResident',
                         'rt_id' => $payload->get('rt_id'),
                         'updated_by' => ($model->get('id'))[0]->id
                     ]);
