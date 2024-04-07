@@ -13,7 +13,7 @@ class FinancialAssistance extends Model
     protected $fillable = [
         'request_by',
         'tanggungan',
-        'alas',
+        'alasan',
         'status',
         'tanggungan',
         'created_at',
