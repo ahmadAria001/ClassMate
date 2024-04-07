@@ -23,25 +23,6 @@ Route::get('/login', function () {
     return Inertia::render('Login');
 })->name('login');
 
-Route::get('/family', FamilyController::class);
-Route::prefix('/family')->group(function(){
-    Route::get('/', FamilyController::class);
-    Route::get('/create', [FamilyController::class, 'create']);
-    Route::post('/store', [FamilyController::class, 'store']);
-    Route::get('/detail/{family_id}', [FamilyController::class, 'detail']);
-    Route::get('/edit/{family_id}', [FamilyController::class, 'edit']);
-    Route::post('/update/{family_id}', [FamilyController::class, 'update']);
-    Route::get('/delete/{family_id}', [FamilyController::class, 'delete']);
-});
-
-Route::get('/bansos', FinancialAssistanceController::class);
-Route::prefix('/bansos')->group(function(){
-    Route::get('/', FinancialAssistanceController::class);
-    Route::get('/create', [FinancialAssistanceController::class, 'create']);
-    Route::post('/store', [FinancialAssistanceController::class, 'store']);
-    Route::get('/detail/{bansos_id}', [FinancialAssistanceController::class, 'detail']);
-    Route::get('/edit/{bansos_id}', [FinancialAssistanceController::class, 'edit']);
-    Route::post('/update/{bansos_id}', [FinancialAssistanceController::class, 'update']);
-    Route::get('/delete/{bansos_id}', [FinancialAssistanceController::class, 'delete']);
-});
-
+Route::get('/civilian', function () {
+    return Inertia::render('Auth/Civilian');
+})->name('civilian');

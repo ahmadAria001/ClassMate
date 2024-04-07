@@ -5,10 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Family extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
     protected $table = 'family';
     protected $fillable = [
         'nkk',
@@ -24,22 +26,26 @@ class Family extends Model
 
     protected $dateFormat = 'U';
 
-    protected function rt_id(): BelongsTo
+    public function civil(): HasMany
+    {
+        return $this->hasMany(Civilian::class);
+    }
+    public function rt_id(): BelongsTo
     {
         return $this->belongsTo(RT::class, 'rt_id', 'id');
     }
 
-    protected function created_by(): BelongsTo
+    public function created_by(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by', 'id');
     }
 
-    protected function updated_by(): BelongsTo
+    public function updated_by(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by', 'id');
     }
 
-    protected function deleted_by(): BelongsTo
+    public function deleted_by(): BelongsTo
     {
         return $this->belongsTo(User::class, 'deleted_by', 'id');
     }

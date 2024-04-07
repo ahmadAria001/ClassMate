@@ -17,18 +17,14 @@ class CiviliantCreate
      */
     public function handle(Request $request, Closure $next): Response
     {
-
         $token = $request->bearerToken();
 
-        // error_log($token);
         if ($token === null) {
             abort(401, 'Unauthorized');
         }
 
         $pat = PersonalAccessToken::findToken($token);
-
-        // error_log($pat->can([\App\Http\Controllers\CivilianController::class, 'create']));
-        // error_log($pat->can('*'));
+        if (!$pat) abort(401, 'Unauthorized');;
 
         if ($pat->cant([\App\Http\Controllers\CivilianController::class, 'create']) && !($pat->can('*'))) {
             return $next(null);

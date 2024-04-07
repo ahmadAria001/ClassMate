@@ -18,13 +18,17 @@ class CivilianController extends Controller
 {
     public function __invoke(): Response
     {
-        $data = Civilian::getAll();
-        return Inertia::render('index', ['data' => $data]);
+        return Inertia::render('Auth/Civilian');
     }
 
-    public function getAll(): JsonResponse
+    public function get($filter = null): JsonResponse
     {
-        $data = Civilian::all();
+        $data = null;
+        if ($filter) {
+            $data = Civilian::with('family')->find($filter);
+        } else
+            $data = Civilian::with('family')->get();
+
         return Response()->json(['data' => $data], 200);
     }
 
@@ -59,17 +63,12 @@ class CivilianController extends Controller
                     'status' => true,
                     'message' => 'Data Created'
                 ]);
-            } else {
-                $token = $req->bearerToken();
-                $pat = PersonalAccessToken::findToken($token);
-                $model = $pat->tokenable();
-                error_log(($model->get('id'))[0]->id);
-
-                return Response()->json([
-                    'status' => false,
-                    'message' => 'Data already exist'
-                ]);
             }
+
+            return Response()->json([
+                'status' => false,
+                'message' => 'Data already exist'
+            ], 400);
         } catch (\Throwable $th) {
             error_log($th);
         }
@@ -77,35 +76,37 @@ class CivilianController extends Controller
 
     public function edit(UpdateCivilianRequest $req): JsonResponse
     {
-        $payload = $req->safe()->all();
+        $payload = $req->safe()->collect();
 
         try {
-            $data = Civilian::withTrashed()->find(['id' => $payload['id']])->first();
+            $data = Civilian::withTrashed()->find(['id' => $payload->get('id')])->first();
 
             if ($data) {
-                // error_log($data);
-                $data->update([
-                    'nik' => $req->nik,
-                    'fullName' => $req->fullName,
-                    'birthplace' => $req->birthplace,
-                    'birthdate' => $req->birthdate,
-                    'residentstatus' => $req->residentstatus,
-                    'family_id' => $req->family_id,
-                    'updated_by' => Auth::id()
-                ]);
+                if (Auth::guard('web')->check()) {
+                    $data->update([
+                        'nik' => $req->nik,
+                        'fullName' => $req->fullName,
+                        'birthplace' => $req->birthplace,
+                        'birthdate' => $req->birthdate,
+                        'residentstatus' => $req->residentstatus,
+                        'family_id' => $req->family_id,
+                        'updated_by' => Auth::id()
+                    ]);
+                } else {
+                    $token = $req->bearerToken();
+                    $pat = PersonalAccessToken::findToken($token);
+                    $model = $pat->tokenable();
 
-                // $data->updated_at = Carbon::now()->timestamp;
-
-                // if (str_contains($req->url(), 'api')) {
-                //     $token = $req->bearerToken();
-                //     $pat = PersonalAccessToken::findToken($token);
-
-                //     $model = $pat->tokenable();
-
-                //     $data->updated_by = ($model->get('id'))[0]->id;
-                // }
-
-                // $data->updated_by = Auth::id();
+                    $data->update([
+                        'nik' => $req->nik,
+                        'fullName' => $req->fullName,
+                        'birthplace' => $req->birthplace,
+                        'birthdate' => $req->birthdate,
+                        'residentstatus' => $req->residentstatus,
+                        'family_id' => $req->family_id,
+                        'updated_by' => ($model->get('id'))[0]->id
+                    ]);
+                }
 
                 $data->save();
 
@@ -113,17 +114,12 @@ class CivilianController extends Controller
                     'status' => true,
                     'message' => 'Data Updated'
                 ]);
-            } else {
-                $token = $req->bearerToken();
-                $pat = PersonalAccessToken::findToken($token);
-                $model = $pat->tokenable();
-                error_log(($model->get('id'))[0]->id);
-
-                return Response()->json([
-                    'status' => false,
-                    'message' => 'Data Not found'
-                ]);
             }
+
+            return Response()->json([
+                'status' => false,
+                'message' => 'Data Not found'
+            ], 400);
         } catch (\Throwable $th) {
             error_log($th);
         }
@@ -131,47 +127,39 @@ class CivilianController extends Controller
 
     public function destroy(DeleteCiviliant $req): JsonResponse
     {
-        $payload = $req->safe()->all();
+        $payload = $req->safe()->collect();
 
         try {
-            $data = Civilian::withTrashed()->find(['id' => $payload['id']])->first();
+            $data = Civilian::withTrashed()->find(['id' => $payload->get('id')])->first();
 
             if ($data) {
-                // error_log($data);
+                if (Auth::guard('web')->check()) {
+                    $data->update([
+                        'deleted_by' => Auth::id()
+                    ]);
+                } else {
+                    $token = $req->bearerToken();
+                    $pat = PersonalAccessToken::findToken($token);
+                    $model = $pat->tokenable();
 
-                $data->update([
-                    'deleted_by' => Auth::id()
-                ]);
-
-                // if (str_contains($req->url(), 'api')) {
-                //     $token = $req->bearerToken();
-                //     $pat = PersonalAccessToken::findToken($token);
-
-                //     $model = $pat->tokenable();
-
-                //     $data->deleted_by = ($model->get('id'))[0]->id;
-                // } else
-                //     $data->deleted_by = Auth::id();
+                    $data->update([
+                        'deleted_by' => ($model->get('id'))[0]->id
+                    ]);
+                }
+                $data->save();
 
                 $data->delete();
 
-                $data->save();
-
                 return Response()->json([
                     'status' => true,
-                    'message' => 'Data Updated'
-                ]);
-            } else {
-                $token = $req->bearerToken();
-                $pat = PersonalAccessToken::findToken($token);
-                $model = $pat->tokenable();
-                error_log(($model->get('id'))[0]->id);
-
-                return Response()->json([
-                    'status' => false,
-                    'message' => 'Data Not found'
+                    'message' => 'Data Deleted'
                 ]);
             }
+
+            return Response()->json([
+                'status' => false,
+                'message' => 'Data Not found'
+            ], 400);
         } catch (\Throwable $th) {
             error_log($th);
         }

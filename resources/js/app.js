@@ -1,5 +1,5 @@
 import { createInertiaApp } from "@inertiajs/svelte";
-
+import axios from "axios";
 axios.defaults.withCredentials = true;
 
 createInertiaApp({
