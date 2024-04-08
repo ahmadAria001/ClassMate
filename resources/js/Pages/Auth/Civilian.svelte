@@ -13,6 +13,10 @@
     import EditRT from "../../Components/Temp/Modal/EditRT.svelte";
     import DeleteRT from "../../Components/Temp/Modal/DeleteRT.svelte";
 
+    import CreateCivil from "../../Components/Temp/Modal/CreateCivil.svelte";
+    import EditCivil from "../../Components/Temp/Modal/EditCivil.svelte";
+    import DeleteCivil from "../../Components/Temp/Modal/DeleteCivil.svelte";
+
     import CreateFamily from "../../Components/Temp/Modal/CreateFamily.svelte";
     import EditFamily from "../../Components/Temp/Modal/EditFamily.svelte";
     import DeleteFamily from "../../Components/Temp/Modal/DeleteFamily.svelte";
@@ -26,6 +30,10 @@
     let showCreateFam = { show: false };
     let showUpdateFam = { show: false, targetId: null };
     let showDeleteFam = { show: false, targetId: null };
+
+    let showCreateCiv = { show: false };
+    let showUpdateCiv = { show: false, targetId: null };
+    let showDeleteCiv = { show: false, targetId: null };
 
     const getData = async () => {
         const response = await axios.get("/api/rt", {
@@ -64,7 +72,7 @@
                     <h1 class="text-3xl">Civilian(RT)</h1>
                     <button
                         type="button"
-                        class="text-lg bg-green-500 hover:bg-green-700 text-white py-1 rounded focus:outline-none focus:shadow-outline w-28 h-full flex justify-between align-middle text-center px-6"
+                        class="text-lg bg-green-500 hover:bg-green-700 text-white py-1 rounded focus:outline-none focus:shadow-outline w-fit h-full flex justify-between align-middle text-center px-6"
                         on:click={() => {
                             showCreate = true;
                         }}
@@ -76,7 +84,7 @@
                             ><path d="M15 2.013H9V9H2v6h7v6.987h6V15h7V9h-7z"
                             ></path></svg
                         >
-                        <span> New </span>
+                        <span> New RT </span>
                     </button>
                 </div>
                 <div class="px-3 py-4 flex justify-center">
@@ -433,12 +441,22 @@
                                                                                         <button
                                                                                             type="button"
                                                                                             class="text-lg bg-yellow-500 hover:bg-yellow-600 text-white py-1 px-2 rounded focus:outline-none focus:shadow-outline w-full h-full"
+                                                                                            on:click={() => {
+                                                                                                showUpdateCiv.targetId =
+                                                                                                    id;
+                                                                                                showUpdateCiv.show = true;
+                                                                                            }}
                                                                                         >
                                                                                             Edit
                                                                                         </button>
                                                                                         <button
                                                                                             type="button"
                                                                                             class="text-lg bg-red-600 hover:bg-red-700 text-white py-1 px-2 rounded focus:outline-none focus:shadow-outline w-full h-full"
+                                                                                            on:click={() => {
+                                                                                                showDeleteCiv.targetId =
+                                                                                                    id;
+                                                                                                showDeleteCiv.show = true;
+                                                                                            }}
                                                                                         >
                                                                                             Delete
                                                                                         </button>
@@ -480,7 +498,9 @@
                     <button
                         type="button"
                         class="text-lg bg-green-500 hover:bg-green-700 text-white py-1 rounded focus:outline-none focus:shadow-outline w-fit h-full flex justify-between align-middle text-center px-6"
-                        on:click={() => {}}
+                        on:click={() => {
+                            showCreateCiv.show = true;
+                        }}
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -517,3 +537,13 @@
     bind:targetId={showDeleteFam.targetId}
 />
 <CreateFamily bind:showState={showCreateFam.show} />
+
+<EditCivil
+    bind:showState={showUpdateCiv.show}
+    bind:targetId={showUpdateCiv.targetId}
+/>
+<DeleteCivil
+    bind:showState={showDeleteCiv.show}
+    bind:targetId={showDeleteCiv.targetId}
+/>
+<CreateCivil bind:showState={showCreateCiv.show} />

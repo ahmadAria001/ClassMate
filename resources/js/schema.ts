@@ -1,12 +1,23 @@
 import { z } from "zod";
-export const UpdateCivilianRequest = z.object({
+export const CraeteCivilian = z.object({
+    nik: z.coerce.string().max(16),
+    fullName: z.coerce.string(),
+    birthplace: z.coerce.string(),
+    birthdate: z.coerce.string().transform((str) => new Date(str).getSeconds()),
+    residentstatus: z.coerce.string(),
+    family_id: z.coerce.number().int(),
+});
+export const UpdateCivilian = z.object({
     id: z.coerce.number().int(),
     nik: z.coerce.string().max(16),
     fullName: z.coerce.string(),
     birthplace: z.coerce.string(),
-    birthdate: z.coerce.number().int(),
+    birthdate: z.coerce.string().transform((str) => new Date(str).getSeconds()),
     residentstatus: z.coerce.string(),
     family_id: z.coerce.number().int(),
+});
+export const DeleteCivilian = z.object({
+    id: z.coerce.number().int(),
 });
 export const CreateFamily = z.object({
     nkk: z.coerce.string().max(16),
@@ -30,13 +41,13 @@ export const CivilianRequest = z.object({
     residentstatus: z.coerce.string(),
     family_id: z.coerce.number().int(),
 });
-export const EditDues = z.object({
+export const UpdateDues = z.object({
     id: z.coerce.number().int(),
     typeDues: z.coerce.string(),
     description: z.coerce.string(),
     amt_dues: z.coerce.number().int(),
     amt_fund: z.coerce.number().int(),
-    status: z.coerce.string(),
+    status: z.coerce.boolean(),
     rt_id: z.coerce.number().int(),
 });
 export const DeleteDues = z.object({
@@ -50,7 +61,7 @@ export const CreateDues = z.object({
     description: z.coerce.string(),
     amt_dues: z.coerce.number().int(),
     amt_fund: z.coerce.number().int(),
-    status: z.coerce.string(),
+    status: z.coerce.boolean(),
     rt_id: z.coerce.number().int(),
 });
 export const Update = z.object({

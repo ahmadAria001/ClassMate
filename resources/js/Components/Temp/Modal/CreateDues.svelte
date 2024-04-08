@@ -2,12 +2,12 @@
     import axios from "axios";
     import { twMerge } from "tailwind-merge";
     import { createForm } from "felte";
-    import { z } from "zod";
+    import { boolean, z } from "zod";
     import { validator } from "@felte/validator-zod";
     import { page, router } from "@inertiajs/svelte";
 
     import BaseModal from "./BaseModal.svelte";
-    import { CraeteCivilian } from "../../../schema";
+    import { CreateDues } from "../../../schema";
     import { setCookie, getCookie } from "@R/Utils/Cokies";
 
     export let showState = false;
@@ -17,21 +17,21 @@
     };
 
     const { form, isSubmitting, errors } = createForm<
-        z.infer<typeof CraeteCivilian>
+        z.infer<typeof CreateDues>
     >({
-        extend: validator<z.infer<typeof CraeteCivilian>>({
-            schema: CraeteCivilian,
+        extend: validator<z.infer<typeof CreateDues>>({
+            schema: CreateDues,
         }),
         onSubmit: async (values) => {
             const response = await axios.post(
-                "/api/civiliant",
+                "/api/dues",
                 {
-                    nik: values.nik,
-                    birthdate: Date.parse(values.birthdate) / 1000,
-                    birthplace: values.birthplace,
-                    residentstatus: values.residentstatus,
-                    fullName: values.fullName,
-                    family_id: values.family_id,
+                    amt_dues: values.amt_dues,
+                    amt_fund: values.amt_fund,
+                    description: values.description,
+                    rt_id: values.rt_id,
+                    status: new Boolean(values.status),
+                    typeDues: values.typeDues,
                     _token: $page.props.csrf_token,
                 },
                 {
@@ -82,113 +82,114 @@
     <form use:form method="POST">
         <div class="mb-4">
             <label
-                for="nik"
+                for="amt_dues"
                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                >NIK</label
+                >amt_dues</label
             >
             <input
-                type="text"
-                id="nik"
-                name="nik"
+                type="number"
+                id="amt_dues"
+                name="amt_dues"
                 class="shadow-sm rounded-md w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="123"
                 required
             />
-            {#if $errors.nik}
-                <span class="text-sm text-red-500">{$errors.nik}</span>
+            {#if $errors.amt_dues}
+                <span class="text-sm text-red-500">{$errors.amt_dues}</span>
             {/if}
         </div>
         <div class="mb-4">
             <label
-                for="birthdate"
+                for="amt_fund"
                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                >Birth Date</label
+                >amt_fund</label
             >
             <input
-                type="date"
-                id="birthdate"
-                name="birthdate"
+                type="number"
+                id="amt_fund"
+                name="amt_fund"
                 class="shadow-sm rounded-md w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 required
             />
-            {#if $errors.birthdate}
-                <span class="text-sm text-red-500">{$errors.birthdate}</span>
+            {#if $errors.amt_fund}
+                <span class="text-sm text-red-500">{$errors.amt_fund}</span>
             {/if}
         </div>
         <div class="mb-4">
             <label
-                for="birthplace"
+                for="description"
                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                >Birth Place</label
+                >description</label
             >
             <input
                 type="text"
-                id="birthplace"
-                name="birthplace"
+                id="description"
+                name="description"
                 class="shadow-sm rounded-md w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="Super Earth"
                 required
             />
-            {#if $errors.nik}
-                <span class="text-sm text-red-500">{$errors.nik}</span>
+            {#if $errors.description}
+                <span class="text-sm text-red-500">{$errors.description}</span>
             {/if}
         </div>
         <div class="mb-4">
             <label
-                for="fullName"
+                for="rt_id"
                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                >Full Name</label
+                >rt_id</label
             >
             <input
                 type="text"
-                id="fullName"
-                name="fullName"
+                id="rt_id"
+                name="rt_id"
                 class="shadow-sm rounded-md w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="Super Earth"
                 required
             />
-            {#if $errors.fullName}
-                <span class="text-sm text-red-500">{$errors.fullName}</span>
+            {#if $errors.rt_id}
+                <span class="text-sm text-red-500">{$errors.rt_id}</span>
             {/if}
         </div>
         <div class="mb-4">
             <label
-                for="residentstatus"
+                for="typeDues"
                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                >Resident Status</label
+                >typeDues</label
             >
             <select
-                name="residentstatus"
-                id="residentstatus"
+                name="typeDues"
+                id="typeDues"
                 class="shadow-sm rounded-md w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 required
             >
-                <option value="ContractResident">ContractResident</option>
-                <option value="PermanentResident">PermanentResident</option>
+                <option value="Security">Security</option>
+                <option value="TrashManagement">TrashManagement</option>
+                <option value="Event">Event</option>
             </select>
-            {#if $errors.residentstatus}
+            {#if $errors.typeDues}
                 <span class="text-sm text-red-500">
-                    {$errors.residentstatus}
+                    {$errors.typeDues}
                 </span>
                 <br />
             {/if}
         </div>
         <div class="mb-4">
             <label
-                for="family_id"
+                for="status"
                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                >Family ID</label
+                >Status</label
             >
             <input
-                type="family_id"
-                id="family_id"
-                name="family_id"
+                type="status"
+                id="status"
+                name="status"
                 class="shadow-sm rounded-md w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="1"
                 required
             />
-            {#if $errors.family_id}
-                <span class="text-sm text-red-500">{$errors.family_id}</span>
+            {#if $errors.status}
+                <span class="text-sm text-red-500">{$errors.status}</span>
                 <br />
             {/if}
         </div>

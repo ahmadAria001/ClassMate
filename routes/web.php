@@ -28,6 +28,10 @@ Route::get('/civilian', function () {
     return Inertia::render('Auth/Civilian');
 })->name('civilian');
 
+Route::get('/dues', function () {
+    return Inertia::render('Auth/Dues');
+})->name('dues');
+
 Route::prefix('/auth')->group(fn () => [
     Route::post('/signin', Login::class)
 ]);
