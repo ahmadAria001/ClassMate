@@ -1,6 +1,8 @@
 import { defineConfig } from "vite";
 import laravel from "laravel-vite-plugin";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
+import typescript from "@rollup/plugin-typescript";
+import sveltePreprocess from "svelte-preprocess";
 import path from "path";
 
 export default defineConfig({
@@ -9,7 +11,12 @@ export default defineConfig({
             input: ["resources/css/app.postcss", "resources/js/app.js"],
             refresh: true,
         }),
-        svelte({}),
+        svelte({
+            preprocess: [sveltePreprocess({ typescript: true })],
+        }),
+        typescript({
+            tsconfig: "./tsconfig.json",
+        }),
     ],
     resolve: {
         alias: {

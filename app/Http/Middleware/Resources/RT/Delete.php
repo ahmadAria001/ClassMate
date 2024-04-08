@@ -18,7 +18,7 @@ class Delete
     {
         $token = $request->bearerToken();
 
-        if ($token === null) {
+        if (!$token) {
             abort(401, 'Unauthorized');
         }
 

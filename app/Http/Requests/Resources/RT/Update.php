@@ -22,8 +22,8 @@ class Update extends FormRequest
     public function rules(): array
     {
         return [
-            'id' => 'required|numeric|min:1',
-            'leader_id' => 'required|numeric|min:1'
+            'id' => 'required|integer|min:1',
+            'leader_id' => 'required|integer|min:1'
         ];
     }
 }

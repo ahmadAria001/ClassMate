@@ -54,7 +54,7 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    protected function civilian_id(): BelongsTo
+    public function civilian_id(): BelongsTo
     {
         return $this->belongsTo(Civilian::class, 'civilian_id', 'id');
     }

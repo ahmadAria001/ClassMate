@@ -22,7 +22,7 @@ class Create extends FormRequest
     public function rules(): array
     {
         return [
-            'leader_id' => 'required|numeric|min:1'
+            'leader_id' => 'required|integer|min:1'
         ];
     }
 }

@@ -24,8 +24,8 @@ class CreateDues extends FormRequest
         return [
             'typeDues' => 'required|string',
             'description' => 'required|string',
-            'amt_dues' => 'required|numeric',
-            'amt_fund' => 'required|numeric',
+            'amt_dues' => 'required|integer',
+            'amt_fund' => 'required|integer',
             'status' => 'required|boolean',
             'rt_id' => 'required|integer',
         ];

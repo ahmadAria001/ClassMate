@@ -22,7 +22,7 @@ class Create extends FormRequest
     public function rules(): array
     {
         return [
-            'request_by' => 'required|numeric|min:1',
+            'request_by' => 'required|integer|min:1',
             'tanggungan' => 'required|string',
             'alasan' => 'required|string',
             'status' => 'string',

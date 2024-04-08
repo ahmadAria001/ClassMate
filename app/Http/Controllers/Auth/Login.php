@@ -28,12 +28,16 @@ class Login extends Controller
                 if ($user->role === 'RW') $token_abilities = ['*'];
                 if ($user->role === 'Warga') $token_abilities = ['complaint:view,create,edit,destroy'];
 
-                $generatedToken = $user->createToken('access_token_', $token_abilities, now()->addWeek())->plainTextToken;
-                return Response()->json(['status' => true, 'token' => $generatedToken]);
+                $generatedToken = $user->createToken('access_token_', $token_abilities, now()->addWeek());
+                return Response()->json([
+                    'status' => true,
+                    'token' => $generatedToken->plainTextToken,
+                    'exp' => now()->addWeek()->timestamp
+                ]);
             }
 
             $user = Auth::attempt($req->only('username', 'password'));
-            return Inertia::render('/Dashboard');
+            return Inertia::render('Auth/Civilian');
         } catch (\Throwable $th) {
             if (str_contains($req->url(), 'api')) {
                 return Response()->json(['status' => false, 'err' => $this->errMsg], 404);

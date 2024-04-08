@@ -22,10 +22,10 @@ class Update extends FormRequest
     public function rules(): array
     {
         return [
-            'id' => 'required|numeric|min:1',
-            'nkk' => 'required|numeric|min:1',
+            'id' => 'required|integer|min:1',
+            'nkk' => 'required|integer|min:1',
             'residentstatus' => 'required|string|min:1',
-            'rt_id' => 'required|numeric|min:1',
+            'rt_id' => 'required|integer|min:1',
         ];
     }
 }

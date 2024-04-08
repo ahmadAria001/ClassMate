@@ -24,11 +24,11 @@ class RtController extends Controller
         $data = null;
 
         if ($filter)
-            $data = RT::with('family.civil')
-                ->find($filter);
+            $data = RT::with('leader_id.civilian_id')->with('family.civil')
+                ->find($filter)->skip(0)->take(10)->get();
         else
-            $data = RT::with('family.civil')
-                ->get();
+            $data = RT::with('leader_id.civilian_id')->with('family.civil')
+                ->skip(0)->take(10)->get();
 
         return Response()->json(['data' => $data], 200);
     }
