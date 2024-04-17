@@ -20,13 +20,6 @@ use Inertia\Inertia;
 Route::get('/', function () {
     return Inertia::render('Home');
 });
-Route::get('/login', function () {
-    return Inertia::render('Login');
-})->name('login');
-
-Route::get('/register', function () {
-    return Inertia::render('Register');
-})->name('register');
 
 Route::get('/beranda', function () {
     return Inertia::render('HomePage');
@@ -117,3 +110,20 @@ Route::get('/kegiatan-warga', function () {
 Route::get('/daftar-rt', function () {
     return Inertia::render('DaftarRT');
 })->name('DaftarRT');
+
+function loadRoutes($dir)
+{
+    if (!is_dir($dir)) return;
+
+    $files = scandir($dir);
+    foreach ($files as $file) {
+        if ($file == '.' || $file == '..') continue;
+
+        $filePath = $dir . '/' . $file;
+        if (is_file($filePath) && pathinfo($filePath)['extension'] === 'php')
+            require_once $filePath;
+        else if (is_dir($filePath)) loadRoutes($filePath);
+    }
+}
+
+loadRoutes(__DIR__ . '/Handler/WEB');

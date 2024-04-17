@@ -14,8 +14,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-$registered = [];
-
 function loadRoutes($dir)
 {
     if (!is_dir($dir)) return;
@@ -31,4 +29,4 @@ function loadRoutes($dir)
     }
 }
 
-loadRoutes(__DIR__ . '/Handler');
+loadRoutes(__DIR__ . '/Handler/API');
