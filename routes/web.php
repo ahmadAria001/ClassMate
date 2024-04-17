@@ -113,7 +113,7 @@ function loadRoutesWEB($dir)
     if (!is_dir($dir)) {
         return;
     }
-    error_log($dir);
+
     $files = scandir($dir);
     foreach ($files as $file) {
         if ($file == '.' || $file == '..') {
@@ -121,7 +121,6 @@ function loadRoutesWEB($dir)
         }
 
         $filePath = $dir . '/' . $file;
-        error_log($filePath);
         if (is_file($filePath) && pathinfo($filePath)['extension'] === 'php') {
             require_once $filePath;
         } elseif (is_dir($filePath)) {
