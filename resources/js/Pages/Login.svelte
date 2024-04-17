@@ -16,6 +16,10 @@
 
     let title = "Login Page";
 
+    let errorContainer = {
+        message: null,
+    };
+
     const signIn = async (values: z.infer<typeof Login>) => {
         const response = await axios.post("/api/auth/signin", {
             username: values.username,
@@ -24,7 +28,7 @@
         });
 
         const { status, token, exp } = response.data;
-        if (status) setCookie("token", response.data.token, exp);
+        // if (status) setCookie("token", response.data.token, exp);
 
         // before '/civilian'
         router.visit("/beranda", {
@@ -40,7 +44,12 @@
         extend: validator<z.infer<typeof Login>>({ schema: Login }),
         onSubmit: signIn,
         onError: (values: unknown) => {
-            console.error(values);
+            if (values?.response?.status === 422) {
+                $errors.username = values?.response?.data?.errors?.username;
+                $errors.password = values?.response?.data?.errors?.password;
+            }
+
+            errorContainer.message = values?.response?.data?.err;
             return;
         },
         onSuccess: () => {
@@ -92,6 +101,11 @@
                 </Label>
                 {#if $errors.password}
                     <span class="text-sm text-red-500">{$errors.password}</span>
+                {/if}
+                {#if errorContainer.message}
+                    <span class="text-sm text-red-500"
+                        >{errorContainer.message}</span
+                    >
                 {/if}
                 <div class="flex items-start mb-3">
                     <Checkbox color="blue">Ingat saya</Checkbox>

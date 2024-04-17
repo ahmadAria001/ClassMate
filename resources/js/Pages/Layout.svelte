@@ -1,5 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
+    import { page } from "@inertiajs/svelte";
     import { sineIn } from "svelte/easing";
     import {
         Button,
@@ -34,7 +35,8 @@
     } from "flowbite-svelte-icons";
 
     // tempat rolenya disini
-    let role = "Warga";
+    let role = $page.props.auth.user.role;
+    console.log($page.props)
 
     let filtermenu: {
         name: string;
@@ -286,10 +288,10 @@
         </Dropdown>
         <Dropdown triggeredBy="#avatar-menu">
             <DropdownHeader>
-                <span class="block text-sm">Muhammad Fatoni</span>
-                <span class="block truncate text-sm font-medium"
-                    >fatonigaming@gmail.com</span
+                <span class="block text-sm"
+                    >{$page.props.auth.user.fullName}</span
                 >
+                <span class="block truncate text-sm font-medium">{role}</span>
             </DropdownHeader>
             <DropdownItem href="/profile">Profile</DropdownItem>
             <DropdownItem href="/login">Keluar</DropdownItem>

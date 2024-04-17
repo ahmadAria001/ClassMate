@@ -2,8 +2,12 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Civilian;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 use Inertia\Middleware;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -40,9 +44,28 @@ class HandleInertiaRequests extends Middleware
             'appName' => config('app.name'),
 
             // Lazily...
-            'auth.user' => fn () => $request->user()
-                ? $request->user()->only('id', 'username', 'role')
-                : null,
+            'auth.user' => function () use ($request) {
+                // $request->user() ? $request->user()->only('id', 'username', 'role') : null
+                $token = $request->cookie('token');
+
+                if ($token) {
+                    $pat = PersonalAccessToken::findToken($token);
+
+                    $model = $pat->tokenable();
+                    $userID = $model->get()->first()->civilian_id;
+                    $user = Civilian::where('id', '=', $userID)->first();
+
+                    return [
+                        'username' => $model->get('username')->first()->username,
+                        'role' => $model->get('role')->first()->role,
+                        'id' => $userID,
+                        'fullName' => $user->fullName,
+                        'nik' => $user->nik,
+                    ];
+                } else {
+                    return $request->user() ? $request->user()->only('id', 'username', 'role') : null;
+                }
+            },
         ]);
     }
 }

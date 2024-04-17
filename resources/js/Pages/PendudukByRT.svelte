@@ -46,7 +46,7 @@
             status: "Kos",
         },
     ];
-    let role = "RT";
+    let role = "RW";
     let addCivilian = false;
     let modalEdit = false;
     let modalFamily = false;

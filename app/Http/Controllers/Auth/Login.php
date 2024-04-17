@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\Login as AuthLogin;
 use App\Models\User;
-use Illuminate\Http\Request;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Cookie;
 use Inertia\Inertia;
 
 class Login extends Controller
@@ -20,25 +20,51 @@ class Login extends Controller
             $req->authenticate();
 
             if (str_contains($req->url(), 'api')) {
-                $user = User::where('username', $req->only('username'))->first();
+                $credentals = $req->only('username', 'password');
+                $user = null;
+
+                // error_log($credentals['username']);
+                if (is_numeric($credentals['username'])) {
+                    $user = User::with('civilian_id')
+                        ->whereHas('civilian_id', function ($query) use ($credentals) {
+                            $query->where('nik', '=', $credentals['username']);
+                        })
+                        ->first();
+                } else {
+                    $user = User::where('username', $credentals['username'])->first();
+                }
 
                 $token_abilities = null;
-                if ($user->role === 'Admin') $token_abilities = ['*'];
-                if ($user->role === 'RT') $token_abilities = ['*'];
-                if ($user->role === 'RW') $token_abilities = ['*'];
-                if ($user->role === 'Warga') $token_abilities = ['complaint:view,create,edit,destroy'];
+                if ($user->role === 'Admin') {
+                    $token_abilities = ['*'];
+                }
+                if ($user->role === 'RT') {
+                    $token_abilities = ['*'];
+                }
+                if ($user->role === 'RW') {
+                    $token_abilities = ['*'];
+                }
+                if ($user->role === 'Warga') {
+                    $token_abilities = ['complaint:view,create,edit,destroy'];
+                }
 
-                $generatedToken = $user->createToken('access_token_', $token_abilities, now()->addWeek());
-                return Response()->json([
-                    'status' => true,
-                    'token' => $generatedToken->plainTextToken,
-                    'exp' => now()->addWeek()->timestamp
-                ]);
+                $generatedToken = $user->createToken('access_token', $token_abilities, now()->addWeek());
+                $cookie = Cookie('token', $generatedToken->plainTextToken, Carbon::now()->addWeek()->getTimestamp(), '/', null, null, true);
+
+                return Response()
+                    ->json([
+                        'status' => true,
+                        'token' => $generatedToken->plainTextToken,
+                        'exp' => now()->addWeek()->timestamp,
+                    ])
+                    ->withCookie($cookie);
             }
 
             $user = Auth::attempt($req->only('username', 'password'));
             return Inertia::render('Auth/Civilian');
         } catch (\Throwable $th) {
+            // error_log($th);
+
             if (str_contains($req->url(), 'api')) {
                 return Response()->json(['status' => false, 'err' => $this->errMsg], 404);
             }
