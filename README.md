@@ -23,7 +23,10 @@ Pastikan Anda telah menginstal semua persyaratan sebelum melanjutkan. Jika belum
 
 1. Clone repo ini:
 ```bash
-   https://github.com/ahmadAria001/KawanDesa.git
+    # HTTPS
+    git clone https://github.com/ahmadAria001/KawanDesa.git
+    # SSH
+    git clone git@github.com:ahmadAria001/KawanDesa.git
 ```
 2. Masuk ke direktori
 ```bash
