@@ -49,7 +49,7 @@ class HandleInertiaRequests extends Middleware
                 // $request->user() ? $request->user()->only('id', 'username', 'role') : nul
                 $token = $request->bearerToken();
 
-                if ($token === null) {
+                if (!$token) {
                     $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
 
                     if (!$token) {
