@@ -25,9 +25,10 @@ class CivilianController extends Controller
     {
         $data = null;
         if ($filter) {
-            $data = Civilian::with('family')->find($filter);
-        } else
-            $data = Civilian::with('family')->get();
+            $data = Civilian::with('family.rt_id')->find($filter);
+        } else {
+            $data = Civilian::with('family.rt_id')->get();
+        }
 
         return Response()->json(['data' => $data], 200);
     }
@@ -53,22 +54,26 @@ class CivilianController extends Controller
 
                     $model = $pat->tokenable();
 
-                    $data->created_by = ($model->get('id'))[0]->id;
-                } else
+                    $data->created_by = $model->get('id')[0]->id;
+                } else {
                     $data->created_by = Auth::id();
+                }
 
                 $data->save();
 
                 return Response()->json([
                     'status' => true,
-                    'message' => 'Data Created'
+                    'message' => 'Data Created',
                 ]);
             }
 
-            return Response()->json([
-                'status' => false,
-                'message' => 'Data already exist'
-            ], 400);
+            return Response()->json(
+                [
+                    'status' => false,
+                    'message' => 'Data already exist',
+                ],
+                400,
+            );
         } catch (\Throwable $th) {
             error_log($th);
         }
@@ -79,7 +84,9 @@ class CivilianController extends Controller
         $payload = $req->safe()->collect();
 
         try {
-            $data = Civilian::withTrashed()->find(['id' => $payload->get('id')])->first();
+            $data = Civilian::withTrashed()
+                ->find(['id' => $payload->get('id')])
+                ->first();
 
             if ($data) {
                 if (Auth::guard('web')->check()) {
@@ -90,7 +97,7 @@ class CivilianController extends Controller
                         'birthdate' => $req->birthdate,
                         'residentstatus' => $req->residentstatus,
                         'family_id' => $req->family_id,
-                        'updated_by' => Auth::id()
+                        'updated_by' => Auth::id(),
                     ]);
                 } else {
                     $token = $req->bearerToken();
@@ -104,7 +111,7 @@ class CivilianController extends Controller
                         'birthdate' => $req->birthdate,
                         'residentstatus' => $req->residentstatus,
                         'family_id' => $req->family_id,
-                        'updated_by' => ($model->get('id'))[0]->id
+                        'updated_by' => $model->get('id')[0]->id,
                     ]);
                 }
 
@@ -112,14 +119,17 @@ class CivilianController extends Controller
 
                 return Response()->json([
                     'status' => true,
-                    'message' => 'Data Updated'
+                    'message' => 'Data Updated',
                 ]);
             }
 
-            return Response()->json([
-                'status' => false,
-                'message' => 'Data Not found'
-            ], 400);
+            return Response()->json(
+                [
+                    'status' => false,
+                    'message' => 'Data Not found',
+                ],
+                400,
+            );
         } catch (\Throwable $th) {
             error_log($th);
         }
@@ -130,12 +140,14 @@ class CivilianController extends Controller
         $payload = $req->safe()->collect();
 
         try {
-            $data = Civilian::withTrashed()->find(['id' => $payload->get('id')])->first();
+            $data = Civilian::withTrashed()
+                ->find(['id' => $payload->get('id')])
+                ->first();
 
             if ($data) {
                 if (Auth::guard('web')->check()) {
                     $data->update([
-                        'deleted_by' => Auth::id()
+                        'deleted_by' => Auth::id(),
                     ]);
                 } else {
                     $token = $req->bearerToken();
@@ -143,7 +155,7 @@ class CivilianController extends Controller
                     $model = $pat->tokenable();
 
                     $data->update([
-                        'deleted_by' => ($model->get('id'))[0]->id
+                        'deleted_by' => $model->get('id')[0]->id,
                     ]);
                 }
                 $data->save();
@@ -152,14 +164,17 @@ class CivilianController extends Controller
 
                 return Response()->json([
                     'status' => true,
-                    'message' => 'Data Deleted'
+                    'message' => 'Data Deleted',
                 ]);
             }
 
-            return Response()->json([
-                'status' => false,
-                'message' => 'Data Not found'
-            ], 400);
+            return Response()->json(
+                [
+                    'status' => false,
+                    'message' => 'Data Not found',
+                ],
+                400,
+            );
         } catch (\Throwable $th) {
             error_log($th);
         }

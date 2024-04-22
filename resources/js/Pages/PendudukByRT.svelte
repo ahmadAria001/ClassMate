@@ -139,15 +139,21 @@
 
     const getData = async (id: string = "") => {
         // console.log($page.props.auth.user)
+        const rtURI = `/api/civiliant/${id}`;
+        const adminURI = `/api/rt/${id}`;
+
         try {
             if ($page.props.auth.user.role === "RT")
                 id = $page.props.auth.user.rt_id;
 
-            const response = await axios.get(`/api/rt/${id}`, {
-                headers: {
-                    Accept: "*/*",
+            const response = await axios.get(
+                $page.props.auth.user.role === "RT" ? rtURI : adminURI,
+                {
+                    headers: {
+                        Accept: "*/*",
+                    },
                 },
-            });
+            );
 
             return response.data;
         } catch (error) {
@@ -250,90 +256,127 @@
         </Modal>
 
         <TableHead>
-            <TableHeadCell>RT</TableHeadCell>
-            <TableHeadCell>Ketua</TableHeadCell>
-            <TableHeadCell></TableHeadCell>
-            <!-- <TableHeadCell class="text-center" width="20%">Status</TableHeadCell -->
-            <!-- > -->
-            <!-- <TableHeadCell class="sr-only">Aksi</TableHeadCell> -->
+            {#if $page.props.auth.user.role === "RT"}
+                <TableHeadCell>NKK</TableHeadCell>
+                <TableHeadCell>Status</TableHeadCell>
+                <!-- <TableHeadCell>Pekerjaan</TableHeadCell> -->
+                <TableHeadCell class="text-center" width="20%"
+                    >Nama Kepala Keluarga</TableHeadCell
+                >
+                <TableHeadCell class="sr-only">Aksi</TableHeadCell>
+            {:else}
+                <TableHeadCell>RT</TableHeadCell>
+                <TableHeadCell>Ketua</TableHeadCell>
+                <TableHeadCell>Aksi</TableHeadCell>
+                <!-- <TableHeadCell class="text-center" width="20%">Status</TableHeadCell -->
+                <!-- > -->
+                <!-- <TableHeadCell class="sr-only">Aksi</TableHeadCell> -->
+            {/if}
         </TableHead>
         <TableBody>
-            {#await getData() then item}
-                {#each item.data as { id, leader_id, created_at, created_by, number, updated_at, updated_by, deleted_at, deleted_by }, idx}
-                    <TableBodyRow>
-                        <TableBodyCell>RT. {number}</TableBodyCell>
-                        <TableBodyCell
-                            >{leader_id
-                                ? leader_id.fullName
-                                : leader_id}</TableBodyCell
-                        >
-                        <!-- <TableBodyCell -->
-                        <!--     >{new Date( -->
-                        <!--         birthdate * 1000, -->
-                        <!--     ).toLocaleDateString()}</TableBodyCell -->
-                        <!-- > -->
-                        <!-- {#if residentstatus == "PermanentResident"} -->
-                        <!--     <TableBodyCell class="text-center"> -->
-                        <!--         <Badge color="green">Tetap</Badge> -->
-                        <!--     </TableBodyCell> -->
-                        <!-- {:else if residentstatus == "ContractResident"} -->
-                        <!--     <TableBodyCell class="text-center"> -->
-                        <!--         <Badge color="indigo">Kontrak</Badge> -->
-                        <!--     </TableBodyCell> -->
-                        <!-- {:else if residentstatus == "Kos"} -->
-                        <!--     <TableBodyCell class="text-center"> -->
-                        <!--         <Badge color="yellow">Kos</Badge> -->
-                        <!--     </TableBodyCell> -->
-                        <!-- {/if} -->
-                        <TableBodyCell class="text-end">
-                            <!-- buttons base on role -->
-                            {#if $page.props.auth.user.role == "RW"}
-                                <Button
-                                    color="blue"
-                                    on:click={() => {
-                                        selected = id;
-                                        modalFamily = true;
-                                    }}>Detail</Button
-                                >
-                            {/if}
-                            {#if $page.props.auth.user.role == "RT"}
-                                <Button
-                                    color="blue"
-                                    on:click={() => {
-                                        modalFamily = true;
-                                    }}>Detail</Button
-                                >
-                                <!-- tampilan edit keluarga? -->
-                                <Button color="yellow">Edit</Button>
-                                <Button
-                                    color="red"
-                                    on:click={() => {
-                                        selected = id;
-                                        modalDelete = true;
-                                    }}>Hapus</Button
-                                >
-                            {/if}
-                            {#if $page.props.auth.user.role == "Admin"}
-                                <Button
-                                    color="blue"
-                                    on:click={() => {
-                                        selected = id;
-                                        modalFamily = true;
-                                    }}>Detail</Button
-                                >
-                                <Button color="yellow">Edit</Button>
-                                <Button
-                                    color="red"
-                                    on:click={() => {
-                                        selected = id;
-                                        modalDelete = true;
-                                    }}>Hapus</Button
-                                >
-                            {/if}
-                        </TableBodyCell>
-                    </TableBodyRow>
-                {/each}
-            {/await}
+            {#if $page.props.auth.user.role === "RT"}
+                {#await getData() then data}
+                    {#each data.data[0].family as item}
+                        <TableBodyRow>
+                            <TableBodyCell>{item.nkk}</TableBodyCell>
+                            <TableBodyCell>{item.residentstatus}</TableBodyCell>
+                            <!-- <TableBodyCell>{item.noHp}</TableBodyCell> -->
+                            <TableBodyCell>{item.civil[0].fullName}</TableBodyCell>
+                            {#if item.residentstatus == "PermanentResident"}
+                                        <TableBodyCell class="text-center">
+                                            <Badge color="green">Tetap</Badge>
+                                        </TableBodyCell>
+                                    {:else if item.residentstatus == "ContractResident"}
+                                        <TableBodyCell class="text-center">
+                                            <Badge color="indigo">Kontrak</Badge
+                                            >
+                                        </TableBodyCell>
+                                    {:else if item.residentstatus == "Kos"}
+                                        <TableBodyCell class="text-center">
+                                            <Badge color="yellow">Kos</Badge>
+                                        </TableBodyCell>
+                                    {/if}
+                        </TableBodyRow>
+                    {/each}
+                {/await}
+            {:else}
+                {#await getData() then item}
+                    {#each item.data as { id, leader_id, created_at, created_by, number, updated_at, updated_by, deleted_at, deleted_by }, idx}
+                        <TableBodyRow>
+                            <TableBodyCell>RT. {number}</TableBodyCell>
+                            <TableBodyCell
+                                >{leader_id
+                                    ? leader_id.fullName
+                                    : leader_id}</TableBodyCell
+                            >
+                            <!-- <TableBodyCell -->
+                            <!--     >{new Date( -->
+                            <!--         birthdate * 1000, -->
+                            <!--     ).toLocaleDateString()}</TableBodyCell -->
+                            <!-- > -->
+                            <!-- {#if residentstatus == "PermanentResident"} -->
+                            <!--     <TableBodyCell class="text-center"> -->
+                            <!--         <Badge color="green">Tetap</Badge> -->
+                            <!--     </TableBodyCell> -->
+                            <!-- {:else if residentstatus == "ContractResident"} -->
+                            <!--     <TableBodyCell class="text-center"> -->
+                            <!--         <Badge color="indigo">Kontrak</Badge> -->
+                            <!--     </TableBodyCell> -->
+                            <!-- {:else if residentstatus == "Kos"} -->
+                            <!--     <TableBodyCell class="text-center"> -->
+                            <!--         <Badge color="yellow">Kos</Badge> -->
+                            <!--     </TableBodyCell> -->
+                            <!-- {/if} -->
+                            <TableBodyCell class="text-end">
+                                <!-- buttons base on role -->
+                                {#if $page.props.auth.user.role == "RW"}
+                                    <Button
+                                        color="blue"
+                                        on:click={() => {
+                                            selected = id;
+                                            modalFamily = true;
+                                        }}>Detail</Button
+                                    >
+                                {/if}
+                                {#if $page.props.auth.user.role == "RT"}
+                                    <Button
+                                        color="blue"
+                                        on:click={() => {
+                                            modalFamily = true;
+                                        }}>Detail</Button
+                                    >
+                                    <!-- tampilan edit keluarga? -->
+                                    <Button color="yellow">Edit</Button>
+                                    <Button
+                                        color="red"
+                                        on:click={() => {
+                                            selected = id;
+                                            modalDelete = true;
+                                        }}>Hapus</Button
+                                    >
+                                {/if}
+                                {#if $page.props.auth.user.role == "Admin"}
+                                    <Button
+                                        color="blue"
+                                        on:click={() => {
+                                            selected = id;
+                                            modalFamily = true;
+                                        }}>Detail</Button
+                                    >
+                                    <Button color="yellow">Edit</Button>
+                                    <Button
+                                        color="red"
+                                        on:click={() => {
+                                            selected = id;
+                                            modalDelete = true;
+                                        }}>Hapus</Button
+                                    >
+                                {/if}
+                            </TableBodyCell>
+                        </TableBodyRow>
+                    {/each}
+                {/await}
+            {/if}
         </TableBody>
 
         <!-- modal detail -->

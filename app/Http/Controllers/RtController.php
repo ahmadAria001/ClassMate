@@ -24,7 +24,7 @@ class RtController extends Controller
         $data = null;
 
         if ($filter) {
-            $data = RT::with('leader_id.civilian_id')->with('family.civil')->find($filter)->get();
+            $data = RT::with('leader_id.civilian_id')->with('family.civil')->where('id', '=', $filter)->get();
 
             if ($data) {
                 $data = $data->skip(0)->take(10);
