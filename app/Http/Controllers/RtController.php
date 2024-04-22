@@ -23,14 +23,42 @@ class RtController extends Controller
     {
         $data = null;
 
-        if ($filter)
-            $data = RT::with('leader_id.civilian_id')->with('family.civil')
-                ->find($filter)->skip(0)->take(10)->get();
-        else
-            $data = RT::with('leader_id.civilian_id')->with('family.civil')
-                ->skip(0)->take(10)->get();
+        if ($filter) {
+            $data = RT::with('leader_id.civilian_id')->with('family.civil')->where('id', '=', $filter)->get();
+
+            if ($data) {
+                $data = $data->skip(0)->take(10);
+            }
+        } else {
+            $data = RT::with('leader_id.civilian_id')->with('family.civil')->get();
+
+            if ($data) {
+                $data = $data->skip(0)->take(10);
+            }
+        }
 
         return Response()->json(['data' => $data], 200);
+    }
+
+    public function withCivils($filter = null)
+    {
+        $data = null;
+
+        if ($filter) {
+            $data = RT::with('leader_id.civilian_id', 'civils')->where('id', '=', $filter)->skip(0)->take(10)->get();
+
+            if ($data) {
+                $data = $data->skip(0)->take(10);
+            }
+        } else {
+            $data = RT::with('leader_id.civilian_id', 'civils')->skip(0)->take(10)->get();
+
+            if ($data) {
+                $data = $data->skip(0)->take(10);
+            }
+        }
+
+        return Response()->json(['data' => $data->load('civils')], 200);
     }
 
     public function create(Create $req)
@@ -43,10 +71,13 @@ class RtController extends Controller
             ]);
 
             if (count($exist) > 0) {
-                return Response()->json([
-                    'status' => false,
-                    'message' => 'Data already exist'
-                ], 400);
+                return Response()->json(
+                    [
+                        'status' => false,
+                        'message' => 'Data already exist',
+                    ],
+                    400,
+                );
             }
 
             $data = RT::firstOrCreate([
@@ -62,22 +93,26 @@ class RtController extends Controller
 
                     $model = $pat->tokenable();
 
-                    $data->created_by = ($model->get('id'))[0]->id;
-                } else
+                    $data->created_by = $model->get('id')[0]->id;
+                } else {
                     $data->created_by = Auth::id();
+                }
 
                 $data->save();
 
                 return Response()->json([
                     'status' => true,
-                    'message' => 'Data Created'
+                    'message' => 'Data Created',
                 ]);
             }
 
-            return Response()->json([
-                'status' => false,
-                'message' => 'Data already exist'
-            ], 400);
+            return Response()->json(
+                [
+                    'status' => false,
+                    'message' => 'Data already exist',
+                ],
+                400,
+            );
         } catch (\Throwable $th) {
             error_log($th);
         }
@@ -88,13 +123,15 @@ class RtController extends Controller
         $payload = $req->safe()->collect();
 
         try {
-            $data = RT::withTrashed()->find(['id' => $payload->get('id')])->first();
+            $data = RT::withTrashed()
+                ->find(['id' => $payload->get('id')])
+                ->first();
 
             if ($data) {
                 if (Auth::guard('web')->check()) {
                     $data->update([
                         'leader_id' => $payload->get('leader_id'),
-                        'updated_by' => Auth::id()
+                        'updated_by' => Auth::id(),
                     ]);
                 } else {
                     $token = $req->bearerToken();
@@ -103,20 +140,23 @@ class RtController extends Controller
 
                     $data->update([
                         'leader_id' => $payload->get('leader_id'),
-                        'updated_by' => ($model->get('id'))[0]->id
+                        'updated_by' => $model->get('id')[0]->id,
                     ]);
                 }
 
                 return Response()->json([
                     'status' => true,
-                    'message' => 'Data Updated'
+                    'message' => 'Data Updated',
                 ]);
             }
 
-            return Response()->json([
-                'status' => false,
-                'message' => 'Data Not found'
-            ], 400);
+            return Response()->json(
+                [
+                    'status' => false,
+                    'message' => 'Data Not found',
+                ],
+                400,
+            );
         } catch (\Throwable $th) {
             error_log($th);
         }
@@ -127,12 +167,14 @@ class RtController extends Controller
         $payload = $req->safe()->collect();
 
         try {
-            $data = RT::withTrashed()->find(['id' => $payload->get('id')])->first();
+            $data = RT::withTrashed()
+                ->find(['id' => $payload->get('id')])
+                ->first();
 
             if ($data) {
                 if (Auth::guard('web')->check()) {
                     $data->update([
-                        'deleted_by' => Auth::id()
+                        'deleted_by' => Auth::id(),
                     ]);
                 } else {
                     $token = $req->bearerToken();
@@ -140,7 +182,7 @@ class RtController extends Controller
 
                     $model = $pat->tokenable();
                     $data->update([
-                        'deleted_by' => ($model->get('id'))[0]->id
+                        'deleted_by' => $model->get('id')[0]->id,
                     ]);
                 }
 
@@ -150,14 +192,17 @@ class RtController extends Controller
 
                 return Response()->json([
                     'status' => true,
-                    'message' => 'Data Deleted'
+                    'message' => 'Data Deleted',
                 ]);
             }
 
-            return Response()->json([
-                'status' => false,
-                'message' => 'Data Not found'
-            ], 400);
+            return Response()->json(
+                [
+                    'status' => false,
+                    'message' => 'Data Not found',
+                ],
+                400,
+            );
         } catch (\Throwable $th) {
             error_log($th);
         }

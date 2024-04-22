@@ -30,6 +30,7 @@ class TableSeeder extends Seeder
 
         for ($i = 1; $i <= 5; $i++) {
             RT::create([
+                'number' => $i,
                 'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
                 'created_by' => $i,
             ]);
@@ -44,7 +45,6 @@ class TableSeeder extends Seeder
             ]);
         }
 
-
         for ($i = 1; $i <= 6; $i++) {
             if ($i < 6) {
                 Civilian::create([
@@ -58,7 +58,6 @@ class TableSeeder extends Seeder
                     'created_by' => $i,
                 ]);
             } else {
-
                 Civilian::create([
                     'nik' => 6,
                     'fullName' => 'admin',
@@ -108,7 +107,6 @@ class TableSeeder extends Seeder
                 'created_by' => $i,
             ]);
         }
-
 
         for ($i = 1; $i <= 3; $i++) {
             DuesPaymentLog::create([
@@ -175,7 +173,6 @@ class TableSeeder extends Seeder
             'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
             'created_by' => 1,
         ]);
-
 
         Documentation::create([
             'docs_id' => 4,
