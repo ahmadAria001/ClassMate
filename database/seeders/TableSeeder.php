@@ -28,18 +28,9 @@ class TableSeeder extends Seeder
     {
         $faker = \Faker\Factory::create();
 
-        for ($i = 1; $i <= 5; $i++) {
+        for ($i = 1; $i <= 6; $i++) {
             RT::create([
                 'number' => $i,
-                'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
-                'created_by' => $i,
-            ]);
-        }
-
-        for ($i = 1; $i <= 5; $i++) {
-            Family::create([
-                'nkk' => $i,
-                'rt_id' => $i,
                 'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
                 'created_by' => $i,
             ]);
@@ -53,7 +44,9 @@ class TableSeeder extends Seeder
                     'residentstatus' => $faker->randomElement(['ContractResident', 'PermanentResident']),
                     'birthplace' => $faker->city(),
                     'birthdate' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
-                    'family_id' => $i,
+                    'nkk' => $i,
+                    'isFamilyHead' => true,
+                    'rt_id' => $i,
                     'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
                     'created_by' => $i,
                 ]);
@@ -64,7 +57,9 @@ class TableSeeder extends Seeder
                     'residentstatus' => 'PermanentResident',
                     'birthplace' => 'MLG',
                     'birthdate' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
-                    'family_id' => 2,
+                    'nkk' => $i,
+                    'isFamilyHead' => true,
+                    'rt_id' => $i,
                     'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
                     'created_by' => 1,
                 ]);
