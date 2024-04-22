@@ -17,7 +17,7 @@ return new class extends Migration
     {
         Schema::create('civilian', function (Blueprint $table) {
             $table->id();
-            $table->char('nik', 16)->nullable();
+            $table->char('nik', 16)->index();
             $table->string('fullName', 100)->nullable();
             $table->string('birthplace', 20)->nullable();
             $table->bigInteger('birthdate')->nullable();

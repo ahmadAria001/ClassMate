@@ -6,7 +6,6 @@ use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
@@ -44,8 +43,18 @@ class Login extends FormRequest
     {
         $this->ensureIsNotRateLimited();
         $credentals = $this->only('username', 'password');
+        $user = null;
 
-        $user = User::where('username', $credentals['username'])->first();
+        // error_log(is_numeric($credentals['username']));
+        if (is_numeric($credentals['username'])) {
+            $user = User::with('civilian_id')
+                ->whereHas('civilian_id', function ($query) use ($credentals) {
+                    $query->where('nik', '=', $credentals['username']);
+                })
+                ->first();
+        } else {
+            $user = User::where('username', $credentals['username'])->first();
+        }
 
         if (!$user) {
             RateLimiter::hit($this->throttleKey());
@@ -56,7 +65,7 @@ class Login extends FormRequest
         }
 
         $isValidPassword = Hash::check($credentals['password'], $user->password);
-
+        // error_log($isValidPassword);
         if (!$isValidPassword) {
             RateLimiter::hit($this->throttleKey());
 

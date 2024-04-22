@@ -131,9 +131,15 @@
         (item) =>
             item.name.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1,
     );
+
+    const title = "Lihat Data Warga";
 </script>
 
-<Layout>
+<svelte:head>
+    {title}
+</svelte:head>
+
+<Layout active={title}>
     <TableSearch
         placeholder="Cari warga"
         hoverable={true}

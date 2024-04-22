@@ -18,8 +18,11 @@ class UpdateCiviliant
     {
         $token = $request->bearerToken();
 
-        if ($token === null) {
-            abort(401, 'Unauthorized');
+        if (!$token) {
+            $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+
+            if (!$token)
+                abort(401, 'Unauthorized');
         }
 
         $pat = PersonalAccessToken::findToken($token);

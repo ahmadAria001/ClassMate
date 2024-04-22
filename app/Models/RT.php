@@ -13,15 +13,7 @@ class RT extends Model
 {
     use HasFactory, SoftDeletes;
     protected $table = 'rt';
-    protected $fillable = [
-        'leader_id',
-        'created_at',
-        'created_by',
-        'updated_at',
-        'updated_by',
-        'deleted_at',
-        'deleted_by'
-    ];
+    protected $fillable = ['leader_id', 'created_at', 'created_by', 'updated_at', 'updated_by', 'deleted_at', 'deleted_by'];
 
     protected $dateFormat = 'U';
 
@@ -35,9 +27,14 @@ class RT extends Model
         return $this->hasMany(Family::class, 'rt_id', 'id');
     }
 
+    public function civilian(): HasManyThrough
+    {
+        return $this->hasManyThrough(Civilian::class, Family::class);
+    }
+
     public function civils(): HasManyThrough
     {
-        return $this->hasManyThrough(Civilian::class, Family::class, 'rt_id', 'family_id');
+        return $this->hasManyThrough(Civilian::class, Family::class, 'rt_id', 'family_id', 'id', 'id');
     }
 
     public function created_by(): BelongsTo
