@@ -22,7 +22,9 @@ return new class extends Migration
             $table->string('birthplace', 20)->nullable();
             $table->bigInteger('birthdate')->nullable();
             $table->enum('residentstatus', ['ContractResident', 'PermanentResident'])->nullable();
-            $table->unsignedBigInteger('family_id')->index('fk_civilian_family');
+            $table->char('nkk', 16)->nullable();
+            $table->boolean('isFamilyHead')->default(false);
+            $table->unsignedBigInteger('rt_id')->index('fk_civilian_rt');
             $table->bigInteger('created_at');
             $table->unsignedBigInteger('created_by')->nullable();
             $table->bigInteger('updated_at')->nullable();

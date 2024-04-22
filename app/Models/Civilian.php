@@ -17,9 +17,9 @@ class Civilian extends Model
 
     protected $dateFormat = 'U';
 
-    public function family(): BelongsTo
+    public function rt_id(): BelongsTo
     {
-        return $this->belongsTo(Family::class);
+        return $this->belongsTo(RT::class, 'rt_id', 'id');
     }
 
     public function created_by(): BelongsTo
