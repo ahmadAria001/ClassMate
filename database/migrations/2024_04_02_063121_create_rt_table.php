@@ -19,7 +19,8 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('leader_id')->index('fk_rt_user')->nullable();
             $table->bigInteger('created_at');
-            $table->unsignedBigInteger('created_by')->nullable()->index('fk_user')->nullable()->nullable();
+        $table->unsignedBigInteger('created_by')->nullable()->index('fk_user')->nullable()->nullable();
+            $table->tinyInteger('number')->unique();
             $table->bigInteger('updated_at')->nullable();
             $table->unsignedBigInteger('updated_by')->index('fk_user_upd')->nullable();
             $table->bigInteger('deleted_at')->nullable();

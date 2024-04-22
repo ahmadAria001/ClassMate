@@ -11,5 +11,7 @@ class EncryptCookies extends Middleware
      *
      * @var array<int, string>
      */
-    protected $except = ['token'];
+    protected $except = [
+        //
+    ];
 }

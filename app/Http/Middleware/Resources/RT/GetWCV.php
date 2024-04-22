@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Http\Middleware\Resources;
+namespace App\Http\Middleware\Resources\RT;
 
+use App\Http\Controllers\CivilianController;
 use Closure;
 use Illuminate\Http\Request;
 use Laravel\Sanctum\PersonalAccessToken;
 use Symfony\Component\HttpFoundation\Response;
 
-class DeleteDues
+class GetWCV
 {
     /**
      * Handle an incoming request.
@@ -21,14 +22,17 @@ class DeleteDues
         if (!$token) {
             $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
 
-            if (!$token)
+            if (!$token) {
                 abort(401, 'Unauthorized');
+            }
         }
 
         $pat = PersonalAccessToken::findToken($token);
-        if (!$pat) abort(401, 'Unauthorized');;
+        if (!$pat) {
+            abort(401, 'Unauthorized');
+        }
 
-        if ($pat->cant([\App\Http\Controllers\DuesController::class, 'destroy']) && !($pat->can('*'))) {
+        if ($pat->cant([[\App\Http\Controllers\RtController::class, 'get'], [CivilianController::class, 'get']]) && !$pat->can('*')) {
             return $next(null);
         }
 

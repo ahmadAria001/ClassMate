@@ -33,10 +33,11 @@
         VolumeUpSolid,
         BellSolid,
     } from "flowbite-svelte-icons";
+    import { twMerge } from "tailwind-merge";
 
     // tempat rolenya disini
+    // console.log($page.props);
     let role = $page.props.auth.user.role;
-    console.log($page.props);
 
     let filtermenu: {
         name: string;
@@ -212,6 +213,9 @@
         ];
     }
 
+    export let active: string = "";
+    // console.log(active);
+
     let site = {
         name: "KawanDesa",
         img: "assets/icons/KD_logo.svg",
@@ -227,6 +231,10 @@
         x: -320,
         duration: 200,
         easing: sineIn,
+    };
+
+    const getKeyByValue = (object: any, value: string) => {
+        return Object.keys(object).find((key: any) => object[key] === value);
     };
 
     let breakPoint: number = 1024;
@@ -456,7 +464,10 @@
                                     label={title}
                                     {href}
                                     spanClass="ml-9"
-                                    class={itemClass}
+                                    class={twMerge(
+                                        itemClass,
+                                        active == title ? "bg-gray-900" : "",
+                                    )}
                                 />
                             {/each}
                         </SidebarDropdownWrapper>

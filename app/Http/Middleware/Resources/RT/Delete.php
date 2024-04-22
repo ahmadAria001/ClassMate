@@ -19,7 +19,10 @@ class Delete
         $token = $request->bearerToken();
 
         if (!$token) {
-            abort(401, 'Unauthorized');
+            $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+
+            if (!$token)
+                abort(401, 'Unauthorized');
         }
 
         $pat = PersonalAccessToken::findToken($token);

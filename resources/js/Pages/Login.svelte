@@ -31,11 +31,7 @@
         // if (status) setCookie("token", response.data.token, exp);
 
         // before '/civilian'
-        router.visit("/beranda", {
-            headers: {
-                Authorization: `Bearer ${getCookie("token")}`,
-            },
-        });
+        router.visit("/beranda");
     };
 
     const errHandler = () => {};

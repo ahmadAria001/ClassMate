@@ -13,20 +13,7 @@ class Civilian extends Model
     use HasFactory, SoftDeletes;
 
     protected $table = 'civilian';
-    protected $fillable = [
-        'nik',
-        'fullName',
-        'birthplace',
-        'birthdate',
-        'residentstatus',
-        'family_id',
-        'created_at',
-        'created_by',
-        'updated_at',
-        'updated_by',
-        'deleted_at',
-        'deleted_by'
-    ];
+    protected $fillable = ['nik', 'fullName', 'birthplace', 'birthdate', 'residentstatus', 'family_id', 'created_at', 'created_by', 'updated_at', 'updated_by', 'deleted_at', 'deleted_by'];
 
     protected $dateFormat = 'U';
 
@@ -42,12 +29,7 @@ class Civilian extends Model
 
     public function fa(): HasManyThrough
     {
-        return $this->hasManyThrough(
-            FinancialAssistance::class,
-            User::class,
-            'civilian_id',
-            'request_by'
-        );
+        return $this->hasManyThrough(FinancialAssistance::class, User::class, 'civilian_id', 'request_by');
     }
 
     public function updated_by(): BelongsTo

@@ -57,7 +57,7 @@ class Login extends Controller
                         'token' => $generatedToken->plainTextToken,
                         'exp' => now()->addWeek()->timestamp,
                     ])
-                    ->withCookie($cookie);
+                    ->cookie($cookie);
             }
 
             $user = Auth::attempt($req->only('username', 'password'));
