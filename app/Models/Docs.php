@@ -24,17 +24,17 @@ class Docs extends Model
 
     protected $dateFormat = 'U';
 
-    protected function created_by(): BelongsTo
+    public function created_by(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by', 'id');
     }
 
-    protected function updated_by(): BelongsTo
+    public function updated_by(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by', 'id');
     }
 
-    protected function deleted_by(): BelongsTo
+    public function deleted_by(): BelongsTo
     {
         return $this->belongsTo(User::class, 'deleted_by', 'id');
     }
