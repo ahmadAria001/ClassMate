@@ -47,6 +47,11 @@ class TableSeeder extends Seeder
                     'nkk' => $i,
                     'isFamilyHead' => true,
                     'rt_id' => $i,
+                    'address' => $faker->address(),
+                    'status' => 'Bujangan',
+                    'phone' => preg_replace('/[^0-9]/', ' ', $faker->phoneNumber()),
+                    'religion' => $faker->randomElement(['Islam', 'Katolik', 'Hindu', 'Budha', 'Konghuan']),
+                    'job' => $faker->randomElement(['Pengangguran', 'Mahasiswa', 'Petani', 'PNS', 'Sum Ting']),
                     'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
                     'created_by' => $i,
                 ]);
@@ -60,6 +65,12 @@ class TableSeeder extends Seeder
                     'nkk' => $i,
                     'isFamilyHead' => true,
                     'rt_id' => $i,
+                    'address' => $faker->address(),
+                    'status' => 'Bujangan',
+                    'phone' => preg_replace('/[^0-9]/', ' ', $faker->phoneNumber()),
+                    'religion' => $faker->randomElement(['Islam', 'Katolik', 'Hindu', 'Budha', 'Konghuan']),
+                    'job' => $faker->randomElement(['Pengangguran', 'Mahasiswa', 'Petani', 'PNS', 'Sum Ting']),
+
                     'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
                     'created_by' => 1,
                 ]);
