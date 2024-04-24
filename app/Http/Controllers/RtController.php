@@ -7,6 +7,7 @@ use App\Http\Requests\Resources\RT\Delete;
 use App\Http\Requests\Resources\RT\Update;
 use App\Models\RT;
 use Carbon\Carbon;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -24,13 +25,27 @@ class RtController extends Controller
         $data = null;
 
         if ($filter) {
-            $data = RT::with('leader_id.civilian_id')->with('family.civil')->where('id', '=', $filter)->get();
+            $data = RT::with('leader_id.civilian_id')
+                ->with([
+                    'civils' => function ($q) {
+                        $q->orderBy('nkk');
+                    },
+                ])
+                ->where('id', '=', $filter)
+                ->get();
 
             if ($data) {
                 $data = $data->skip(0)->take(10);
             }
         } else {
-            $data = RT::with('leader_id.civilian_id')->with('family.civil')->get();
+            $data = RT::with('leader_id.civilian_id')
+                ->with([
+                    'civils' => function ($q) {
+                        $q->orderBy('nkk');
+                    },
+                ])
+                ->get();
+            // ->with()
 
             if ($data) {
                 $data = $data->skip(0)->take(10);
@@ -45,20 +60,31 @@ class RtController extends Controller
         $data = null;
 
         if ($filter) {
-            $data = RT::with('leader_id.civilian_id', 'civils')->where('id', '=', $filter)->skip(0)->take(10)->get();
+            $data = RT::with(['civils' => fn($query) => $query->orderBy('nkk')])
+                ->where('id', '=', $filter)
+                ->skip(0)
+                ->take(10)
+                ->get();
 
             if ($data) {
                 $data = $data->skip(0)->take(10);
             }
         } else {
-            $data = RT::with('leader_id.civilian_id', 'civils')->skip(0)->take(10)->get();
+            $data = RT::with([
+                'civils' => function ($query) {
+                    $query->orderBy('nkk');
+                },
+            ])
+                ->skip(0)
+                ->take(10)
+                ->get();
 
             if ($data) {
                 $data = $data->skip(0)->take(10);
             }
         }
 
-        return Response()->json(['data' => $data->load('civils')], 200);
+        return Response()->json(['data' => $data], 200);
     }
 
     public function create(Create $req)

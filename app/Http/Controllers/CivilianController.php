@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CivilianRequest;
+use App\Http\Requests\Resources\Civilian\Create;
+use App\Http\Requests\Resources\Civilian\Delete;
+use App\Http\Requests\Resources\Civilian\Update;
 use App\Http\Requests\Resources\DeleteCiviliant;
 use App\Http\Requests\UpdateCivilianRequest;
 use App\Models\Civilian;
@@ -25,24 +28,52 @@ class CivilianController extends Controller
     {
         $data = null;
         if ($filter) {
-            $data = Civilian::with('family.rt_id')->find($filter);
+            $data = Civilian::with('rt_id')->find($filter);
         } else {
-            $data = Civilian::with('family.rt_id')->get();
+            $data = Civilian::with('rt_id')
+                ->where(['status', 'status'], ['!=', '!='], ['Meninggal', 'pindah'], 'or')
+                ->get();
         }
 
         return Response()->json(['data' => $data], 200);
     }
 
-    public function create(CivilianRequest $req): JsonResponse
+    public function getCustom($column, $operator, $value): JsonResponse
     {
+        $data = Civilian::with('rt_id')->where($column, $operator, $value)->get();
+        return Response()->json(['data' => $data], 200);
+    }
+
+    public function create(Create $req): JsonResponse
+    {
+        $payload = $req->safe()->collect();
+
         try {
+            $existingHead = null;
+
+            if ($payload->get('status')) {
+                $existingHead = Civilian::withTrashed()->where('nkk', $payload->get('nkk'))->where('isFamilyHead', true)->first();
+
+                if ($existingHead) {
+                    $existingHead->isFamilyHead = false;
+                    $existingHead->save();
+                }
+            }
+
             $data = Civilian::firstOrCreate([
-                'nik' => $req->nik,
-                'fullName' => $req->fullName,
-                'birthplace' => $req->birthplace,
-                'birthdate' => $req->birthdate,
-                'residentstatus' => $req->residentstatus,
-                'family_id' => $req->family_id,
+                'nik' => $payload->get('nik'),
+                'fullName' => $payload->get('fullName'),
+                'birthplace' => $payload->get('birthplace'),
+                'birthdate' => $payload->get('birthdate'),
+                'residentstatus' => $payload->get('residentstatus'),
+                'nkk' => $payload->get('nkk'),
+                'isFamilyHead' => $payload->get('isFamilyHead'),
+                'rt_id' => $payload->get('rt_id'),
+                'address' => $payload->get('address'),
+                'status' => $payload->get('status'),
+                'phone' => preg_replace('/[^0-9]/', ' ', $payload->get('phone')),
+                'religion' => $payload->get('religion'),
+                'job' => $payload->get('job'),
             ]);
 
             if ($data->wasRecentlyCreated) {
@@ -50,6 +81,15 @@ class CivilianController extends Controller
 
                 if (str_contains($req->url(), 'api')) {
                     $token = $req->bearerToken();
+
+                    if (!$token) {
+                        $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+
+                        if (!$token) {
+                            return null;
+                        }
+                    }
+
                     $pat = PersonalAccessToken::findToken($token);
 
                     $model = $pat->tokenable();
@@ -79,7 +119,7 @@ class CivilianController extends Controller
         }
     }
 
-    public function edit(UpdateCivilianRequest $req): JsonResponse
+    public function edit(Update $req): JsonResponse
     {
         $payload = $req->safe()->collect();
 
@@ -91,26 +131,48 @@ class CivilianController extends Controller
             if ($data) {
                 if (Auth::guard('web')->check()) {
                     $data->update([
-                        'nik' => $req->nik,
-                        'fullName' => $req->fullName,
-                        'birthplace' => $req->birthplace,
-                        'birthdate' => $req->birthdate,
-                        'residentstatus' => $req->residentstatus,
-                        'family_id' => $req->family_id,
+                        'nik' => $payload->get('nik'),
+                        'fullName' => $payload->get('fullName'),
+                        'birthplace' => $payload->get('birthplace'),
+                        'birthdate' => $payload->get('birthdate'),
+                        'residentstatus' => $payload->get('residentstatus'),
+                        'nkk' => $payload->get('nkk'),
+                        'isFamilyHead' => $payload->get('isFamilyHead'),
+                        'rt_id' => $payload->get('rt_id'),
+                        'address' => $payload->get('address'),
+                        'status' => $payload->get('status'),
+                        'phone' => preg_replace('/[^0-9]/', ' ', $payload->get('phone')),
+                        'religion' => $payload->get('religion'),
+                        'job' => $payload->get('job'),
                         'updated_by' => Auth::id(),
                     ]);
                 } else {
                     $token = $req->bearerToken();
+                    if (!$token) {
+                        $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+
+                        if (!$token) {
+                            return null;
+                        }
+                    }
+
                     $pat = PersonalAccessToken::findToken($token);
                     $model = $pat->tokenable();
 
                     $data->update([
-                        'nik' => $req->nik,
-                        'fullName' => $req->fullName,
-                        'birthplace' => $req->birthplace,
-                        'birthdate' => $req->birthdate,
-                        'residentstatus' => $req->residentstatus,
-                        'family_id' => $req->family_id,
+                        'nik' => $payload->get('nik'),
+                        'fullName' => $payload->get('fullName'),
+                        'birthplace' => $payload->get('birthplace'),
+                        'birthdate' => $payload->get('birthdate'),
+                        'residentstatus' => $payload->get('residentstatus'),
+                        'nkk' => $payload->get('nkk'),
+                        'isFamilyHead' => $payload->get('isFamilyHead'),
+                        'rt_id' => $payload->get('rt_id'),
+                        'address' => $payload->get('address'),
+                        'status' => $payload->get('status'),
+                        'phone' => preg_replace('/[^0-9]/', ' ', $payload->get('phone')),
+                        'religion' => $payload->get('religion'),
+                        'job' => $payload->get('job'),
                         'updated_by' => $model->get('id')[0]->id,
                     ]);
                 }
@@ -135,7 +197,7 @@ class CivilianController extends Controller
         }
     }
 
-    public function destroy(DeleteCiviliant $req): JsonResponse
+    public function destroy(Delete $req): JsonResponse
     {
         $payload = $req->safe()->collect();
 
@@ -147,14 +209,24 @@ class CivilianController extends Controller
             if ($data) {
                 if (Auth::guard('web')->check()) {
                     $data->update([
+                        'status' => $payload->get('status'),
                         'deleted_by' => Auth::id(),
                     ]);
                 } else {
                     $token = $req->bearerToken();
+                    if (!$token) {
+                        $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+
+                        if (!$token) {
+                            return null;
+                        }
+                    }
+
                     $pat = PersonalAccessToken::findToken($token);
                     $model = $pat->tokenable();
 
                     $data->update([
+                        'status' => $payload->get('status'),
                         'deleted_by' => $model->get('id')[0]->id,
                     ]);
                 }

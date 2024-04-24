@@ -23,6 +23,10 @@
         ChevronRightOutline,
         ExclamationCircleOutline,
     } from "flowbite-svelte-icons";
+    import Create from "./../Components/PendudukByRT/Modals/Create.svelte";
+    import Edit from "./../Components/PendudukByRT/Modals/Edit.svelte";
+    import Delete from "./../Components/PendudukByRT/Modals/Delete.svelte";
+
     import { page } from "@inertiajs/svelte";
 
     import axiosInstance from "axios";
@@ -54,7 +58,8 @@
         },
         // 459,
     ];
-    let role = "RT";
+    let role = $page.props.auth.user.role;
+    // "RT";
     let addCivilian = false;
     let modalEdit = false;
     let modalFamily = false;
@@ -79,6 +84,9 @@
     const title = "Lihat Data Warga";
 
     let selected: string | null = null;
+    let selEdit: string | null = null;
+    let selDel: string | null = null;
+
     const updateDataAndPagination = () => {
         const currentPageItems = items.slice(
             currentPosition,
@@ -123,7 +131,53 @@
     $: startRange = currentPosition + 1;
     $: endRange = Math.min(currentPosition + itemsPerPage, totalItems);
 
-    onMount(() => {
+    const getData = async (
+        id: string = "",
+        landing: boolean = false,
+        custom: {
+            column: string;
+            operator: string;
+            value: string;
+        } | null = null,
+    ) => {
+        // console.log($page.props.auth.user)
+        const url = `/api/rt/${id}`;
+
+        try {
+            if (role === "RT") id = $page.props.auth.user.rt_id;
+
+            if (!custom) {
+                const response = await axios.get(url, {
+                    headers: {
+                        Accept: "*/*",
+                    },
+                });
+
+                if (landing) {
+                    let rawData = response.data;
+                    let data = rawData.data[0].civils;
+                    let landingData: any[] = [];
+
+                    data.map((val: any) => {
+                        if (val.isFamilyHead) landingData.push(val);
+                    });
+
+                    return landingData;
+                }
+
+                return response.data;
+            }
+
+            const response = await axios.get(
+                `/api/civilian/${custom.column}/${custom.operator}/${custom.value}`,
+            );
+            return response.data;
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    onMount(async () => {
         // Call renderPagination when the component initially mounts
         renderPagination(items.length);
     });
@@ -137,25 +191,6 @@
             item?.name?.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1,
     );
 
-    const getData = async (id: string = "") => {
-        // console.log($page.props.auth.user)
-        const url = `/api/rt/${id}`;
-
-        try {
-            if (role === "RT") id = role;
-
-            const response = await axios.get(url, {
-                headers: {
-                    Accept: "*/*",
-                },
-            });
-
-            return response.data;
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
     const getWCV = async (id: string = "") => {
         const token = getCookie("token");
         const response = await axios.get(`/api/rt/cvl/${id}`, {
@@ -167,8 +202,9 @@
         return response.data;
     };
 
-    const getFam = async (id: string = "") => {
-        const response = await axios.get(`/api/family/${id}`, {
+    const getCivil = async (id: string = "") => {
+        const token = getCookie("token");
+        const response = await axios.get(`/api/civilian/${id}`, {
             headers: {
                 Accept: "application/json",
             },
@@ -176,6 +212,12 @@
 
         return response.data;
     };
+
+    let custom: {
+        column: string;
+        operator: string;
+        value: string;
+    } = { column: "", operator: "", value: "" };
 </script>
 
 <svelte:head>
@@ -203,76 +245,25 @@
                 }}>+ Tambah Warga</Button
             >
         </div>
-        <Modal title="Tambah RT" bind:open={addCivilian} autoclose>
-            <form method="POST">
-                <div class="mb-4">
-                    <Label for="full_name" class="mb-2">Nama Lengkap</Label>
-                    <Input id="full_name" placeholder="Nama Lengkap" />
-                </div>
-                <div class="grid md:grid-cols-2 md:gap-6">
-                    <div class="mb-4">
-                        <Label for="kk" class="mb-2">No KK</Label>
-                        <Input id="kk" placeholder="No KK" />
-                    </div>
-                    <div class="mb-4">
-                        <Label for="nik" class="mb-2">NIK</Label>
-                        <Input id="nik" placeholder="NIK" />
-                    </div>
-                </div>
-                <div class="grid md:grid-cols-2 md:gap-6">
-                    <div class="mb-4">
-                        <Label for="religion" class="mb-2">Agama</Label>
-                        <Input id="religion" placeholder="Agama" />
-                    </div>
-                    <div class="mb-4">
-                        <Label for="birthdate" class="mb-2"
-                            >Tempat, Tanggal Lahir</Label
-                        >
-                        <Input
-                            id="birthdate"
-                            placeholder="Tempat, Tanggal Lahir"
-                        />
-                    </div>
-                </div>
-                <div class="grid md:grid-cols-2 md:gap-6">
-                    <div class="mb-4">
-                        <Label for="address" class="mb-2">Alamat</Label>
-                        <Input id="address" placeholder="Alamat" />
-                    </div>
-                    <div class="mb-4">
-                        <Label for="no_hp" class="mb-2">No. HP</Label>
-                        <Input type="number" id="no_hp" placeholder="No. HP" />
-                    </div>
-                </div>
-                <div class="grid md:grid-cols-2 md:gap-6">
-                    <div class="mb-4">
-                        <Label for="residentstatus" class="mb-2">Status</Label>
-                        <Input id="residentstatus" placeholder="Status" />
-                    </div>
-                    <div class="mb-4">
-                        <Label for="job" class="mb-2">Pekerjaan</Label>
-                        <Input id="job" placeholder="Pekerjaan" />
-                    </div>
-                </div>
-                <div class="block flex">
-                    <Button type="submit" class="ml-auto">Simpan</Button>
-                </div>
-            </form>
-        </Modal>
+
+        <Create bind:showState={addCivilian} />
 
         <TableHead>
             {#if role === "RT"}
-                <TableHeadCell>NKK</TableHeadCell>
-                <TableHeadCell>Status</TableHeadCell>
+                <TableHeadCell>Nama Kepala Keluarga</TableHeadCell>
+                <TableHeadCell>Alamaat</TableHeadCell>
                 <!-- <TableHeadCell>Pekerjaan</TableHeadCell> -->
                 <TableHeadCell class="text-center" width="20%"
-                    >Nama Kepala Keluarga</TableHeadCell
+                    >Pekerjaan</TableHeadCell
                 >
-                <TableHeadCell class="sr-only">Aksi</TableHeadCell>
+                <TableHeadCell class="text-center" width="20%"
+                    >Status</TableHeadCell
+                >
+                <TableHeadCell class="sr-only"></TableHeadCell>
             {:else}
                 <TableHeadCell>RT</TableHeadCell>
                 <TableHeadCell>Ketua</TableHeadCell>
-                <TableHeadCell>Aksi</TableHeadCell>
+                <TableHeadCell></TableHeadCell>
                 <!-- <TableHeadCell class="text-center" width="20%">Status</TableHeadCell -->
                 <!-- > -->
                 <!-- <TableHeadCell class="sr-only">Aksi</TableHeadCell> -->
@@ -280,16 +271,16 @@
         </TableHead>
         <TableBody>
             {#if role === "RT"}
-                {#await getData() then data}
+                {#await getData("", true) then data}
                     <!-- {console.log(data.data[0])} -->
-                    {#each data.data[0].family as item}
+                    {#each data as item, idx}
+                        <!-- {console.log(item)} -->
+
                         <TableBodyRow>
-                            <TableBodyCell>{item.nkk}</TableBodyCell>
-                            <TableBodyCell>{item.residentstatus}</TableBodyCell>
+                            <TableBodyCell>{item.fullName}</TableBodyCell>
+                            <TableBodyCell>{item.address}</TableBodyCell>
                             <!-- <TableBodyCell>{item.noHp}</TableBodyCell> -->
-                            <TableBodyCell
-                                >{item.civil[0].fullName}</TableBodyCell
-                            >
+                            <TableBodyCell>{item.job}</TableBodyCell>
                             {#if item.residentstatus == "PermanentResident"}
                                 <TableBodyCell class="text-center">
                                     <Badge color="green">Tetap</Badge>
@@ -309,16 +300,25 @@
                                     color="blue"
                                     on:click={() => {
                                         selected = item.id;
+                                        custom.column = "nkk";
+                                        custom.operator = "=";
+                                        custom.value = item.nkk;
 
                                         modalFamily = true;
                                     }}>Detail</Button
                                 >
                                 <!-- tampilan edit keluarga? -->
-                                <Button color="yellow">Edit</Button>
+                                <Button
+                                    color="yellow"
+                                    on:click={() => {
+                                        selected = item.id;
+                                        modalEdit = true;
+                                    }}>Edit</Button
+                                >
                                 <Button
                                     color="red"
                                     on:click={() => {
-                                        selected = item.id;
+                                        selDel = item.id;
                                         modalDelete = true;
                                     }}>Hapus</Button
                                 >
@@ -377,7 +377,7 @@
                                     <Button
                                         color="red"
                                         on:click={() => {
-                                            selected = id;
+                                            selected = item.id;
                                             modalDelete = true;
                                         }}>Hapus</Button
                                     >
@@ -390,11 +390,17 @@
                                             modalFamily = true;
                                         }}>Detail</Button
                                     >
-                                    <Button color="yellow">Edit</Button>
+                                    <Button
+                                        color="yellow"
+                                        on:click={() => {
+                                            selected = item.id;
+                                            modalEdit = true;
+                                        }}>Edit</Button
+                                    >
                                     <Button
                                         color="red"
                                         on:click={() => {
-                                            selected = id;
+                                            selDel = item.id;
                                             modalDelete = true;
                                         }}>Hapus</Button
                                     >
@@ -415,10 +421,14 @@
         >
             <Table>
                 <TableHead>
-                    <TableHeadCell>Nama Kepala Keluarga</TableHeadCell>
+                    <TableHeadCell>Nama Lengkap</TableHeadCell>
                     <TableHeadCell>Alamat</TableHeadCell>
                     <TableHeadCell>Pekerjaan</TableHeadCell>
-                    <TableHeadCell class="text-center">Status</TableHeadCell>
+                    <TableHeadCell class="text-center"
+                        >Status Kependudukan</TableHeadCell
+                    >
+                    <TableHeadCell class="text-center">Kondisi</TableHeadCell>
+
                     {#if role == "RT" || role == "Admin"}
                         <TableHeadCell class="sr-only">Aksi</TableHeadCell>
                     {/if}
@@ -426,20 +436,17 @@
                 <TableBody>
                     {#if selected}
                         {#if role == "RT"}
-                            {#await getFam(selected) then data}
-                                {console.log(data.data)}
-                                {#each data.data.civil as item, idx}
+                            {#await getData("", false, custom) then data}
+                                <!-- {console.log(data.data)} -->
+                                {#each data.data as item, idx}
                                     <TableBodyRow>
                                         <TableBodyCell
                                             >{item.fullName}</TableBodyCell
                                         >
                                         <TableBodyCell
-                                            >{item.birthplace}</TableBodyCell
+                                            >{item.address}</TableBodyCell
                                         >
-                                        <TableBodyCell
-                                            >{new Date(
-                                                item.birthdate * 1000,
-                                            ).toLocaleDateString()}</TableBodyCell
+                                        <TableBodyCell>{item.job}</TableBodyCell
                                         >
                                         {#if item.residentstatus == "PermanentResident"}
                                             <TableBodyCell class="text-center">
@@ -459,16 +466,35 @@
                                                 >
                                             </TableBodyCell>
                                         {/if}
-                                        {#if role == "RT"}
-                                            <TableBodyCell>
-                                                <Button
-                                                    color="yellow"
-                                                    on:click={() => {
-                                                        modalEdit = true;
-                                                    }}>Edit</Button
+                                        {#if item.status == "Aktif"}
+                                            <TableBodyCell class="text-center">
+                                                <Badge color="green"
+                                                    >Tetap</Badge
                                                 >
                                             </TableBodyCell>
                                         {/if}
+                                        {#if item.status == "Meninggal"}
+                                            <TableBodyCell class="text-center">
+                                                <Badge color="red"
+                                                    >{item.status}</Badge
+                                                >
+                                            </TableBodyCell>
+                                        {:else if item.status == "Pindah"}
+                                            <TableBodyCell class="text-center">
+                                                <Badge color="yellow"
+                                                    >{item.status}</Badge
+                                                >
+                                            </TableBodyCell>
+                                        {/if}
+
+                                        <TableBodyCell>
+                                            <Button
+                                                color="yellow"
+                                                on:click={() => {
+                                                    modalEdit = true;
+                                                }}>Edit</Button
+                                            >
+                                        </TableBodyCell>
                                     </TableBodyRow>
                                 {/each}
                             {/await}
@@ -480,12 +506,9 @@
                                             >{item.fullName}</TableBodyCell
                                         >
                                         <TableBodyCell
-                                            >{item.birthplace}</TableBodyCell
+                                            >{item.address}</TableBodyCell
                                         >
-                                        <TableBodyCell
-                                            >{new Date(
-                                                item.birthdate * 1000,
-                                            ).toLocaleDateString()}</TableBodyCell
+                                        <TableBodyCell>{item.job}</TableBodyCell
                                         >
                                         {#if item.residentstatus == "PermanentResident"}
                                             <TableBodyCell class="text-center">
@@ -505,6 +528,28 @@
                                                 >
                                             </TableBodyCell>
                                         {/if}
+                                        {#if item.status == "Aktif"}
+                                            <TableBodyCell class="text-center">
+                                                <Badge color="green"
+                                                    >Aktif</Badge
+                                                >
+                                            </TableBodyCell>
+                                        {/if}
+                                        {#if item.status == "Meninggal"}
+                                            <TableBodyCell class="text-center">
+                                                <Badge color="red"
+                                                    >{item.status}</Badge
+                                                >
+                                            </TableBodyCell>
+                                        {/if}
+                                        {#if item.status == "Pindah"}
+                                            <TableBodyCell class="text-center">
+                                                <Badge color="yellow"
+                                                    >{item.status}</Badge
+                                                >
+                                            </TableBodyCell>
+                                        {/if}
+
                                         {#if role == "RT"}
                                             <TableBodyCell>
                                                 <Button
@@ -520,8 +565,17 @@
                                                 <Button
                                                     color="yellow"
                                                     on:click={() => {
+                                                        modalFamily = false;
+                                                        selEdit = item.id;
                                                         modalEdit = true;
                                                     }}>Edit</Button
+                                                >
+                                                <Button
+                                                    color="red"
+                                                    on:click={() => {
+                                                        selDel = item.id;
+                                                        modalDelete = true;
+                                                    }}>Hapus</Button
                                                 >
                                             </TableBodyCell>
                                         {/if}
@@ -535,107 +589,20 @@
         </Modal>
 
         <!-- modal edit -->
-        <Modal title="Edit Data Warga" bind:open={modalEdit} autoclose>
-            <form method="POST">
-                <div class="mb-4">
-                    <Label for="full_name" class="mb-2">Nama Lengkap</Label>
-                    <Input id="full_name" placeholder="Nama Lengkap" />
-                </div>
-                <div class="grid md:grid-cols-2 md:gap-6">
-                    <div class="mb-4">
-                        <Label for="kk" class="mb-2">No KK</Label>
-                        <Input id="kk" placeholder="No KK" />
-                    </div>
-                    <div class="mb-4">
-                        <Label for="nik" class="mb-2">NIK</Label>
-                        <Input id="nik" placeholder="NIK" />
-                    </div>
-                </div>
-                <div class="grid md:grid-cols-2 md:gap-6">
-                    <div class="mb-4">
-                        <Label for="religion" class="mb-2">Agama</Label>
-                        <Input id="religion" placeholder="Agama" />
-                    </div>
-                    <div class="mb-4">
-                        <Label for="birthdate" class="mb-2"
-                            >Tempat, Tanggal Lahir</Label
-                        >
-                        <Input
-                            id="birthdate"
-                            placeholder="Tempat, Tanggal Lahir"
-                        />
-                    </div>
-                </div>
-                <div class="grid md:grid-cols-2 md:gap-6">
-                    <div class="mb-4">
-                        <Label for="address" class="mb-2">Alamat</Label>
-                        <Input id="address" placeholder="Alamat" />
-                    </div>
-                    <div class="mb-4">
-                        <Label for="no_hp" class="mb-2">No. HP</Label>
-                        <Input type="number" id="no_hp" placeholder="No. HP" />
-                    </div>
-                </div>
-                <div class="grid md:grid-cols-2 md:gap-6">
-                    <div class="mb-4">
-                        <Label for="residentstatus" class="mb-2">Status</Label>
-                        <Input id="residentstatus" placeholder="Status" />
-                    </div>
-                    <div class="mb-4">
-                        <Label for="job" class="mb-2">Pekerjaan</Label>
-                        <Input id="job" placeholder="Pekerjaan" />
-                    </div>
-                </div>
-                <div class="block flex">
-                    <Button type="submit" class="ml-auto">Simpan</Button>
-                </div>
-            </form>
-        </Modal>
+        {#if selEdit}
+            {#await getCivil(selEdit) then data}
+                <Edit bind:showState={modalEdit} {data} />
+            {/await}
+        {/if}
 
         <!-- modal hapus -->
-        <Modal bind:open={modalDelete} size="sm" autoclose>
-            <div class="text-center">
-                <ExclamationCircleOutline
-                    class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200"
-                />
-                <h3
-                    class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400"
-                >
-                    Apa alasan data warga 'nama' dihapus?
-                </h3>
-                <Select
-                    class="my-2"
-                    items={delReasons}
-                    bind:value={selectedReason}
-                    placeholder="Alasan dihapus"
-                    size="sm"
-                />
-                <Button
-                    color="red"
-                    class="me-2"
-                    on:click={() => {
-                        modalConfirmDel = true;
-                    }}>Selanjutnya</Button
-                >
-                <Button color="alternative">Batal</Button>
-            </div>
-        </Modal>
-
+        {#if selDel}
+            {console.log(selDel)}
+            {#await getCivil(selDel) then data}
+                <Delete bind:showState={modalDelete} {data} />
+            {/await}
+        {/if}
         <!-- modal konfirmasi -->
-        <Modal bind:open={modalConfirmDel} size="sm" autoclose>
-            <div class="text-center">
-                <ExclamationCircleOutline
-                    class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200"
-                />
-                <h3
-                    class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400"
-                >
-                    Apakah yakin ingin menghapus warga ini?
-                </h3>
-                <Button color="red" class="me-2">Ya, yakin</Button>
-                <Button color="alternative">Tidak, batal</Button>
-            </div>
-        </Modal>
 
         <div
             slot="footer"
