@@ -25,7 +25,7 @@ class RtController extends Controller
         $data = null;
 
         if ($filter) {
-            $data = RT::with('leader_id.civilian_id')
+            $data = RT::withTrashed()->with('leader_id.civilian_id')
                 ->with([
                     'civils' => function ($q) {
                         $q->orderBy('nkk');
@@ -38,7 +38,7 @@ class RtController extends Controller
                 $data = $data->skip(0)->take(10);
             }
         } else {
-            $data = RT::with('leader_id.civilian_id')
+            $data = RT::withTrashed()->with('leader_id.civilian_id')
                 ->with([
                     'civils' => function ($q) {
                         $q->orderBy('nkk');
