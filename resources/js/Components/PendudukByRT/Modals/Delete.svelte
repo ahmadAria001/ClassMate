@@ -27,9 +27,11 @@
     } from "../../../Utils/Schema/Civils/Delete";
 
     import { twMerge } from "tailwind-merge";
+    import { createEventDispatcher } from "svelte";
 
     export let showState = false;
     export let data: any | null = null;
+    const dispatch = createEventDispatcher();
 
     let confirm = false;
     let status: string | null = null;
@@ -52,10 +54,11 @@
                     _token: $page.props.csrf_token,
                 },
             });
-            console.log(response.data);
 
             err = response.data;
             showState = false;
+            dispatch("comp");
+
             setTimeout(() => {
                 err = { status: null, message: null };
             }, 5000);

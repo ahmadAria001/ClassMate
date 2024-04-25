@@ -22,9 +22,11 @@
         updateSchema,
     } from "./../../../Utils/Schema/Civils/Update";
     import { twMerge } from "tailwind-merge";
+    import { createEventDispatcher } from "svelte";
 
     export let showState = false;
     export let data: any | null = null;
+    const dispatch = createEventDispatcher();
 
     const axios = axiosInstance.create({ withCredentials: true });
     let err: { status: null | boolean; message: null | string } = {
@@ -54,10 +56,11 @@
                 isFamilyHead: values.isFamilyHead,
                 _token: $page.props.csrf_token,
             });
-            console.log(response.data);
 
             err = response.data;
             showState = false;
+            dispatch('comp')
+
             setTimeout(() => {
                 err = { status: null, message: null };
             }, 5000);
@@ -201,7 +204,7 @@
                     id="no_hp"
                     name="phone"
                     placeholder="No. HP"
-                    value={data.data.phone}
+                    value={Number.parseInt(data.data.phone.replaceAll(" ", ""))}
                 />
                 {#if $errors.phone}
                     <span class="text-sm text-red-500">{$errors.phone}</span>
