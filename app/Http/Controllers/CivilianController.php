@@ -49,18 +49,14 @@ class CivilianController extends Controller
         $payload = $req->safe()->collect();
 
         try {
-            $existingHead = null;
+            $headExistance = Civilian::withTrashed()->where('nkk', $payload->get('nkk'))->where('isFamilyHead', true)->first();
 
-            if ($payload->get('status')) {
-                $existingHead = Civilian::withTrashed()->where('nkk', $payload->get('nkk'))->where('isFamilyHead', true)->first();
-
-                if ($existingHead) {
-                    $existingHead->isFamilyHead = false;
-                    $existingHead->save();
+            if ($payload->get('isFamilyHead') && $headExistance) {
+                if ($headExistance) {
+                    $headExistance->isFamilyHead = false;
+                    $headExistance->save();
                 }
             }
-
-            $headExistance = Civilian::withTrashed()->where('nkk', $payload->get('nkk'))->where('isFamilyHead', true)->first();
 
             $data = Civilian::firstOrCreate([
                 'nik' => $payload->get('nik'),
@@ -69,7 +65,7 @@ class CivilianController extends Controller
                 'birthdate' => $payload->get('birthdate'),
                 'residentstatus' => $payload->get('residentstatus'),
                 'nkk' => $payload->get('nkk'),
-                'isFamilyHead' => $payload->get('isFamilyHead') == false && !$headExistance ? true : false,
+                'isFamilyHead' => $payload->get('isFamilyHead'),
                 'rt_id' => $payload->get('rt_id'),
                 'address' => $payload->get('address'),
                 'status' => $payload->get('status'),
@@ -126,11 +122,17 @@ class CivilianController extends Controller
         $payload = $req->safe()->collect();
 
         try {
-            $headExistance = Civilian::withTrashed()->where('nkk', $payload->get('nkk'))->where('isFamilyHead', true)->first();
+            $headExistance = Civilian::withTrashed()->where('nkk', '=', $payload->get('nkk'))->where('isFamilyHead', true)->first();
 
             $data = Civilian::withTrashed()
                 ->find(['id' => $payload->get('id')])
                 ->first();
+
+            if (!$payload->get('isFamilyHead') && !$headExistance) {
+                $this->replaceFamHead($payload->get('nkk'), false);
+            } elseif ($payload->get('isFamilyHead') && $headExistance) {
+                $this->replaceFamHead($payload->get('nkk'), true);
+            }
 
             if ($data) {
                 if (Auth::guard('web')->check()) {
@@ -141,11 +143,11 @@ class CivilianController extends Controller
                         'birthdate' => $payload->get('birthdate'),
                         'residentstatus' => $payload->get('residentstatus'),
                         'nkk' => $payload->get('nkk'),
-                        'isFamilyHead' => $payload->get('isFamilyHead') == false && !$headExistance ? true : false,
+                        'isFamilyHead' => $payload->get('isFamilyHead'),
                         'rt_id' => $payload->get('rt_id'),
                         'address' => $payload->get('address'),
                         'status' => $payload->get('status'),
-                        'phone' => preg_replace('/[^0-9]/', ' ', $payload->get('phone')),
+                        'phone' => preg_replace('/[^0-9]/', '', $payload->get('phone')),
                         'religion' => $payload->get('religion'),
                         'job' => $payload->get('job'),
                         'updated_by' => Auth::id(),
@@ -174,13 +176,12 @@ class CivilianController extends Controller
                         'rt_id' => $payload->get('rt_id'),
                         'address' => $payload->get('address'),
                         'status' => $payload->get('status'),
-                        'phone' => preg_replace('/[^0-9]/', ' ', $payload->get('phone')),
+                        'phone' => preg_replace('/[^0-9]/', '', $payload->get('phone')),
                         'religion' => $payload->get('religion'),
                         'job' => $payload->get('job'),
                         'updated_by' => $model->get('id')[0]->id,
                     ]);
                 }
-
                 $data->save();
 
                 return Response()->json([
@@ -247,7 +248,7 @@ class CivilianController extends Controller
                 $data->delete();
 
                 if ($isFamhead) {
-                    $this->replaceFamHead($nkk);
+                    $this->replaceFamHead($nkk, false);
                 }
 
                 return Response()->json([
@@ -268,15 +269,35 @@ class CivilianController extends Controller
         }
     }
 
-    function replaceFamHead(string $nkk)
+    function replaceFamHead(string $nkk, bool $replace)
     {
-        $headReplacement = Civilian::withTrashed()->where('nkk', '=', $nkk)->orderBy('birthdate')->first();
+        try {
+            if (!$replace) {
+                $headReplacement = Civilian::withTrashed()->where('nkk', '=', $nkk)->where('status', '=', 'Aktif')->orderBy('birthdate')->first();
 
-        if (!$headReplacement) {
+                if (!$headReplacement) {
+                    return;
+                }
+
+                $headReplacement->update(['isFamilyHead' => 1]);
+                $headReplacement->save();
+                return;
+            }
+
+            $oldHead = Civilian::withTrashed()->where('nkk', '=', $nkk)->where('status', '=', 'Aktif')->where('isFamilyHead', '=', 1)->first();
+
+            if (!$oldHead) {
+                return;
+            }
+
+            $oldHead->isFamilyHead = false;
+            $oldHead->save();
+
+            error_log('REPLACE TRUE');
+            error_log($oldHead->address . $oldHead->residentstatus . $oldHead->isFamilyHead);
             return;
+        } catch (\Throwable $th) {
+            error_log($th->getMessage());
         }
-
-        $headReplacement->isFamilyHead = true;
-        $headReplacement->save();
     }
 }
