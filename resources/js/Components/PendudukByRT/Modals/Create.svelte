@@ -31,6 +31,8 @@
         message: null,
     };
 
+    let resstatval: string | null = null;
+
     const { form, isSubmitting, errors } = createForm<CreateSchema>({
         extend: validator<CreateSchema>({
             schema: createSchema,
@@ -206,6 +208,7 @@
                     items={statusList}
                     placeholder="Pilih Status Penduduk"
                     size="sm"
+                    bind:value={resstatval}
                     name="residentstatus"
                     id="residentstatus"
                 />
@@ -276,10 +279,23 @@
         </div>
         <div class="mb-4">
             <Label for="famhead" class="mb-2">Kepala Keluarga</Label>
-            <Toggle id="famhead" placeholder="Status" name="isFamilyHead" />
+            {#if resstatval != "PermanentResident" || !resstatval}
+                <Toggle
+                    id="famhead"
+                    onclick="return false"
+                    placeholder="Status"
+                    name="isFamilyHead"
+                />
+            {:else}
+                <Toggle id="famhead" placeholder="Status" name="isFamilyHead" />
+            {/if}
             {#if $errors.isFamilyHead}
                 <span class="text-sm text-red-500">{$errors.isFamilyHead}</span>
             {/if}
+            <span class="w-full text-sm text-gray-600"
+                >*Pilih Status Kependudukan <br/> Sebelum Memutuskan Status
+                Kepala Keluarga</span
+            >
         </div>
 
         <div class="flex justify-end">

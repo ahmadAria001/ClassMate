@@ -59,8 +59,8 @@
         // 459,
     ];
     let role =
-        // $page.props.auth.user.role;
-        "RT";
+        $page.props.auth.user.role;
+        // "RT";
     let addCivilian = false;
     let modalEdit = false;
     let modalFamily = false;

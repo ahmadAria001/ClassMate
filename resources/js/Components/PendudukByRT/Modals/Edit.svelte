@@ -28,6 +28,8 @@
     export let data: any | null = null;
     const dispatch = createEventDispatcher();
 
+    let resstatval: string | null = null;
+
     const axios = axiosInstance.create({ withCredentials: true });
     let err: { status: null | boolean; message: null | string } = {
         status: null,
@@ -59,7 +61,7 @@
 
             err = response.data;
             showState = false;
-            dispatch('comp')
+            dispatch("comp");
 
             setTimeout(() => {
                 err = { status: null, message: null };
@@ -291,12 +293,21 @@
         </div>
         <div class="mb-4">
             <Label for="famhead" class="mb-2">Kepala Keluarga</Label>
-            <Toggle
-                id="famhead"
-                placeholder="Status"
-                name="isFamilyHead"
-                checked={data.data.isFamilyHead}
-            />
+            {#if data.data.residentstatus != "PermanentResident" || data.data.status != "Aktif"}
+                <Toggle
+                    id="famhead"
+                    onclick="return false"
+                    placeholder="Status"
+                    name="isFamilyHead"
+                />
+            {:else}
+                <Toggle
+                    id="famhead"
+                    placeholder="Status"
+                    name="isFamilyHead"
+                    checked={data.data.isFamilyHead}
+                />
+            {/if}
             {#if $errors.isFamilyHead}
                 <span class="text-sm text-red-500">{$errors.isFamilyHead}</span>
             {/if}
