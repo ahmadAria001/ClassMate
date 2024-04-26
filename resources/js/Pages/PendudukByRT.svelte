@@ -58,6 +58,7 @@
         },
         // 459,
     ];
+
     let role =
         $page.props.auth.user.role;
         // "RT";
@@ -65,12 +66,6 @@
     let modalEdit = false;
     let modalFamily = false;
     let modalDelete = false;
-    let modalConfirmDel = false;
-    let selectedReason: string;
-    let delReasons = [
-        { value: "pindah", name: "Pindah" },
-        { value: "meninggal", name: "Meninggal" },
-    ];
 
     let searchTerm = "";
     let currentPosition = 0;
