@@ -54,6 +54,5 @@ export const createSchema = z.object({
     }).min(1),
     "isFamilyHead": z.coerce.boolean(),
 });
-});
 
 export type CreateSchema = z.infer<typeof createSchema>;
