@@ -66,9 +66,9 @@ class HandleInertiaRequests extends Middleware
 
                     $model = $pat->tokenable();
                     $userID = $model->get()->first()->civilian_id;
-                    $user = Civilian::with('family.rt_id')->where('id', '=', $userID)->first();
+                    $user = Civilian::with('rt_id')->where('id', '=', $userID)->first();
 
-                    $rt = $user->family->rt_id;
+                    $rt = $user->rt_id;
 
                     return [
                         'username' => $model->get('username')->first()->username,

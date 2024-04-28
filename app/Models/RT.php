@@ -22,19 +22,9 @@ class RT extends Model
         return $this->belongsTo(User::class, 'leader_id', 'id');
     }
 
-    public function family(): HasMany
+    public function civils(): HasMany
     {
-        return $this->hasMany(Family::class, 'rt_id', 'id');
-    }
-
-    public function civilian(): HasManyThrough
-    {
-        return $this->hasManyThrough(Civilian::class, Family::class);
-    }
-
-    public function civils(): HasManyThrough
-    {
-        return $this->hasManyThrough(Civilian::class, Family::class, 'rt_id', 'family_id', 'id', 'id');
+        return $this->hasMany(Civilian::class, 'rt_id', 'id');
     }
 
     public function created_by(): BelongsTo
