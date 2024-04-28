@@ -51,6 +51,8 @@ class Login extends Controller
                 $generatedToken = $user->createToken('access_token', $token_abilities, now()->addWeek());
                 $cookie = Cookie('token', $generatedToken->plainTextToken, Carbon::now()->addWeek()->getTimestamp(), '/', null, null, true);
 
+                error_log($generatedToken->plainTextToken);
+
                 return Response()
                     ->json([
                         'status' => true,

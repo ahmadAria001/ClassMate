@@ -13,7 +13,7 @@ class Civilian extends Model
     use HasFactory, SoftDeletes;
 
     protected $table = 'civilian';
-    protected $fillable = ['nik', 'fullName', 'birthplace', 'birthdate', 'residentstatus', 'family_id', 'created_at', 'created_by', 'updated_at', 'updated_by', 'deleted_at', 'deleted_by'];
+    protected $fillable = ['nik', 'fullName', 'birthplace', 'birthdate', 'residentstatus', 'family_id', 'created_at', 'created_by', 'updated_at', 'updated_by', 'deleted_at', 'deleted_by', 'nkk', 'isFamilyHead', 'rt_id', 'address', 'status', 'phone', 'religion', 'job'];
 
     protected $dateFormat = 'U';
 

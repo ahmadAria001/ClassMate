@@ -10,6 +10,7 @@ use App\Models\Docs;
 use App\Models\Documentation;
 use App\Models\Dues;
 use App\Models\DuesPaymentLog;
+use App\Models\EnvironmentInfo;
 use App\Models\EnvirontmentInfo;
 use App\Models\Family;
 use App\Models\FinancialAssistance;
@@ -48,7 +49,7 @@ class TableSeeder extends Seeder
                     'isFamilyHead' => true,
                     'rt_id' => $i,
                     'address' => $faker->address(),
-                    'status' => 'Bujangan',
+                    'status' => $faker->randomElement(['Aktif', 'Meninggal', 'Pindah']),
                     'phone' => preg_replace('/[^0-9]/', ' ', $faker->phoneNumber()),
                     'religion' => $faker->randomElement(['Islam', 'Katolik', 'Hindu', 'Budha', 'Konghuan']),
                     'job' => $faker->randomElement(['Pengangguran', 'Mahasiswa', 'Petani', 'PNS', 'Sum Ting']),
@@ -66,7 +67,7 @@ class TableSeeder extends Seeder
                     'isFamilyHead' => true,
                     'rt_id' => $i,
                     'address' => $faker->address(),
-                    'status' => 'Bujangan',
+                    'status' => $faker->randomElement(['Aktif', 'Meninggal', 'Pindah']),
                     'phone' => preg_replace('/[^0-9]/', ' ', $faker->phoneNumber()),
                     'religion' => $faker->randomElement(['Islam', 'Katolik', 'Hindu', 'Budha', 'Konghuan']),
                     'job' => $faker->randomElement(['Pengangguran', 'Mahasiswa', 'Petani', 'PNS', 'Sum Ting']),
@@ -127,7 +128,7 @@ class TableSeeder extends Seeder
         }
 
         for ($i = 1; $i <= 5; $i++) {
-            EnvirontmentInfo::create([
+            EnvironmentInfo::create([
                 'env_condition' => $faker->sentence(),
                 'desc' => $faker->sentences(2, true),
                 'general_facility' => $faker->sentence(),

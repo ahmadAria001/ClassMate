@@ -20,12 +20,15 @@ return new class extends Migration {
             $table->string('fullName', 100)->nullable();
             $table->string('birthplace', 20)->nullable();
             $table->bigInteger('birthdate')->nullable();
-            $table->enum('residentstatus', ['ContractResident', 'PermanentResident'])->nullable();
+            $table->enum('residentstatus', ['ContractResident', 'PermanentResident', 'Kos'])->nullable();
             $table->char('nkk', 16)->nullable();
             $table->boolean('isFamilyHead')->default(false);
             $table->unsignedBigInteger('rt_id')->index('fk_civilian_rt');
             $table->text('address')->nullable();
-            $table->string('status', 100)->nullable();
+            $table
+                ->enum('status', ['Aktif', 'Meninggal', 'Pindah'])
+                ->nullable()
+                ->default('Aktif');
             $table->string('phone', 20)->nullable();
             $table->string('religion', 100)->nullable();
             $table->string('job', 100)->nullable();

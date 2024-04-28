@@ -9,7 +9,9 @@ use App\Http\Middleware\Resources\UpdateCiviliant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('civiliant')->group(function () {
+Route::prefix('civilian')->group(function () {
+    Route::get('/{column}/{operator}/{value}', [CivilianController::class, 'getCustom'])->middleware(CiviliantGet::class);
+
     Route::get('/', [CivilianController::class, 'get'])->middleware(CiviliantGet::class);
     Route::get('/{filter}', [CivilianController::class, 'get'])->middleware(CiviliantGet::class);
 
