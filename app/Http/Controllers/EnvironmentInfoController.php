@@ -2,12 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Resources\Environment\Create;
+use App\Http\Requests\Resources\Environment\Delete;
+use App\Http\Requests\Resources\Environment\Update;
 use App\Models\EnvironmentInfo;
-use App\Models\EnvirontmentInfo;
+use App\Models\RT;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Laravel\Sanctum\PersonalAccessToken;
 
-class EnvironmentInfoControllerInfoController extends Controller
+class EnvironmentInfoController extends Controller
 {
     public function __invoke()
     {
@@ -19,18 +25,26 @@ class EnvironmentInfoControllerInfoController extends Controller
         $data = null;
 
         if ($filter)
-            $data = EnvironmentInfo::with('leader_id.civilian_id')
-                ->with('family.civil')
-                ->find($filter)
+            $data = EnvironmentInfo::where('created_by', $filter)
                 ->skip(0)
                 ->take(10)
                 ->get();
         else
-            $data = EnvironmentInfo::with('leader_id.civilian_id')
-                ->with('family.civil')
-                ->skip(0)
+            $data = EnvironmentInfo::skip(0)
                 ->take(10)
                 ->get();
+
+        return Response()->json(['data' => $data], 200);
+    }
+
+    public function getlts(){
+
+        // $data = null;
+
+        $data = EnvironmentInfo::orderByDesc('created_at')->get()->first();
+        // $data = EnvironmentInfo::all();
+
+        // echo var_dump($data);
 
         return Response()->json(['data' => $data], 200);
     }
@@ -40,19 +54,10 @@ class EnvironmentInfoControllerInfoController extends Controller
         $payload = $req->safe()->collect();
 
         try {
-            $exist = EnvironmentInfo::find([
-                'leader_id' => $payload->get('leader_id'),
-            ]);
-
-            if (count($exist) > 0) {
-                return Response()->json([
-                    'status' => false,
-                    'message' => 'Data already exist'
-                ], 400);
-            }
-
-            $data = EnvirontmentInfo::firstOrCreate([
-                'leader_id' => $payload->get('leader_id'),
+            $data = EnvironmentInfo::Create([
+                'env_condition' => $payload->get('env_condition'),
+                'desc' => $payload->get('desc'),
+                'general_facility' => $payload->get('general_facility'),
             ]);
 
             if ($data->wasRecentlyCreated) {
@@ -90,12 +95,14 @@ class EnvironmentInfoControllerInfoController extends Controller
         $payload = $req->safe()->collect();
 
         try {
-            $data = RT::withTrashed()->find(['id' => $payload->get('id')])->first();
+            $data = EnvironmentInfo::withTrashed()->find(['id' => $payload->get('id')])->first();
 
             if ($data) {
                 if (Auth::guard('web')->check()) {
                     $data->update([
-                        'leader_id' => $payload->get('leader_id'),
+                        'env_condition' => $payload->get('env_condition'),
+                        'desc' => $payload->get('desc'),
+                        'general_facility' => $payload->get('general_facility'),
                         'updated_by' => Auth::id()
                     ]);
                 } else {
@@ -104,7 +111,9 @@ class EnvironmentInfoControllerInfoController extends Controller
                     $model = $pat->tokenable();
 
                     $data->update([
-                        'leader_id' => $payload->get('leader_id'),
+                        'env_condition' => $payload->get('env_condition'),
+                        'desc' => $payload->get('desc'),
+                        'general_facility' => $payload->get('general_facility'),
                         'updated_by' => ($model->get('id'))[0]->id
                     ]);
                 }
@@ -129,8 +138,7 @@ class EnvironmentInfoControllerInfoController extends Controller
         $payload = $req->safe()->collect();
 
         try {
-            $data = RT::withTrashed()->find(['id' => $payload->get('id')])->first();
-
+            $data = EnvironmentInfo::withTrashed()->find(['id' => $payload->get('id')])->first();
             if ($data) {
                 if (Auth::guard('web')->check()) {
                     $data->update([
