@@ -28,11 +28,9 @@ class CivilianController extends Controller
     {
         $data = null;
         if ($filter) {
-            $data = Civilian::with('rt_id')->find($filter);
+            $data = Civilian::withoutTrashed()->with('rt_id')->orWhere('id', '=', $filter)->orWhere('nik', '=', $filter)->orWhere('fullName', '=', $filter)->get()->first();
         } else {
-            $data = Civilian::with('rt_id')
-                ->where(['status', 'status'], ['!=', '!='], ['Meninggal', 'pindah'], 'or')
-                ->get();
+            $data = Civilian::withoutTrashed()->with('rt_id')->where('status', '!=', 'pindah')->where('status', '!=', 'Meninggal')->get();
         }
 
         return Response()->json(['data' => $data], 200);
@@ -40,7 +38,7 @@ class CivilianController extends Controller
 
     public function getCustom($column, $operator, $value): JsonResponse
     {
-        $data = Civilian::with('rt_id')->where($column, $operator, $value)->get();
+        $data = Civilian::withoutTrashed()->with('rt_id')->where($column, $operator, $value)->get();
         return Response()->json(['data' => $data], 200);
     }
 
@@ -84,7 +82,12 @@ class CivilianController extends Controller
                         $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
 
                         if (!$token) {
-                            return null;
+                            return Response()->json(
+                                [
+                                    'message' => 'Unauthorized',
+                                ],
+                                401,
+                            );
                         }
                     }
 

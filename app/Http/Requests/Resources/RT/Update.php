@@ -23,7 +23,8 @@ class Update extends FormRequest
     {
         return [
             'id' => 'required|integer|min:1',
-            'leader_id' => 'required|integer|min:1'
+            'leader_id' => 'required|integer|min:1',
+            'number' => 'required|integer|min:1',
         ];
     }
 }

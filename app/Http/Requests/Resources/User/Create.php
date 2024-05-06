@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Resources\RT;
+namespace App\Http\Requests\Resources\User;
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -22,8 +22,10 @@ class Create extends FormRequest
     public function rules(): array
     {
         return [
-            'leader_id' => 'required|integer|min:1',
-            'number' => 'required|integer|min:1',
+            'username' => 'required|string',
+            'password' => 'required|string',
+            'role' => 'required|string',
+            'civilian_id' => 'required|integer|min:1',
         ];
     }
 }
