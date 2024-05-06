@@ -22,10 +22,11 @@ class CertificateController extends Controller
     {
         $data = null;
 
-        if ($filter)
-            $data = Certificate::find($filter);
-        else
-            $data = Certificate::all();
+        if ($filter) {
+            $data = Certificate::withoutTrashed()->find($filter);
+        } else {
+            $data = Certificate::withoutTrashed()->all();
+        }
 
         return Response()->json(['data' => $data], 200);
     }
@@ -48,22 +49,26 @@ class CertificateController extends Controller
 
                     $model = $pat->tokenable();
 
-                    $data->created_by = ($model->get('id'))[0]->id;
-                } else
+                    $data->created_by = $model->get('id')[0]->id;
+                } else {
                     $data->created_by = Auth::id();
+                }
 
                 $data->save();
 
                 return Response()->json([
                     'status' => true,
-                    'message' => 'Data Created'
+                    'message' => 'Data Created',
                 ]);
             }
 
-            return Response()->json([
-                'status' => false,
-                'message' => 'Data already exist'
-            ], 400);
+            return Response()->json(
+                [
+                    'status' => false,
+                    'message' => 'Data already exist',
+                ],
+                400,
+            );
         } catch (\Throwable $th) {
             error_log($th);
         }
@@ -74,7 +79,9 @@ class CertificateController extends Controller
         $payload = $req->safe()->collect();
 
         try {
-            $data = Certificate::withTrashed()->find(['id' => $payload->get('id')])->first();
+            $data = Certificate::withTrashed()
+                ->find(['id' => $payload->get('id')])
+                ->first();
 
             if ($data) {
                 if (Auth::guard('web')->check()) {
@@ -85,7 +92,7 @@ class CertificateController extends Controller
                         'amt_fund' => $payload->get('amt_fund'),
                         'status' => $payload->get('status'),
                         'rt_id' => $payload->get('rt_id'),
-                        'updated_by' => Auth::id()
+                        'updated_by' => Auth::id(),
                     ]);
                 } else {
                     $token = $req->bearerToken();
@@ -99,7 +106,7 @@ class CertificateController extends Controller
                         'amt_fund' => $payload->get('amt_fund'),
                         'status' => $payload->get('status'),
                         'rt_id' => $payload->get('rt_id'),
-                        'updated_by' => ($model->get('id'))[0]->id
+                        'updated_by' => $model->get('id')[0]->id,
                     ]);
                 }
 
@@ -107,14 +114,17 @@ class CertificateController extends Controller
 
                 return Response()->json([
                     'status' => true,
-                    'message' => 'Data Updated'
+                    'message' => 'Data Updated',
                 ]);
             }
 
-            return Response()->json([
-                'status' => false,
-                'message' => 'Data Not found'
-            ], 400);
+            return Response()->json(
+                [
+                    'status' => false,
+                    'message' => 'Data Not found',
+                ],
+                400,
+            );
         } catch (\Throwable $th) {
             error_log($th);
         }
@@ -125,12 +135,14 @@ class CertificateController extends Controller
         $payload = $req->safe()->collect();
 
         try {
-            $data = Certificate::withTrashed()->find(['id' => $payload->get('id')])->first();
+            $data = Certificate::withTrashed()
+                ->find(['id' => $payload->get('id')])
+                ->first();
 
             if ($data) {
                 if (Auth::guard('web')->check()) {
                     $data->update([
-                        'deleted_by' => Auth::id()
+                        'deleted_by' => Auth::id(),
                     ]);
                 } else {
                     $token = $req->bearerToken();
@@ -138,7 +150,7 @@ class CertificateController extends Controller
 
                     $model = $pat->tokenable();
                     $data->update([
-                        'deleted_by' => ($model->get('id'))[0]->id
+                        'deleted_by' => $model->get('id')[0]->id,
                     ]);
                 }
 
@@ -148,14 +160,17 @@ class CertificateController extends Controller
 
                 return Response()->json([
                     'status' => true,
-                    'message' => 'Data Deleted'
+                    'message' => 'Data Deleted',
                 ]);
             }
 
-            return Response()->json([
-                'status' => false,
-                'message' => 'Data Not found'
-            ], 400);
+            return Response()->json(
+                [
+                    'status' => false,
+                    'message' => 'Data Not found',
+                ],
+                400,
+            );
         } catch (\Throwable $th) {
             error_log($th);
         }
