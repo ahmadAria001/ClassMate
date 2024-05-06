@@ -19,9 +19,9 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('paid_by')->index('fk_payer_payment');
             $table->unsignedBigInteger('dues_id')->index('fk_dues_payment');
-            $table->bigInteger('amount_paid');
-            $table->bigInteger('exchange');
-            $table->bigInteger('debt');
+            $table->decimal('amount_paid', 13, 2);
+            $table->decimal('exchange', 13, 2)->default(0);
+            $table->decimal('debt', 13, 2)->default(0);
             $table->bigInteger('created_at');
             $table->unsignedBigInteger('created_by')->nullable()->index('fk_docs_user');
             $table->bigInteger('updated_at')->nullable();

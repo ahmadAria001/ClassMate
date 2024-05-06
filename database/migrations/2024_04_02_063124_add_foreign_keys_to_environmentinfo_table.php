@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('environtmentinfo', function (Blueprint $table) {
+        Schema::table('environmentinfo', function (Blueprint $table) {
             $table->foreign(
                 ['created_by'],
                 'fk_created_env'
