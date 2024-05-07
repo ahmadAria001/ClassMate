@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Resources\User\Create;
 use App\Http\Requests\Resources\User\Delete;
 use App\Http\Requests\Resources\User\Update;
+use App\Models\Civilian;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -51,42 +52,30 @@ class UserController extends Controller
         $payload = $req->safe()->collect();
 
         try {
-            $existLeader = User::find([
-                'username' => $payload->get('username'),
-                'password' => Hash::make($payload->get('password')),
-                'role' => $payload->get('role'),
-                'civilian_id' => $payload->get('civilian_id'),
-            ]);
+            $existingCivils = Civilian::where('nik', '=', $payload->get('nik'))->first();
 
-            if (count($existLeader) > 0) {
+            if (!$existingCivils) {
                 return Response()->json(
                     [
                         'status' => false,
-                        'message' => 'Data already exist',
+                        'message' => 'Warga tidak ditemukan',
                     ],
                     400,
                 );
             }
 
-            $existNumber = User::find([
-                'number' => $payload->get('number'),
-            ]);
+            $username = preg_replace('/\s+/', '', strtolower($existingCivils->fullName));
+            $existingName = User::where('username', '=', $username)->get();
 
-            if (count($existNumber) > 0) {
-                return Response()->json(
-                    [
-                        'status' => false,
-                        'message' => 'Data already exist',
-                    ],
-                    400,
-                );
+            if (count($existingName) > 0) {
+                $username = $username . count($existingName);
             }
 
             $data = User::firstOrCreate([
-                'username' => $payload->get('username'),
+                'username' => $username,
                 'password' => Hash::make($payload->get('password')),
-                'role' => $payload->get('role'),
-                'civilian_id' => $payload->get('civilian_id'),
+                'role' => 'Warga',
+                'civilian_id' => $existingCivils->id,
             ]);
 
             if ($data->wasRecentlyCreated) {

@@ -56,6 +56,18 @@ class CivilianController extends Controller
                 }
             }
 
+            $existingNik = Civilian::withTrashed()->where('nik', $payload->get('nik'))->first();
+
+            if ($existingNik) {
+                return Response()->json(
+                    [
+                        'status' => false,
+                        'message' => 'Data already exist',
+                    ],
+                    400,
+                );
+            }
+
             $data = Civilian::firstOrCreate([
                 'nik' => $payload->get('nik'),
                 'fullName' => $payload->get('fullName'),
