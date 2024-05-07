@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\EnvirontmentInfo;
+use App\Models\EnvironmentInfo;
 use Carbon\Carbon;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -15,7 +15,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('environtmentinfo', function (Blueprint $table) {
+        Schema::create('environmentinfo', function (Blueprint $table) {
             $table->id();
             $table->text('env_condition');
             $table->text('desc');
