@@ -23,6 +23,7 @@ export default defineConfig({
             "@P": path.resolve(__dirname, "resources/js/Pages"),
             "@R": path.resolve(__dirname, "resources/js/"),
             "@C": path.resolve(__dirname, "resources/js/Components"),
+            "@U": path.resolve(__dirname, "resources/js/Utils)"),
         },
     },
     //  (name) => {
