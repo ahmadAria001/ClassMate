@@ -22,10 +22,8 @@ class Create extends FormRequest
     public function rules(): array
     {
         return [
-            'username' => 'required|string',
             'password' => 'required|string',
-            'role' => 'required|string',
-            'civilian_id' => 'required|integer|min:1',
+            'nik' => 'required|integer|min:1',
         ];
     }
 }
