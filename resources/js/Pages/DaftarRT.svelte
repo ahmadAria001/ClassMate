@@ -1,4 +1,6 @@
 <script lang="ts">
+    import axiosInstance from "axios";
+
     import { onMount } from "svelte";
     import Layout from "./Layout.svelte";
     import {
@@ -24,6 +26,10 @@
         ChevronRightOutline,
         ExclamationCircleOutline,
     } from "flowbite-svelte-icons";
+    import Create from "@C/DaftarRT/Modals/Create.svelte";
+    import Edit from "@C/DaftarRT/Modals/Edit.svelte";
+    import Delete from "@C/DaftarRT/Modals/Delete.svelte";
+
     let items = [
         {
             id: 1,
@@ -64,6 +70,8 @@
         { value: "meninggal", name: "Meninggal" },
     ];
 
+    const axios = axiosInstance.create({ withCredentials: true });
+
     let searchTerm = "";
     let currentPosition = 0;
     const itemsPerPage = 10;
@@ -73,6 +81,8 @@
     let totalItems: number = items.length;
     let startPage: number;
     let endPage: number;
+
+    let selected: string | null = null;
 
     const updateDataAndPagination = () => {
         const currentPageItems = items.slice(
@@ -113,6 +123,16 @@
     const goToPage = (pageNumber: number) => {
         currentPosition = (pageNumber - 1) * itemsPerPage;
         updateDataAndPagination();
+    };
+
+    const getRT = async () => {
+        const response = await axios.get("/api/rt", {
+            headers: {
+                Accept: "application/json",
+            },
+        });
+
+        return response.data;
     };
 
     $: startRange = currentPosition + 1;
@@ -158,105 +178,7 @@
                 }}>+ Tambah RT</Button
             >
         </div>
-        <Modal title="Tambah RT" bind:open={addRT} autoclose>
-            <form method="POST">
-                <div class="grid md:grid-cols-2 md:gap-6">
-                    <div class="mb-4">
-                        <Label for="full_name" class="mb-2">Nama Lengkap</Label>
-                        <Input id="full_name" placeholder="Nama Lengkap" />
-                    </div>
-                    <div class="mb-4">
-                        <Label for="address" class="mb-2">Alamat</Label>
-                        <Input id="address" placeholder="Alamat" />
-                    </div>
-                </div>
-                <div class="grid md:grid-cols-2 md:gap-6">
-                    <div class="mb-4">
-                        <Label for="kk" class="mb-2">No KK</Label>
-                        <Input id="kk" placeholder="No KK" />
-                    </div>
-                    <div class="mb-4">
-                        <Label for="nik" class="mb-2">NIK</Label>
-                        <Input id="nik" placeholder="NIK" />
-                    </div>
-                </div>
-                <div class="grid md:grid-cols-2 md:gap-6">
-                    <div class="mb-4">
-                        <Label for="religion" class="mb-2">Agama</Label>
-                        <Input id="religion" placeholder="Agama" />
-                    </div>
-                    <div class="mb-4">
-                        <Label for="birthdate" class="mb-2"
-                            >Tempat, Tanggal Lahir</Label
-                        >
-                        <Input
-                            type="date"
-                            id="birthdate"
-                            placeholder="Tempat, Tanggal Lahir"
-                        />
-                    </div>
-                </div>
-                <div class="grid md:grid-cols-2 md:gap-6">
-                    <div class="mb-4 md:order-last">
-                        <div class="mb-4">
-                            <Label for="chief" class="mb-2">Ketua RT</Label>
-                            <Input id="chief" placeholder="Ketua RT" />
-                        </div>
-                        <div class="mb-4">
-                            <Label for="status" class="mb-2">Status</Label>
-                            <Input id="status" placeholder="Status" />
-                        </div>
-                        <div class="mb-4">
-                            <Label for="noHp" class="mb-2">No. HP</Label>
-                            <Input id="noHp" placeholder="No. HP" />
-                        </div>
-                        <div class="mb-4">
-                            <Label for="job" class="mb-2">Pekerjaan</Label>
-                            <Input id="job" placeholder="Pekerjaan" />
-                        </div>
-                    </div>
-                    <div class="mb-4">
-                        <label
-                            for="dropzone-file"
-                            class="flex flex-col items-center justify-center w-full h-full border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
-                        >
-                            <div
-                                class="flex flex-col items-center justify-center pt-5 pb-6"
-                            >
-                                <svg
-                                    class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400"
-                                    aria-hidden="true"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 20 16"
-                                >
-                                    <path
-                                        stroke="currentColor"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
-                                    />
-                                </svg>
-                                <p
-                                    class="mb-2 text-sm text-gray-500 dark:text-gray-400 font-semibold"
-                                >
-                                    Upload Gambar
-                                </p>
-                            </div>
-                            <input
-                                id="dropzone-file"
-                                type="file"
-                                class="hidden"
-                            />
-                        </label>
-                    </div>
-                </div>
-                <div class="block flex">
-                    <Button type="submit" class="ml-auto">Simpan</Button>
-                </div>
-            </form>
-        </Modal>
+        <Create bind:showState={addRT} />
 
         <TableHead>
             <TableHeadCell>Nama Lengkap</TableHeadCell>
@@ -265,208 +187,47 @@
             <TableHeadCell class="sr-only">Aksi</TableHeadCell>
         </TableHead>
         <TableBody>
-            {#each filteredItems as item}
-                <TableBodyRow>
-                    <TableBodyCell class="flex items-center">
-                        <Avatar src={item.src} class="mr-3" />
-                        {item.name}
-                    </TableBodyCell>
-                    <TableBodyCell>RT {item.head}</TableBodyCell>
-                    <TableBodyCell>{item.address}</TableBodyCell>
-                    <TableBodyCell>
-                        <Button href="/warga-rt">Lihat Penduduk</Button>
-                        <Button
-                            color="yellow"
-                            on:click={() => {
-                                modalEdit = true;
-                            }}>Edit</Button
-                        >
-                        <Button color="red">Hapus</Button>
-                    </TableBodyCell>
-                </TableBodyRow>
-            {/each}
+            {#await getRT() then data}
+                {#each data.data as item}
+                    <TableBodyRow>
+                        <TableBodyCell class="flex items-center">
+                            <Avatar src={item.src} class="mr-3" />
+                            {item.leader_id
+                                ? item.leader_id?.civilian_id?.fullName
+                                : "Tidak Ada"}
+                        </TableBodyCell>
+                        <TableBodyCell>RT. {item.number}</TableBodyCell>
+                        <TableBodyCell>
+                            {item.leader_id
+                                ? item.leader_id?.civilian_id?.address
+                                : "Tidak Ada"}
+                        </TableBodyCell>
+                        <TableBodyCell>
+                            <Button href="/warga-rt">Lihat Penduduk</Button>
+                            <Button
+                                color="yellow"
+                                on:click={() => {
+                                    modalEdit = true;
+                                    selected = item.id;
+                                }}>Edit</Button
+                            >
+                            <Button
+                                color="red"
+                                on:click={() => {
+                                    modalDelete = true;
+                                    selected = item.id;
+                                }}>Hapus</Button
+                            >
+                        </TableBodyCell>
+                    </TableBodyRow>
+                {/each}
+            {/await}
         </TableBody>
 
-        <!-- modal detail -->
-        <Modal
-            title="Data Keluarga"
-            bind:open={modalFamily}
-            size="lg"
-            autoclose
-        >
-            <Table>
-                <TableHead>
-                    <TableHeadCell>Nama</TableHeadCell>
-                    <TableHeadCell>Ketua RT</TableHeadCell>
-                    <TableHeadCell>Alamat RT</TableHeadCell>
-                    <TableHeadCell class="sr-only">Aksi</TableHeadCell>
-                </TableHead>
-                <TableBody>
-                    {#each filteredItems as item}
-                        <TableBodyRow>
-                            <TableBodyCell>{item.name}</TableBodyCell>
-                            <TableBodyCell>{item.address}</TableBodyCell>
-                            <TableBodyCell>{item.job}</TableBodyCell>
-                            <TableBodyCell>
-                                <Button
-                                    color="yellow"
-                                    on:click={() => {
-                                        modalEdit = true;
-                                    }}>Edit</Button
-                                >
-                                <Button>Hapus</Button>
-                            </TableBodyCell>
-                        </TableBodyRow>
-                    {/each}
-                </TableBody>
-            </Table>
-        </Modal>
-
-        <!-- modal edit -->
-        <Modal title="Tambah RT" bind:open={modalEdit} autoclose>
-            <form method="POST">
-                <div class="grid md:grid-cols-2 md:gap-6">
-                    <div class="mb-4">
-                        <Label for="full_name" class="mb-2">Nama Lengkap</Label>
-                        <Input id="full_name" placeholder="Nama Lengkap" />
-                    </div>
-                    <div class="mb-4">
-                        <Label for="address" class="mb-2">Alamat</Label>
-                        <Input id="address" placeholder="Alamat" />
-                    </div>
-                </div>
-                <div class="grid md:grid-cols-2 md:gap-6">
-                    <div class="mb-4">
-                        <Label for="kk" class="mb-2">No KK</Label>
-                        <Input id="kk" placeholder="No KK" />
-                    </div>
-                    <div class="mb-4">
-                        <Label for="nik" class="mb-2">NIK</Label>
-                        <Input id="nik" placeholder="NIK" />
-                    </div>
-                </div>
-                <div class="grid md:grid-cols-2 md:gap-6">
-                    <div class="mb-4">
-                        <Label for="religion" class="mb-2">Agama</Label>
-                        <Input id="religion" placeholder="Agama" />
-                    </div>
-                    <div class="mb-4">
-                        <Label for="birthdate" class="mb-2"
-                            >Tempat, Tanggal Lahir</Label
-                        >
-                        <Input
-                            type="date"
-                            id="birthdate"
-                            placeholder="Tempat, Tanggal Lahir"
-                        />
-                    </div>
-                </div>
-                <div class="grid md:grid-cols-2 md:gap-6">
-                    <div class="mb-4 md:order-last">
-                        <div class="mb-4">
-                            <Label for="chief" class="mb-2">Ketua RT</Label>
-                            <Input id="chief" placeholder="Ketua RT" />
-                        </div>
-                        <div class="mb-4">
-                            <Label for="status" class="mb-2">Status</Label>
-                            <Input id="status" placeholder="Status" />
-                        </div>
-                        <div class="mb-4">
-                            <Label for="noHp" class="mb-2">No. HP</Label>
-                            <Input id="noHp" placeholder="No. HP" />
-                        </div>
-                        <div class="mb-4">
-                            <Label for="job" class="mb-2">Pekerjaan</Label>
-                            <Input id="job" placeholder="Pekerjaan" />
-                        </div>
-                    </div>
-                    <div class="mb-4">
-                        <label
-                            for="dropzone-file"
-                            class="flex flex-col items-center justify-center w-full h-full border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
-                        >
-                            <div
-                                class="flex flex-col items-center justify-center pt-5 pb-6"
-                            >
-                                <svg
-                                    class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400"
-                                    aria-hidden="true"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 20 16"
-                                >
-                                    <path
-                                        stroke="currentColor"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
-                                    />
-                                </svg>
-                                <p
-                                    class="mb-2 text-sm text-gray-500 dark:text-gray-400 font-semibold"
-                                >
-                                    Upload Gambar
-                                </p>
-                            </div>
-                            <input
-                                id="dropzone-file"
-                                type="file"
-                                class="hidden"
-                            />
-                        </label>
-                    </div>
-                </div>
-                <div class="block flex">
-                    <Button type="submit" class="ml-auto">Simpan</Button>
-                </div>
-            </form>
-        </Modal>
-
-        <!-- modal hapus -->
-        <Modal bind:open={modalDelete} size="sm" autoclose>
-            <div class="text-center">
-                <ExclamationCircleOutline
-                    class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200"
-                />
-                <h3
-                    class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400"
-                >
-                    Apa alasan data warga 'nama' dihapus?
-                </h3>
-                <Select
-                    class="my-2"
-                    items={delReasons}
-                    bind:value={selectedReason}
-                    placeholder="Alasan dihapus"
-                    size="sm"
-                />
-                <Button
-                    color="red"
-                    class="me-2"
-                    on:click={() => {
-                        modalConfirmDel = true;
-                    }}>Selanjutnya</Button
-                >
-                <Button color="alternative">Batal</Button>
-            </div>
-        </Modal>
-
-        <!-- modal konfirmasi -->
-        <Modal bind:open={modalConfirmDel} size="sm" autoclose>
-            <div class="text-center">
-                <ExclamationCircleOutline
-                    class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200"
-                />
-                <h3
-                    class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400"
-                >
-                    Apakah yakin ingin menghapus warga ini?
-                </h3>
-                <Button color="red" class="me-2">Ya, yakin</Button>
-                <Button color="alternative">Tidak, batal</Button>
-            </div>
-        </Modal>
+        {#if selected}
+            <Edit bind:showState={modalEdit} bind:target={selected} />
+            <Delete bind:showState={modalDelete} bind:target={selected} />
+        {/if}
 
         <div
             slot="footer"

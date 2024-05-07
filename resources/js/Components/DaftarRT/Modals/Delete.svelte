@@ -17,8 +17,11 @@
     } from "flowbite-svelte-icons";
 
     import { createForm } from "felte";
-    import { validateSchema, validator } from "@felte/validator-zod";
-    import { type DeleteSchema, deleteSchema } from "@U/Schema/RT/Delete";
+    import { validator } from "@felte/validator-zod";
+    import {
+        type DeleteSchema,
+        deleteSchema,
+    } from "@R/Utils/Schema/Civils/Delete";
 
     import { twMerge } from "tailwind-merge";
     import { createEventDispatcher, onMount } from "svelte";

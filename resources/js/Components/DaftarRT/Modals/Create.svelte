@@ -19,7 +19,7 @@
     import { createEventDispatcher, onMount } from "svelte";
     import { page } from "@inertiajs/svelte";
 
-    import { type CreateSchema, createSchema } from "@U/Schema/RT/Create";
+    import { type CreateSchema, createSchema } from "@R/Utils/Schema/RT/Create";
 
     const axios = axiosInstance.create({ withCredentials: true });
     let err: { status: null | boolean; message: null | string } = {
