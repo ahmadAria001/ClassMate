@@ -11,7 +11,7 @@ class EnvironmentInfo extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table = 'environtmentinfo';
+    protected $table = 'environmentinfo';
 
     protected $fillable = [
         'env_condition',

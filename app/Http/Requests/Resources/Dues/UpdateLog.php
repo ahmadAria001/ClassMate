@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Resources\RT;
+namespace App\Http\Requests\Resources\Dues;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class Create extends FormRequest
+class UpdateLog extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,8 +22,8 @@ class Create extends FormRequest
     public function rules(): array
     {
         return [
-            'leader_id' => 'required|integer|min:1',
-            'number' => 'required|integer|min:1',
+            'id' => 'required|integer|min:1',
+            'amount_paid' => 'required|integer|min:0',
         ];
     }
 }

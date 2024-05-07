@@ -25,7 +25,8 @@ class RtController extends Controller
         $data = null;
 
         if ($filter) {
-            $data = RT::withTrashed()->with('leader_id.civilian_id')
+            $data = RT::withoutTrashed()
+                ->with('leader_id.civilian_id')
                 ->with([
                     'civils' => function ($q) {
                         $q->orderBy('nkk');
@@ -38,14 +39,14 @@ class RtController extends Controller
                 $data = $data->skip(0)->take(10);
             }
         } else {
-            $data = RT::withTrashed()->with('leader_id.civilian_id')
+            $data = RT::withoutTrashed()
+                ->with('leader_id.civilian_id')
                 ->with([
                     'civils' => function ($q) {
                         $q->orderBy('nkk');
                     },
                 ])
                 ->get();
-            // ->with()
 
             if ($data) {
                 $data = $data->skip(0)->take(10);
@@ -60,7 +61,8 @@ class RtController extends Controller
         $data = null;
 
         if ($filter) {
-            $data = RT::with(['civils' => fn($query) => $query->orderBy('nkk')])
+            $data = RT::withTrashed()
+                ->with(['civils' => fn($query) => $query->orderBy('nkk')])
                 ->where('id', '=', $filter)
                 ->skip(0)
                 ->take(10)
@@ -70,11 +72,12 @@ class RtController extends Controller
                 $data = $data->skip(0)->take(10);
             }
         } else {
-            $data = RT::with([
-                'civils' => function ($query) {
-                    $query->orderBy('nkk');
-                },
-            ])
+            $data = RT::withTrashed()
+                ->with([
+                    'civils' => function ($query) {
+                        $query->orderBy('nkk');
+                    },
+                ])
                 ->skip(0)
                 ->take(10)
                 ->get();
@@ -87,16 +90,46 @@ class RtController extends Controller
         return Response()->json(['data' => $data], 200);
     }
 
+    public function getCustom($column, $operator, $value)
+    {
+        $data = null;
+        if ($value == 'null') {
+            $data = RT::withTrashed()->whereNull($column)->with('leader_id.civilian_id')->where('number', '>', 0)->get();
+        } else {
+            $data = RT::withTrashed()->with('leader_id.civilian_id')->where($column, $operator, $value)->get();
+        }
+
+        return Response()->json(['data' => $data], 200);
+    }
+
     public function create(Create $req)
     {
         $payload = $req->safe()->collect();
 
         try {
-            $exist = RT::find([
-                'leader_id' => $payload->get('leader_id'),
-            ]);
+            $existLeader = RT::withoutTrashed()
+                ->where([
+                    'leader_id' => $payload->get('leader_id'),
+                ])
+                ->get();
 
-            if (count($exist) > 0) {
+            if (count($existLeader) > 0) {
+                return Response()->json(
+                    [
+                        'status' => false,
+                        'message' => 'Data already exist',
+                    ],
+                    400,
+                );
+            }
+
+            $existNumber = RT::withoutTrashed()
+                ->where([
+                    'number' => $payload->get('number'),
+                ])
+                ->get();
+
+            if (count($existNumber) > 0) {
                 return Response()->json(
                     [
                         'status' => false,
@@ -108,6 +141,7 @@ class RtController extends Controller
 
             $data = RT::firstOrCreate([
                 'leader_id' => $payload->get('leader_id'),
+                'number' => $payload->get('number'),
             ]);
 
             if ($data->wasRecentlyCreated) {
@@ -115,6 +149,20 @@ class RtController extends Controller
 
                 if (str_contains($req->url(), 'api')) {
                     $token = $req->bearerToken();
+
+                    if (!$token) {
+                        $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+
+                        if (!$token) {
+                            return Response()->json(
+                                [
+                                    'message' => 'Unauthorized',
+                                ],
+                                401,
+                            );
+                        }
+                    }
+
                     $pat = PersonalAccessToken::findToken($token);
 
                     $model = $pat->tokenable();
@@ -157,15 +205,31 @@ class RtController extends Controller
                 if (Auth::guard('web')->check()) {
                     $data->update([
                         'leader_id' => $payload->get('leader_id'),
+                        'number' => $payload->get('number'),
                         'updated_by' => Auth::id(),
                     ]);
                 } else {
                     $token = $req->bearerToken();
+
+                    if (!$token) {
+                        $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+
+                        if (!$token) {
+                            return Response()->json(
+                                [
+                                    'message' => 'Unauthorized',
+                                ],
+                                401,
+                            );
+                        }
+                    }
+
                     $pat = PersonalAccessToken::findToken($token);
                     $model = $pat->tokenable();
 
                     $data->update([
                         'leader_id' => $payload->get('leader_id'),
+                        'number' => $payload->get('number'),
                         'updated_by' => $model->get('id')[0]->id,
                     ]);
                 }
@@ -204,6 +268,20 @@ class RtController extends Controller
                     ]);
                 } else {
                     $token = $req->bearerToken();
+
+                    if (!$token) {
+                        $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+
+                        if (!$token) {
+                            return Response()->json(
+                                [
+                                    'message' => 'Unauthorized',
+                                ],
+                                401,
+                            );
+                        }
+                    }
+
                     $pat = PersonalAccessToken::findToken($token);
 
                     $model = $pat->tokenable();

@@ -2,30 +2,45 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\Resources\Certificate\Create;
-use App\Http\Requests\Resources\Certificate\Delete;
-use App\Http\Requests\Resources\Certificate\Update;
-use App\Models\Certificate;
+use App\Http\Requests\Resources\User\Create;
+use App\Http\Requests\Resources\User\Delete;
+use App\Http\Requests\Resources\User\Update;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Inertia\Inertia;
+use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\PersonalAccessToken;
 
-class CertificateController extends Controller
+class UserController extends Controller
 {
-    public function __invoke()
-    {
-        return Inertia::render('Auth/Certificate');
-    }
-
     public function get($filter = null)
     {
         $data = null;
 
         if ($filter) {
-            $data = Certificate::withoutTrashed()->find($filter);
+            $data = User::withoutTrashed()->with('civilian_id.rt_id')->where('id', '=', $filter)->get();
+
+            if ($data) {
+                $data = $data->skip(0)->take(10);
+            }
         } else {
-            $data = Certificate::withoutTrashed()->all();
+            $data = User::withoutTrashed()->with('civilian_id.rt_id')->get();
+
+            if ($data) {
+                $data = $data->skip(0)->take(10);
+            }
+        }
+
+        return Response()->json(['data' => $data], 200);
+    }
+
+    public function getCustom($column, $operator, $value)
+    {
+        $data = null;
+        if ($value == 'null') {
+            $data = User::withoutTrashed()->whereNull($column)->with('civilian_id.rt_id')->where('number', '>', 0)->get();
+        } else {
+            $data = User::withoutTrashed()->with('civilian_id.rt_id')->where($column, $operator, $value)->get();
         }
 
         return Response()->json(['data' => $data], 200);
@@ -34,10 +49,44 @@ class CertificateController extends Controller
     public function create(Create $req)
     {
         $payload = $req->safe()->collect();
+
         try {
-            $data = Certificate::firstOrCreate([
-                'request_by' => $payload->get('request_by'),
-                'desc' => $payload->get('desc'),
+            $existLeader = User::find([
+                'username' => $payload->get('username'),
+                'password' => Hash::make($payload->get('password')),
+                'role' => $payload->get('role'),
+                'civilian_id' => $payload->get('civilian_id'),
+            ]);
+
+            if (count($existLeader) > 0) {
+                return Response()->json(
+                    [
+                        'status' => false,
+                        'message' => 'Data already exist',
+                    ],
+                    400,
+                );
+            }
+
+            $existNumber = User::find([
+                'number' => $payload->get('number'),
+            ]);
+
+            if (count($existNumber) > 0) {
+                return Response()->json(
+                    [
+                        'status' => false,
+                        'message' => 'Data already exist',
+                    ],
+                    400,
+                );
+            }
+
+            $data = User::firstOrCreate([
+                'username' => $payload->get('username'),
+                'password' => Hash::make($payload->get('password')),
+                'role' => $payload->get('role'),
+                'civilian_id' => $payload->get('civilian_id'),
             ]);
 
             if ($data->wasRecentlyCreated) {
@@ -79,19 +128,15 @@ class CertificateController extends Controller
         $payload = $req->safe()->collect();
 
         try {
-            $data = Certificate::withTrashed()
+            $data = User::withTrashed()
                 ->find(['id' => $payload->get('id')])
                 ->first();
 
             if ($data) {
                 if (Auth::guard('web')->check()) {
                     $data->update([
-                        'typeDues' => $payload->get('typeDues'),
-                        'description' => $payload->get('description'),
-                        'amt_dues' => $payload->get('amt_dues'),
-                        'amt_fund' => $payload->get('amt_fund'),
-                        'status' => $payload->get('status'),
-                        'rt_id' => $payload->get('rt_id'),
+                        'leader_id' => $payload->get('leader_id'),
+                        'number' => $payload->get('number'),
                         'updated_by' => Auth::id(),
                     ]);
                 } else {
@@ -100,17 +145,11 @@ class CertificateController extends Controller
                     $model = $pat->tokenable();
 
                     $data->update([
-                        'typeDues' => $payload->get('typeDues'),
-                        'description' => $payload->get('description'),
-                        'amt_dues' => $payload->get('amt_dues'),
-                        'amt_fund' => $payload->get('amt_fund'),
-                        'status' => $payload->get('status'),
-                        'rt_id' => $payload->get('rt_id'),
+                        'leader_id' => $payload->get('leader_id'),
+                        'number' => $payload->get('number'),
                         'updated_by' => $model->get('id')[0]->id,
                     ]);
                 }
-
-                // $data->save();
 
                 return Response()->json([
                     'status' => true,
@@ -135,7 +174,7 @@ class CertificateController extends Controller
         $payload = $req->safe()->collect();
 
         try {
-            $data = Certificate::withTrashed()
+            $data = User::withTrashed()
                 ->find(['id' => $payload->get('id')])
                 ->first();
 

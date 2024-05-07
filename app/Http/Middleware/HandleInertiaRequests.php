@@ -53,7 +53,14 @@ class HandleInertiaRequests extends Middleware
                     $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
 
                     if (!$token) {
-                        return null;
+                        return [
+                            'username' => null,
+                            'role' => null,
+                            'id' => null,
+                            'fullName' => null,
+                            'nik' => null,
+                            'rt_id' => null,
+                        ];
                     }
                 }
 
@@ -61,13 +68,20 @@ class HandleInertiaRequests extends Middleware
                     $pat = PersonalAccessToken::findToken($token);
 
                     if (!$pat) {
-                        return null;
+                        return [
+                            'username' => null,
+                            'role' => null,
+                            'id' => null,
+                            'fullName' => null,
+                            'nik' => null,
+                            'rt_id' => null,
+                        ];
                     }
 
                     $model = $pat->tokenable();
+
                     $userID = $model->get()->first()->civilian_id;
                     $user = Civilian::with('rt_id')->where('id', '=', $userID)->first();
-
                     $rt = $user->rt_id;
 
                     return [
