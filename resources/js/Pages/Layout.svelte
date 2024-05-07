@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { page } from "@inertiajs/svelte";
+    import { page, router } from "@inertiajs/svelte";
     import { sineIn } from "svelte/easing";
     import {
         Button,
@@ -34,6 +34,9 @@
         BellSolid,
     } from "flowbite-svelte-icons";
     import { twMerge } from "tailwind-merge";
+    import axiosInstance from "axios";
+
+    const axios = axiosInstance.create({ withCredentials: true });
 
     // tempat rolenya disini
     // console.log($page.props);
@@ -214,7 +217,6 @@
     }
 
     export let active: string = "";
-    // console.log(active);
 
     let site = {
         name: "KawanDesa",
@@ -285,6 +287,17 @@
             time: "12 minutes ago",
         },
     ];
+
+    const logout = async () => {
+        const { data, status } = await axios.get("/api/auth/signout");
+
+        if (status != 200) {
+            router.visit("/login");
+            return;
+        }
+
+        router.visit("/login");
+    };
 </script>
 
 <svelte:window bind:innerWidth={width} />
@@ -427,7 +440,9 @@
                 <span class="block truncate text-sm font-medium">{role}</span>
             </DropdownHeader>
             <DropdownItem href="/profile">Profile</DropdownItem>
-            <DropdownItem href="/login">Keluar</DropdownItem>
+            <DropdownItem on:click={async () => await logout()}
+                >Keluar</DropdownItem
+            >
         </Dropdown>
     </Navbar>
 </header>
