@@ -14,7 +14,7 @@
 
     import { createForm } from "felte";
     import { validateSchema, validator } from "@felte/validator-zod";
-    import { type UpdateSchema, updateSchema } from "@U/Schema/RT/Update";
+    import { type UpdateSchema, updateSchema } from "@R/Utils/Schema/RT/Update";
 
     import { twMerge } from "tailwind-merge";
     import { createEventDispatcher, onMount } from "svelte";
