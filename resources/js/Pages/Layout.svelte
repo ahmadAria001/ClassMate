@@ -304,7 +304,7 @@
 <header class="flex-none w-full mx-auto bg-white dark:bg-slate-950">
     <Navbar let:hidden let:toggle class="border-b-2 h-16 fixed">
         <NavHamburger
-            on:click={toggleDrawer}
+            onClick={toggleDrawer}
             btnClass="focus:outline-none whitespace-normal rounded-lg focus:ring-2 p-1.5 focus:ring-gray-400 hover:bg-gray-100 dark:hover:bg-gray-600 m-0 mr-3 lg:hidden"
         />
         <NavBrand href="/" class="md:w-64">
@@ -460,7 +460,7 @@
     <div class="flex items-center">
         <CloseButton
             on:click={() => (drawerHidden = true)}
-            class="mb-4 dark:text-white lg:hidden"
+            class="mb- text-black dark:text-white lg:hidden"
         />
     </div>
     <Sidebar asideClass="w-54">
