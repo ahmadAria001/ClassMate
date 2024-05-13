@@ -59,9 +59,8 @@
         // 459,
     ];
 
-    let role =
-        $page.props.auth.user.role;
-        // "RT";
+    let role = $page.props.auth.user.role;
+    // "RT";
     let addCivilian = false;
     let modalEdit = false;
     let modalFamily = false;
@@ -370,27 +369,9 @@
                                 <TableBodyCell>RT. {number}</TableBodyCell>
                                 <TableBodyCell
                                     >{leader_id
-                                        ? leader_id.fullName
+                                        ? leader_id.civilian_id.fullName
                                         : leader_id}</TableBodyCell
                                 >
-                                <!-- <TableBodyCell -->
-                                <!--     >{new Date( -->
-                                <!--         birthdate * 1000, -->
-                                <!--     ).toLocaleDateString()}</TableBodyCell -->
-                                <!-- > -->
-                                <!-- {#if residentstatus == "PermanentResident"} -->
-                                <!--     <TableBodyCell class="text-center"> -->
-                                <!--         <Badge color="green">Tetap</Badge> -->
-                                <!--     </TableBodyCell> -->
-                                <!-- {:else if residentstatus == "ContractResident"} -->
-                                <!--     <TableBodyCell class="text-center"> -->
-                                <!--         <Badge color="indigo">Kontrak</Badge> -->
-                                <!--     </TableBodyCell> -->
-                                <!-- {:else if residentstatus == "Kos"} -->
-                                <!--     <TableBodyCell class="text-center"> -->
-                                <!--         <Badge color="yellow">Kos</Badge> -->
-                                <!--     </TableBodyCell> -->
-                                <!-- {/if} -->
                                 <TableBodyCell class="text-end">
                                     <!-- buttons base on role -->
                                     {#if role == "RW"}
