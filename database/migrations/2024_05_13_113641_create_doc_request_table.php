@@ -1,26 +1,21 @@
 <?php
 
-use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('doc_request', function (Blueprint $table) {
             $table->id();
-            $table->string('username', 50)->nullable();
-            $table->string('password');
-            $table->enum('role', ['RT', 'RW', 'Warga', 'Admin'])->nullable();
-            $table->unsignedBigInteger('civilian_id')->index('fk_users_civilian')->nullable();
-            $table->text('pict')->nullable();
+            $table->enum('requestStatus', ['Resolved', 'Declined', 'Open'])->default('Open');
+            $table->unsignedBigInteger('request_by')->index('fk_request_by');
+            $table->unsignedBigInteger('docs_id')->index('fk_request_docs');
             $table->bigInteger('created_at');
             $table->unsignedBigInteger('created_by')->index('fk_user')->nullable();
             $table->bigInteger('updated_at')->nullable();
@@ -32,11 +27,9 @@ return new class extends Migration {
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('doc_request');
     }
 };

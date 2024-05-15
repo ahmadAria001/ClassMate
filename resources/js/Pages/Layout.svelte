@@ -45,7 +45,6 @@
     const axios = axiosInstance.create({ withCredentials: true });
 
     // tempat rolenya disini
-    // console.log($page.props);
     let role = $page.props.auth.user.role;
 
     let filtermenu: {
@@ -274,7 +273,7 @@
     const toggleDrawer = () => {
         // console.log("test");
         // drawerHidden = !drawerHidden;
-        drawerHidden = false;
+        drawerHidden = drawerHidden ? false : true;
     };
 
     let notifs = [
@@ -515,11 +514,13 @@
     </Sidebar>
 </Drawer>
 
-<div class="flex px-4 mx-auto w-full">
+<div class="flex px-4 mx-auto w-full mb-14">
     <main class="lg:ml-64 mt-4 w-full mx-auto" style="margin-top: 5rem">
         <slot />
     </main>
 </div>
-<Footer class="absolute bottom-0 start-0 z-20 w-full p-3 border-t-2">
+<Footer
+    class="w-full p-3 border-t-2 mt-5 flex justify-center max-md:static fixed bottom-0 bg-white z-0 mt-5"
+>
     <FooterCopyright by="Simpang Lima Softwork" />
 </Footer>

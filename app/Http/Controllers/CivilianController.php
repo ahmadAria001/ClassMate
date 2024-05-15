@@ -10,6 +10,7 @@ use App\Http\Requests\Resources\DeleteCiviliant;
 use App\Http\Requests\UpdateCivilianRequest;
 use App\Models\Civilian;
 use Carbon\Carbon;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -28,7 +29,7 @@ class CivilianController extends Controller
     {
         $data = null;
         if ($filter) {
-            $data = Civilian::withoutTrashed()->with('rt_id')->orWhere('id', '=', $filter)->orWhere('nik', '=', $filter)->orWhere('fullName', '=', $filter)->get()->first();
+            $data = Civilian::withoutTrashed()->with('rt_id')->where('id', '=', $filter)->orWhere('nik', '=', $filter)->orWhere('fullName', '=', $filter)->get()->first();
         } else {
             $data = Civilian::withoutTrashed()->with('rt_id')->where('status', '!=', 'pindah')->where('status', '!=', 'Meninggal')->get();
         }
@@ -39,7 +40,33 @@ class CivilianController extends Controller
     public function getCustom($column, $operator, $value): JsonResponse
     {
         $data = Civilian::withoutTrashed()->with('rt_id')->where($column, $operator, $value)->get();
+
         return Response()->json(['data' => $data], 200);
+    }
+
+    public function getArchived($filter = null, $byRT = false): JsonResponse
+    {
+        $data = null;
+        $filter = $filter == 'null' ? null : $filter;
+        $byRT = filter_var($byRT, FILTER_VALIDATE_BOOLEAN);
+
+        if (!$filter) {
+            $data = Civilian::withTrashed()->with('rt_id')->where('status', '!=', 'Aktif')->get();
+        } else {
+            if ($byRT) {
+                $data = Civilian::withTrashed()
+                    ->with('rt_id')
+                    ->where('status', '!=', 'Aktif')
+                    ->whereHas('rt_id', function ($query) use ($filter) {
+                        $query->where('id', $filter);
+                    })
+                    ->get();
+            } else {
+                $data = Civilian::withTrashed()->with('rt_id')->where('status', '!=', 'Aktif')->where('id', $filter)->get()->first();
+            }
+        }
+
+        return Response()->json($data, 200);
     }
 
     public function create(Create $req): JsonResponse
