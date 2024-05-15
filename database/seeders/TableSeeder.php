@@ -6,6 +6,7 @@ use App\Models\Activity;
 use App\Models\Certificate;
 use App\Models\Civilian;
 use App\Models\Complaint;
+use App\Models\DocRequest;
 use App\Models\Docs;
 use App\Models\Documentation;
 use App\Models\Dues;
@@ -153,7 +154,7 @@ class TableSeeder extends Seeder
         }
 
         for ($i = 1; $i <= 4; $i++) {
-            $docsType = ['Complaint', 'Dues', 'Event', 'Administration'];
+            $docsType = ['Complaint', 'Event', 'Administration', 'Request'];
 
             Docs::create([
                 'type' => $docsType[$i - 1],
@@ -179,11 +180,18 @@ class TableSeeder extends Seeder
         ]);
 
         Documentation::create([
-            'docs_id' => 4,
+            'docs_id' => 3,
             'contentType' => 'Administration',
             'contentDesc' => $faker->sentence(6, true),
             'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
             'created_by' => 1,
+        ]);
+
+        DocRequest::create([
+            'docs_id' => 4,
+            'request_by' => 1,
+            'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
+            'created_by' => 1
         ]);
     }
 }
