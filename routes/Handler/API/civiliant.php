@@ -10,10 +10,17 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('civilian')->group(function () {
-    Route::get('/{column}/{operator}/{value}', [CivilianController::class, 'getCustom'])->middleware(CiviliantGet::class);
+    Route::prefix('/archive')->group(fn() => [
+        Route::get('/', [CivilianController::class, 'getArchived'])->middleware(CiviliantGet::class),
+        Route::get('/{filter}', [CivilianController::class, 'getArchived'])->middleware(CiviliantGet::class),
+        Route::get('/{filter}/{byRT}', [CivilianController::class, 'getArchived'])->middleware(CiviliantGet::class),
+    ]);
 
     Route::get('/', [CivilianController::class, 'get'])->middleware(CiviliantGet::class);
     Route::get('/{filter}', [CivilianController::class, 'get'])->middleware(CiviliantGet::class);
+
+    Route::get('/{column}/{operator}/{value}', [CivilianController::class, 'getCustom'])->middleware(CiviliantGet::class);
+
 
     Route::post('/', [CivilianController::class, 'create'])->middleware(CiviliantCreate::class);
     Route::put('/', [CivilianController::class, 'edit'])->middleware(UpdateCiviliant::class);
