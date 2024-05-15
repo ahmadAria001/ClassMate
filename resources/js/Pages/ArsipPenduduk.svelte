@@ -37,6 +37,10 @@
             status: "Pindah",
         },
     ];
+    import axiosInstance from "axios";
+    import { page } from "@inertiajs/svelte";
+
+    const axios = axiosInstance.create({ withCredentials: true });
     let modalDetailArchive = false;
     let searchTerm = "";
     let currentPosition = 0;
@@ -47,6 +51,8 @@
     let totalItems: number = items.length;
     let startPage: number;
     let endPage: number;
+
+    let selected: string | null = null;
 
     const updateDataAndPagination = () => {
         const currentPageItems = items.slice(
@@ -84,6 +90,25 @@
         );
     };
 
+    const getCivilsArchive = async (
+        id: string | null = null,
+        byRT: boolean,
+    ) => {
+        let uriEncoded: string | null = null;
+
+        if (byRT && !id)
+            uriEncoded = `/api/civilian/archive/${$page.props.auth.user.rt_id}/1`;
+        if ($page.props.auth.user.role != "RT" && !id)
+            uriEncoded = `/api/civilian/archive`;
+        if (id && !byRT)
+            uriEncoded = `/api/civilian/archive/${encodeURI(id)}/0`;
+
+        if (!uriEncoded) return;
+
+        const response = await axios.get(uriEncoded);
+        return response.data;
+    };
+
     const goToPage = (pageNumber: number) => {
         currentPosition = (pageNumber - 1) * itemsPerPage;
         updateDataAndPagination();
@@ -92,7 +117,7 @@
     $: startRange = currentPosition + 1;
     $: endRange = Math.min(currentPosition + itemsPerPage, totalItems);
 
-    onMount(() => {
+    onMount(async () => {
         // Call renderPagination when the component initially mounts
         renderPagination(items.length);
     });
@@ -105,9 +130,14 @@
         (item) =>
             item.name.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1,
     );
+
+    const title = "Arsip Warga";
 </script>
 
-<Layout>
+<svelte:head>
+    <title>{title}</title>
+</svelte:head>
+<Layout active={title}>
     <TableSearch
         placeholder="Cari warga"
         hoverable={true}
@@ -129,84 +159,203 @@
             <TableHeadCell class="sr-only">Aksi</TableHeadCell>
         </TableHead>
         <TableBody>
-            {#each filteredItems as item}
-                <TableBodyRow>
-                    <TableBodyCell>{item.name}</TableBodyCell>
-                    <TableBodyCell>{item.address}</TableBodyCell>
-                    <TableBodyCell>{item.job}</TableBodyCell>
-                    {#if item.status == "Meninggal"}
-                        <TableBodyCell class="text-center">
-                            <Badge color="red">{item.status}</Badge>
-                        </TableBodyCell>
-                    {:else if item.status == "Pindah"}
-                        <TableBodyCell class="text-center">
-                            <Badge color="yellow">{item.status}</Badge>
-                        </TableBodyCell>
+            {#if $page.props.auth.user.role === "RT"}
+                {#await getCivilsArchive(null, true) then data}
+                    {#if Object.keys(data).length > 0}
+                        {#each data as item, idx}
+                            <TableBodyRow>
+                                <TableBodyCell>{item.fullName}</TableBodyCell>
+                                <TableBodyCell>{item.address}</TableBodyCell>
+                                <TableBodyCell>{item.job}</TableBodyCell>
+                                {#if item.status == "Meninggal"}
+                                    <TableBodyCell class="text-center">
+                                        <Badge color="red">{item.status}</Badge>
+                                    </TableBodyCell>
+                                {:else if item.status == "Pindah"}
+                                    <TableBodyCell class="text-center">
+                                        <Badge color="yellow"
+                                            >{item.status}</Badge
+                                        >
+                                    </TableBodyCell>
+                                {/if}
+                                <TableBodyCell>
+                                    <Button
+                                        color="blue"
+                                        on:click={() => {
+                                            selected = item.id;
+                                            console.log(item);
+                                            modalDetailArchive = true;
+                                        }}>Detail</Button
+                                    >
+                                </TableBodyCell>
+                            </TableBodyRow>
+                        {/each}
                     {/if}
-                    <TableBodyCell>
-                        <Button
-                            color="blue"
-                            on:click={() => {
-                                modalDetailArchive = true;
-                            }}>Detail</Button
-                        >
-                    </TableBodyCell>
-                </TableBodyRow>
-            {/each}
+                {/await}
+            {:else}
+                {#await getCivilsArchive(null, false) then data}
+                    {#if Object.keys(data).length > 0}
+                        {#each data as item, idx}
+                            <TableBodyRow>
+                                <TableBodyCell>{item.fullName}</TableBodyCell>
+                                <TableBodyCell>{item.address}</TableBodyCell>
+                                <TableBodyCell>{item.job}</TableBodyCell>
+                                {#if item.status == "Meninggal"}
+                                    <TableBodyCell class="text-center">
+                                        <Badge color="red">{item.status}</Badge>
+                                    </TableBodyCell>
+                                {:else if item.status == "Pindah"}
+                                    <TableBodyCell class="text-center">
+                                        <Badge color="yellow"
+                                            >{item.status}</Badge
+                                        >
+                                    </TableBodyCell>
+                                {/if}
+                                <TableBodyCell>
+                                    <Button
+                                        color="blue"
+                                        on:click={() => {
+                                            selected = item.id;
+                                            modalDetailArchive = true;
+                                        }}>Detail</Button
+                                    >
+                                </TableBodyCell>
+                            </TableBodyRow>
+                        {/each}
+                    {/if}
+                {/await}
+            {/if}
         </TableBody>
 
         <!-- modal detail -->
-        <Modal title="Detail Warga" bind:open={modalDetailArchive} autoclose>
-            <div class="mb-4">
-                <Label for="full_name" class="mb-2">Nama Lengkap</Label>
-                <Input id="full_name" placeholder="Nama Lengkap" />
-            </div>
-            <div class="grid md:grid-cols-2 md:gap-6">
-                <div class="mb-4">
-                    <Label for="kk" class="mb-2">No KK</Label>
-                    <Input id="kk" placeholder="No KK" />
-                </div>
-                <div class="mb-4">
-                    <Label for="nik" class="mb-2">NIK</Label>
-                    <Input id="nik" placeholder="NIK" />
-                </div>
-            </div>
-            <div class="grid md:grid-cols-2 md:gap-6">
-                <div class="mb-4">
-                    <Label for="religion" class="mb-2">Agama</Label>
-                    <Input id="religion" placeholder="Agama" />
-                </div>
-                <div class="mb-4">
-                    <Label for="birthdate" class="mb-2"
-                        >Tempat, Tanggal Lahir</Label
-                    >
-                    <Input id="birthdate" placeholder="Tempat, Tanggal Lahir" />
-                </div>
-            </div>
-            <div class="grid md:grid-cols-2 md:gap-6">
-                <div class="mb-4">
-                    <Label for="address" class="mb-2">Alamat</Label>
-                    <Input id="address" placeholder="Alamat" />
-                </div>
-                <div class="mb-4">
-                    <Label for="no_hp" class="mb-2">No. HP</Label>
-                    <Input type="number" id="no_hp" placeholder="No. HP" />
-                </div>
-            </div>
-            <div class="grid md:grid-cols-2 md:gap-6">
-                <div class="mb-4">
-                    <Label for="residentstatus" class="mb-2">Status</Label>
-                    <Input id="residentstatus" placeholder="Status" />
-                </div>
-                <div class="mb-4">
-                    <Label for="job" class="mb-2">Pekerjaan</Label>
-                    <Input id="job" placeholder="Pekerjaan" />
-                </div>
-            </div>
-            <div class="block flex">
-                <Button type="submit" class="ml-auto">Kembali</Button>
-            </div>
-        </Modal>
+        {#if selected}
+            {#await getCivilsArchive(selected, false) then data}
+                <Modal
+                    title="Detail Warga"
+                    bind:open={modalDetailArchive}
+                    autoclose
+                >
+                    <div class="mb-4">
+                        <Label for="full_name" class="mb-2">Nama Lengkap</Label>
+                        <Input
+                            id="full_name"
+                            placeholder="Nama Lengkap"
+                            readonly
+                            value={data.fullName}
+                        />
+                    </div>
+                    <div class="grid md:grid-cols-2 md:gap-6">
+                        <div class="mb-4">
+                            <Label for="kk" class="mb-2">No KK</Label>
+                            <Input
+                                id="kk"
+                                placeholder="No KK"
+                                readonly
+                                value={data.nkk}
+                            />
+                        </div>
+                        <div class="mb-4">
+                            <Label for="nik" class="mb-2">NIK</Label>
+                            <Input
+                                id="nik"
+                                placeholder="NIK"
+                                readonly
+                                value={data.nik}
+                            />
+                        </div>
+                    </div>
+                    <div class="grid md:grid-cols-2 md:gap-6">
+                        <div class="mb-4">
+                            <Label for="religion" class="mb-2">Agama</Label>
+                            <Input
+                                id="religion"
+                                placeholder="Agama"
+                                readonly
+                                value={data.religion}
+                            />
+                        </div>
+                        <div class="mb-4">
+                            <Label class="mb-2 w-full text-center"
+                                >Tempat, Tanggal Lahir</Label
+                            >
+                            <div class="flex w-full gap-5">
+                                <div class="flex w-full gap-5">
+                                    <Input
+                                        id="birthplace"
+                                        name="birthplace"
+                                        placeholder="Tempat Lahir"
+                                        value={data.birthplace}
+                                        readonly
+                                    />
+                                    <Input
+                                        id="birthdate"
+                                        name="birthdate"
+                                        placeholder="Tanggal Lahir"
+                                        type="date"
+                                        pattern="\d{4}-\d{2}-\d{2}"
+                                        value={new Date(data.birthdate * 1000)
+                                            .toISOString()
+                                            .substring(0, 10)}
+                                        readonly
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid md:grid-cols-2 md:gap-6">
+                        <div class="mb-4">
+                            <Label for="address" class="mb-2">Alamat</Label>
+                            <Input
+                                id="address"
+                                placeholder="Alamat"
+                                readonly
+                                value={data.address}
+                            />
+                        </div>
+                        <div class="mb-4">
+                            <Label for="no_hp" class="mb-2">No. HP</Label>
+                            <Input
+                                type="number"
+                                id="no_hp"
+                                placeholder="No. HP"
+                                readonly
+                                value={Number.parseInt(data.phone)}
+                            />
+                        </div>
+                    </div>
+                    <div class="grid md:grid-cols-2 md:gap-6">
+                        <div class="mb-4">
+                            <Label for="residentstatus" class="mb-2"
+                                >Status</Label
+                            >
+                            <Input
+                                id="residentstatus"
+                                placeholder="Status"
+                                readonly
+                                value={data.status}
+                            />
+                        </div>
+                        <div class="mb-4">
+                            <Label for="job" class="mb-2">Pekerjaan</Label>
+                            <Input
+                                id="job"
+                                placeholder="Pekerjaan"
+                                readonly
+                                value={data.job}
+                            />
+                        </div>
+                    </div>
+                    <div class="block flex">
+                        <Button
+                            type="button"
+                            class="ml-auto"
+                            on:click={() => (modalDetailArchive = false)}
+                            >Kembali</Button
+                        >
+                    </div>
+                </Modal>
+            {/await}
+        {/if}
 
         <div
             slot="footer"

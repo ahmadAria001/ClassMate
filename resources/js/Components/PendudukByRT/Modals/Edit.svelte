@@ -22,7 +22,7 @@
         updateSchema,
     } from "./../../../Utils/Schema/Civils/Update";
     import { twMerge } from "tailwind-merge";
-    import { createEventDispatcher } from "svelte";
+    import { createEventDispatcher, onMount } from "svelte";
 
     export let showState = false;
     export let data: any | null = null;
@@ -94,6 +94,8 @@
         { value: "Meninggal", name: "Meninggal" },
         { value: "Pindah", name: "Pindah" },
     ];
+
+    // onMount(() => console.log(data));
 </script>
 
 <Modal title="Edit Data Warga" bind:open={showState}>
