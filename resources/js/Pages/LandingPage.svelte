@@ -1,14 +1,9 @@
-<script type="ts">
+<script lang="ts">
     import {
         A,
         Footer,
         FooterCopyright,
         Heading,
-        Navbar,
-        NavBrand,
-        NavHamburger,
-        NavLi,
-        NavUl,
         Table,
         TableBody,
         TableBodyCell,
@@ -21,25 +16,8 @@
         ArrowRightOutline,
         CheckOutline,
     } from "flowbite-svelte-icons";
-    import Cards from "@C/Cards.svelte";
-    // import { onMount } from "svelte";
-    // let url = ``;
-    // onMount(() => (url = window.location.href));
-    // console.log(url);
-    let menus = [
-        {
-            name: "Home",
-            link: "/",
-        },
-        {
-            name: "Profile",
-            link: "/profile",
-        },
-        {
-            name: "Pengumuman",
-            link: "/pengumuman",
-        },
-    ];
+    import Cards from "@C/LandingPage/cards/CardsAnnouncement.svelte";
+    import Navbar from "@C/LandingPage/nav/Navbar.svelte";
     let pengumumans = [
         {
             img: "https://media.kompas.tv/library/image/content_article/article_img/20231204072833.jpg",
@@ -190,39 +168,8 @@
 </script>
 
 <div class="relative px-8 md:px-16 mt-24 md:mt-0">
-    <Navbar
-        class="px-8 py-2.5 fixed w-full z-20 top-0 start-0 border-b container"
-    >
-        <NavBrand href="/">
-            <img
-                src="assets/icons/KD_logo.svg"
-                alt="KawanDesa Logo"
-                class="h-8"
-            />
-        </NavBrand>
-        <NavHamburger />
-        <NavUl>
-            {#each menus as menu}
-                <NavLi href={menu.link} class="hover:text-black"
-                    >{menu.name}</NavLi
-                >
-            {/each}
-            <NavLi class="md:sr-only">
-                <div class="login">
-                    <a href="/login" class="flex items-center hover:text-black">
-                        <!-- <ArrowLeftToBracketOutline class="mr-2 font-bold" /> -->
-                        <p class="text-blue-600 font-medium">Masuk</p>
-                    </a>
-                </div>
-            </NavLi>
-        </NavUl>
-        <div class="login sr-only md:not-sr-only">
-            <a href="/login" class="flex items-center font-bold">
-                <ArrowLeftToBracketOutline class="mr-2 font-bold" />
-                <p class="opacity-60 hover:opacity-100">Masuk</p>
-            </a>
-        </div>
-    </Navbar>
+    <!--  -->
+    <Navbar />
 
     <div class="content">
         <div

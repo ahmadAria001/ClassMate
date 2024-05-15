@@ -34,7 +34,13 @@
         BellSolid,
     } from "flowbite-svelte-icons";
     import { twMerge } from "tailwind-merge";
+    import { writable } from "svelte/store";
     import axiosInstance from "axios";
+
+    const url = writable("");
+    onMount(() => {
+        url.set(window.location.pathname);
+    });
 
     const axios = axiosInstance.create({ withCredentials: true });
 
@@ -481,7 +487,9 @@
                                     spanClass="ml-9"
                                     class={twMerge(
                                         itemClass,
-                                        active == title ? "bg-gray-900" : "",
+                                        $url == href
+                                            ? "bg-gray-100 dark:bg-gray-900"
+                                            : "",
                                     )}
                                 />
                             {/each}
@@ -491,7 +499,12 @@
                             label={name}
                             {href}
                             spanClass="ml-3"
-                            class={itemClass}
+                            class={twMerge(
+                                itemClass,
+                                $url == href
+                                    ? "bg-gray-100 dark:bg-gray-900"
+                                    : "",
+                            )}
                         >
                             <svelte:component this={icon} slot="icon" />
                         </SidebarItem>
