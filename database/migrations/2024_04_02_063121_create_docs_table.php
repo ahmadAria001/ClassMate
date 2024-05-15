@@ -17,7 +17,7 @@ return new class extends Migration
     {
         Schema::create('docs', function (Blueprint $table) {
             $table->id();
-            $table->enum('type', ['Complaint', 'Dues', 'Event', 'Administration'])->nullable();
+            $table->enum('type', ['Complaint','Event', 'Administration','Request'])->nullable();
             $table->text('description')->nullable();
             $table->bigInteger('created_at');
             $table->unsignedBigInteger('created_by')->index('fk_docs_user')->nullable();
