@@ -34,7 +34,13 @@
         BellSolid,
     } from "flowbite-svelte-icons";
     import { twMerge } from "tailwind-merge";
+    import { writable } from "svelte/store";
     import axiosInstance from "axios";
+
+    const url = writable("");
+    onMount(() => {
+        url.set(window.location.pathname);
+    });
 
     const axios = axiosInstance.create({ withCredentials: true });
 
@@ -214,8 +220,6 @@
             },
         ];
     }
-
-    export let active: string = "";
 
     let site = {
         name: "KawanDesa",
@@ -397,7 +401,10 @@
             >
             <Avatar
                 id="avatar-menu"
-                src="https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?cs=srgb&dl=pexels-simon-robben-614810.jpg&fm=jpg"
+                src={$page.props.auth.user.pict
+                    ? `/assets/uploads/${$page.props.auth.user.pict}`
+                    : ""}
+                class="cursor-pointer"
             />
             <!-- <NavHamburger class1="w-full md:flex md:w-auto md:order-1" /> -->
         </div>
@@ -431,12 +438,14 @@
                 </a>
             </Listgroup>
         </Dropdown>
-        <Dropdown triggeredBy="#avatar-menu">
+        <Dropdown triggeredBy="#avatar-menu" class="w-52">
             <DropdownHeader>
-                <span class="block text-sm"
+                <span class="block text-sm max-w-full truncate"
                     >{$page.props.auth.user.fullName}</span
                 >
-                <span class="block truncate text-sm font-medium">{role}</span>
+                <span class="block truncate text-sm font-medium"
+                    ><b>{role}</b></span
+                >
             </DropdownHeader>
             <DropdownItem href="/profile">Profile</DropdownItem>
             <DropdownItem on:click={async () => await logout()}
@@ -459,7 +468,7 @@
     <div class="flex items-center">
         <CloseButton
             on:click={() => (drawerHidden = true)}
-            class="mb-4 dark:text-white lg:hidden"
+            class="mb- text-black dark:text-white lg:hidden"
         />
     </div>
     <Sidebar asideClass="w-54">
@@ -480,7 +489,9 @@
                                     spanClass="ml-9"
                                     class={twMerge(
                                         itemClass,
-                                        active == title ? "bg-gray-900" : "",
+                                        $url == href
+                                            ? "bg-gray-100 dark:bg-gray-900"
+                                            : "",
                                     )}
                                 />
                             {/each}
@@ -490,7 +501,12 @@
                             label={name}
                             {href}
                             spanClass="ml-3"
-                            class={itemClass}
+                            class={twMerge(
+                                itemClass,
+                                $url == href
+                                    ? "bg-gray-100 dark:bg-gray-900"
+                                    : "",
+                            )}
                         >
                             <svelte:component this={icon} slot="icon" />
                         </SidebarItem>
@@ -507,7 +523,7 @@
     </main>
 </div>
 <Footer
-    class="w-full p-3 border-t-2 mt-5 flex justify-center max-md:static fixed bottom-0 bg-white z-0 mt-5"
+    class="w-full p-3 border-t-2 mt-5 flex justify-center max-md:static fixed bottom-0 bg-white dark:bg-gray-800 z-0 mt-5"
 >
     <FooterCopyright by="Simpang Lima Softwork" />
 </Footer>

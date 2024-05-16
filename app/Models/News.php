@@ -7,16 +7,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class EnvironmentInfo extends Model
+class News extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table = 'environmentinfo';
+    protected $table = 'news';
 
     protected $fillable = [
-        'env_condition',
+        'title',
         'desc',
-        'general_facility',
+        'attachment',
         'created_at',
         'created_by',
         'updated_at',

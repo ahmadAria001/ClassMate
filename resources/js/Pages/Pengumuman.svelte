@@ -19,6 +19,14 @@
         ChevronLeftOutline,
         ChevronRightOutline,
     } from "flowbite-svelte-icons";
+
+    import Detail from "@C/Pengumuman/Modals/Detail.svelte";
+    import Create from "@C/Pengumuman/Modals/Create.svelte";
+
+    import axiosInstance from "axios";
+    import Edit from "@C/Pengumuman/Modals/Edit.svelte";
+
+    const axios = axiosInstance.create({ withCredentials: true });
     let items = [
         {
             id: 1,
@@ -41,6 +49,8 @@
     let totalItems: number = items.length;
     let startPage: number;
     let endPage: number;
+
+    let selected = "";
 
     const updateDataAndPagination = () => {
         const currentPageItems = items.slice(
@@ -83,6 +93,16 @@
         updateDataAndPagination();
     };
 
+    const getNewsData = async (id: string = "") => {
+        const response = await axios.get("/api/news", {
+            headers: {
+                Accept: "application/json",
+            },
+        });
+
+        return response.data;
+    };
+
     $: startRange = currentPosition + 1;
     $: endRange = Math.min(currentPosition + itemsPerPage, totalItems);
 
@@ -120,173 +140,49 @@
                 }}>+ Tambah Pengumuman</Button
             >
         </div>
-        <Modal title="Tambah Pengumuman" bind:open={addAnnoucement} autoclose>
-            <form method="POST">
-                <div class="mb-4">
-                    <Label for="titleAnnouncement" class="mb-2"
-                        >Judul Pengumuman</Label
-                    >
-                    <Input
-                        id="titleAnnouncement"
-                        placeholder="Judul Pengumuman"
-                    />
-                </div>
-                <div class="mb-4">
-                    <Label for="desc" class="mb-2">Isi Pengumuman</Label>
-                    <Textarea
-                        rows="2"
-                        id="desc"
-                        name="desc"
-                        placeholder="Isi Pengumuman"
-                    />
-                </div>
-                <div class="mb-4">
-                    <div class="flex items-center justify-center w-full">
-                        <label
-                            for="dropzone-file"
-                            class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
-                        >
-                            <div
-                                class="flex flex-col items-center justify-center pt-5 pb-6"
-                            >
-                                <svg
-                                    class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400"
-                                    aria-hidden="true"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 20 16"
-                                >
-                                    <path
-                                        stroke="currentColor"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
-                                    />
-                                </svg>
-                                <p
-                                    class="mb-2 text-sm text-gray-500 dark:text-gray-400 font-semibold"
-                                >
-                                    Upload Gambar
-                                </p>
-                            </div>
-                            <input
-                                id="dropzone-file"
-                                type="file"
-                                class="hidden"
-                            />
-                        </label>
-                    </div>
-                </div>
-                <div class="block flex">
-                    <Button type="submit" class="ml-auto">Simpan</Button>
-                </div>
-            </form>
-        </Modal>
-
         <TableHead>
             <TableHeadCell>Nama Pengumuman</TableHeadCell>
             <TableHeadCell>Tanggal Buat</TableHeadCell>
             <TableHeadCell class="sr-only">Aksi</TableHeadCell>
         </TableHead>
         <TableBody>
-            {#each filteredItems as item}
-                <TableBodyRow>
-                    <TableBodyCell>{item.name}</TableBodyCell>
-                    <TableBodyCell>{item.location}</TableBodyCell>
-                    <TableBodyCell class="text-end">
-                        <Button
-                            color="blue"
-                            on:click={() => {
-                                modalPreview = true;
-                            }}>Preview</Button
+            {#await getNewsData() then data}
+                {#each data.data as item}
+                    <TableBodyRow>
+                        <TableBodyCell>{item.title}</TableBodyCell>
+                        <TableBodyCell
+                            >{new Date(
+                                item.created_at,
+                            ).toLocaleDateString()}</TableBodyCell
                         >
-                        <Button
-                            color="blue"
-                            on:click={() => {
-                                modalEdit = true;
-                            }}>Edit Data</Button
-                        >
-                    </TableBodyCell>
-                </TableBodyRow>
-            {/each}
+                        <TableBodyCell class="text-end">
+                            <Button
+                                color="blue"
+                                on:click={() => {
+                                    selected = item.id;
+                                    modalPreview = true;
+                                }}>Preview</Button
+                            >
+                            <Button
+                                color="blue"
+                                on:click={() => {
+                                    modalEdit = true;
+                                    selected = item.id;
+                                }}>Edit Data</Button
+                            >
+                        </TableBodyCell>
+                    </TableBodyRow>
+                {/each}
+            {/await}
         </TableBody>
 
-        <!-- modal edit -->
-        <Modal title="Edit Pengumuman" bind:open={modalEdit} autoclose>
-            <form method="POST">
-                <div class="mb-4">
-                    <Label for="titleAnnouncement" class="mb-2"
-                        >Judul Pengumuman</Label
-                    >
-                    <Input
-                        id="titleAnnouncement"
-                        placeholder="Judul Pengumuman"
-                    />
-                </div>
-                <div class="mb-4">
-                    <Label for="desc" class="mb-2">Isi Pengumuman</Label>
-                    <Textarea
-                        rows="2"
-                        id="desc"
-                        name="desc"
-                        placeholder="Isi Pengumuman"
-                    />
-                </div>
-                <div class="mb-4">
-                    <div class="flex items-center justify-center w-full">
-                        <label
-                            for="dropzone-file"
-                            class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
-                        >
-                            <div
-                                class="flex flex-col items-center justify-center pt-5 pb-6"
-                            >
-                                <svg
-                                    class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400"
-                                    aria-hidden="true"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 20 16"
-                                >
-                                    <path
-                                        stroke="currentColor"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
-                                    />
-                                </svg>
-                                <p
-                                    class="mb-2 text-sm text-gray-500 dark:text-gray-400 font-semibold"
-                                >
-                                    Upload Gambar
-                                </p>
-                            </div>
-                            <input
-                                id="dropzone-file"
-                                type="file"
-                                class="hidden"
-                            />
-                        </label>
-                    </div>
-                </div>
-                <div class="block flex">
-                    <Button type="submit" class="ml-auto">Simpan</Button>
-                </div>
-            </form>
-        </Modal>
+        <!-- modal -->
+        <Create bind:showState={addAnnoucement} />
 
-        <!-- modal edit -->
-        <Modal title="Preview Pengumuman" bind:open={modalPreview} autoclose>
-            <img src={items[0].src} alt="" class="w-full h-auto mb-3" />
-            <h5
-                class="mb-4 text-xl font-bold tracking-tight text-gray-900 dark:text-white"
-            >
-                {items[0].title}
-            </h5>
-            <p>{items[0].desc}</p>
-        </Modal>
+        {#if selected}
+            <Detail bind:showState={modalPreview} bind:items={selected} />
+            <Edit bind:showState={modalEdit} bind:target={selected} />
+        {/if}
 
         <div
             slot="footer"

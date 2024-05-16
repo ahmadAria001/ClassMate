@@ -191,7 +191,12 @@
                 {#each data.data as item}
                     <TableBodyRow>
                         <TableBodyCell class="flex items-center">
-                            <Avatar src={item.src} class="mr-3" />
+                            <Avatar
+                                src={item.leader_id?.pict
+                                    ? `/assets/uploads/${item.leader_id?.pict}`
+                                    : ""}
+                                class="mr-3"
+                            />
                             {item.leader_id
                                 ? item.leader_id?.civilian_id?.fullName
                                 : "Tidak Ada"}

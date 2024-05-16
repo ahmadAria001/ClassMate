@@ -63,6 +63,7 @@
     ];
 
     let role = $page.props.auth.user.role;
+    // let role = "RT";
     // "RT";
     let addCivilian = false;
     let modalEdit = false;
@@ -267,16 +268,13 @@
 
         <TableHead>
             {#if role === "RT"}
-                <TableHeadCell>Nama Kepala Keluarga</TableHeadCell>
-                <TableHeadCell>Alamaat</TableHeadCell>
+                <TableHeadCell width="25%">Nama Kepala Keluarga</TableHeadCell>
+                <TableHeadCell>Alamat</TableHeadCell>
                 <!-- <TableHeadCell>Pekerjaan</TableHeadCell> -->
-                <TableHeadCell class="text-center" width="20%"
-                    >Pekerjaan</TableHeadCell
-                >
+                <TableHeadCell width="10%">Pekerjaan</TableHeadCell>
                 <TableHeadCell class="text-center" width="20%"
                     >Status Kependudukan</TableHeadCell
                 >
-                <TableHeadCell>Status Penduduk</TableHeadCell>
                 <TableHeadCell class="sr-only"></TableHeadCell>
             {:else}
                 <TableHeadCell>RT</TableHeadCell>
@@ -290,7 +288,9 @@
                     {#await getData("", true) then data}
                         {#each data as item, idx}
                             <TableBodyRow>
-                                <TableBodyCell>{item.fullName}</TableBodyCell>
+                                <TableBodyCell class="max-w-xs truncate"
+                                    >{item.fullName}</TableBodyCell
+                                >
                                 <TableBodyCell>{item.address}</TableBodyCell>
                                 <TableBodyCell>{item.job}</TableBodyCell>
                                 {#if item.residentstatus == "PermanentResident"}
@@ -306,13 +306,13 @@
                                         <Badge color="yellow">Kos</Badge>
                                     </TableBodyCell>
                                 {/if}
-                                {#if item.status == "Aktif"}
+                                <!-- {#if item.status == "Aktif"}
                                     <TableBodyCell class="text-center">
                                         <Badge color="green"
                                             >{item.status}</Badge
                                         >
                                     </TableBodyCell>
-                                {/if}
+                                {/if} -->
                                 {#if item.status == "Meninggal"}
                                     <TableBodyCell class="text-center">
                                         <Badge color="red">{item.status}</Badge>
@@ -430,12 +430,12 @@
             <Modal
                 title="Data Keluarga"
                 bind:open={modalFamily}
-                size="lg"
+                size="xl"
                 autoclose
             >
                 <Table>
                     <TableHead>
-                        <TableHeadCell>Nama Lengkap</TableHeadCell>
+                        <TableHeadCell width="20%">Nama Lengkap</TableHeadCell>
                         <TableHeadCell>Alamat</TableHeadCell>
                         <TableHeadCell>Pekerjaan</TableHeadCell>
                         <TableHeadCell class="text-center"
@@ -455,7 +455,9 @@
                                 {#await getData("", false, custom) then data}
                                     {#each data.data as item, idx}
                                         <TableBodyRow>
-                                            <TableBodyCell>
+                                            <TableBodyCell
+                                                class="max-w-xs truncate"
+                                            >
                                                 {item.fullName}
                                             </TableBodyCell>
                                             <TableBodyCell
@@ -515,6 +517,12 @@
                                                     >
                                                 </TableBodyCell>
                                             {/if}
+
+                                            <TableBodyCell class="text-center">
+                                                <Badge color="yellow"
+                                                    >{item.status}</Badge
+                                                >
+                                            </TableBodyCell>
 
                                             <TableBodyCell>
                                                 <Button

@@ -18,7 +18,7 @@ use Inertia\Inertia;
 */
 
 Route::get('/', function () {
-    return Inertia::render('Home');
+    return Inertia::render('LandingPage');
 });
 
 Route::get('/beranda', function () {
@@ -75,7 +75,7 @@ Route::get('/daftar-rt', function () {
     return Inertia::render('DaftarRT');
 })->name('DaftarRT');
 
-Route::prefix('/auth')->group(fn() => [Route::post('/signin', Login::class)]);
+Route::prefix('/auth')->group(fn () => [Route::post('/signin', Login::class)]);
 
 function loadRoutesWEB($dir)
 {

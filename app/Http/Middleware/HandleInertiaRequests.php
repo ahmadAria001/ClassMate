@@ -75,6 +75,7 @@ class HandleInertiaRequests extends Middleware
                             'fullName' => null,
                             'nik' => null,
                             'rt_id' => null,
+                            'pict' => null,
                         ];
                     }
 
@@ -91,6 +92,7 @@ class HandleInertiaRequests extends Middleware
                         'fullName' => $user->fullName,
                         'nik' => $user->nik,
                         'rt_id' => $rt,
+                        'pict' => $model->get('pict')->first()->pict,
                     ];
                 } else {
                     return $request->user() ? $request->user()->only('id', 'username', 'role') : null;

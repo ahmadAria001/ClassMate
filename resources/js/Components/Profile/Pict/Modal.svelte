@@ -37,46 +37,45 @@
     let avatar: any;
     let value: any[] = [];
 
-    const { form, isSubmitting, errors, createSubmitHandler } =
-        createForm<CreateSchema>({
-            extend: validator<CreateSchema>({
-                schema: createSchema,
-            }),
-            onSubmit: async (values) => {
-                console.log(values);
+    const { form, isSubmitting, errors } = createForm<CreateSchema>({
+        extend: validator<CreateSchema>({
+            schema: createSchema,
+        }),
+        onSubmit: async (values) => {
+            console.log(values);
 
-                const formData = new FormData();
-                formData.append("img", values.img);
-                formData.append("_token", $page.props.csrf_token);
+            const formData = new FormData();
+            formData.append("img", values.img);
+            formData.append("_token", $page.props.csrf_token);
 
-                const response = await axios.post("/api/user/img/", formData);
-                console.log(response);
+            const response = await axios.post("/api/user/img/", formData);
+            console.log(response);
 
-                err = response.data;
-                dispatch("comp");
-                showState = false;
+            err = response.data;
+            dispatch("comp");
+            showState = false;
 
-                setTimeout(() => {
-                    err = { status: null, message: null };
-                }, 5000);
-            },
-            onError: (values: unknown) => {
-                err = {
-                    message: values?.response?.data?.message,
-                    status: values?.response?.data?.status,
-                };
-                setTimeout(() => {
-                    err = { status: null, message: null };
-                }, 5000);
+            setTimeout(() => {
+                err = { status: null, message: null };
+            }, 5000);
+        },
+        onError: (values: unknown) => {
+            err = {
+                message: values?.response?.data?.message,
+                status: values?.response?.data?.status,
+            };
+            setTimeout(() => {
+                err = { status: null, message: null };
+            }, 5000);
 
-                console.log(values);
+            console.log(values);
 
-                return;
-            },
-            onSuccess: () => {
-                console.log("Success");
-            },
-        });
+            return;
+        },
+        onSuccess: () => {
+            console.log("Success");
+        },
+    });
 
     const onFileSelected = (event: EventTarget) => {
         let image = event?.target?.files[0];
