@@ -34,7 +34,13 @@
         BellSolid,
     } from "flowbite-svelte-icons";
     import { twMerge } from "tailwind-merge";
+    import { writable } from "svelte/store";
     import axiosInstance from "axios";
+
+    const url = writable("");
+    onMount(() => {
+        url.set(window.location.pathname);
+    });
 
     const axios = axiosInstance.create({ withCredentials: true });
 
@@ -214,8 +220,6 @@
             },
         ];
     }
-
-    export let active: string = "";
 
     let site = {
         name: "KawanDesa",
@@ -434,9 +438,9 @@
                 </a>
             </Listgroup>
         </Dropdown>
-        <Dropdown triggeredBy="#avatar-menu">
+        <Dropdown triggeredBy="#avatar-menu" class="w-52">
             <DropdownHeader>
-                <span class="block text-sm"
+                <span class="block text-sm max-w-full truncate"
                     >{$page.props.auth.user.fullName}</span
                 >
                 <span class="block truncate text-sm font-medium"
@@ -464,7 +468,7 @@
     <div class="flex items-center">
         <CloseButton
             on:click={() => (drawerHidden = true)}
-            class="mb-4 dark:text-white lg:hidden"
+            class="mb- text-black dark:text-white lg:hidden"
         />
     </div>
     <Sidebar asideClass="w-54">
@@ -485,7 +489,9 @@
                                     spanClass="ml-9"
                                     class={twMerge(
                                         itemClass,
-                                        active == title ? "bg-gray-900" : "",
+                                        $url == href
+                                            ? "bg-gray-100 dark:bg-gray-900"
+                                            : "",
                                     )}
                                 />
                             {/each}
@@ -495,7 +501,12 @@
                             label={name}
                             {href}
                             spanClass="ml-3"
-                            class={itemClass}
+                            class={twMerge(
+                                itemClass,
+                                $url == href
+                                    ? "bg-gray-100 dark:bg-gray-900"
+                                    : "",
+                            )}
                         >
                             <svelte:component this={icon} slot="icon" />
                         </SidebarItem>
@@ -512,7 +523,7 @@
     </main>
 </div>
 <Footer
-    class="w-full p-3 border-t-2 mt-5 flex justify-center max-md:static fixed bottom-0 bg-white z-0 mt-5 dark:bg-gray-800"
+    class="w-full p-3 border-t-2 mt-5 flex justify-center max-md:static fixed bottom-0 bg-white dark:bg-gray-800 z-0 mt-5"
 >
     <FooterCopyright by="Simpang Lima Softwork" />
 </Footer>

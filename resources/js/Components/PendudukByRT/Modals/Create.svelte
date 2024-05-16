@@ -93,15 +93,11 @@
     ];
 </script>
 
-<Modal title="Tambah RT" bind:open={showState}>
+<Modal title="Tambah Warga" bind:open={showState}>
     <form method="POST" use:form>
         <div class="mb-4">
             <Label for="full_name" class="mb-2">Nama Lengkap</Label>
-            <Input
-                id="full_name"
-                name="fullName"
-                placeholder="Nama Lengkap"
-            />
+            <Input id="full_name" name="fullName" placeholder="Nama Lengkap" />
             {#if $errors.fullName}
                 <span class="text-sm text-red-500">{$errors.fullName}</span>
             {/if}
@@ -116,7 +112,7 @@
             </div>
             <div class="mb-4">
                 <Label for="nik" class="mb-2">NIK</Label>
-                <Input id="nik" placeholder="NIK" name="nik"  />
+                <Input id="nik" placeholder="NIK" name="nik" />
                 {#if $errors.nik}
                     <span class="text-sm text-red-500">{$errors.nik}</span>
                 {/if}
@@ -125,11 +121,7 @@
         <div class="grid md:grid-cols-2 md:gap-6">
             <div class="mb-4">
                 <Label for="religion" class="mb-2">Agama</Label>
-                <Input
-                    id="religion"
-                    placeholder="Agama"
-                    name="religion"
-                />
+                <Input id="religion" placeholder="Agama" name="religion" />
                 {#if $errors.religion}
                     <span class="text-sm text-red-500">{$errors.religion}</span>
                 {/if}
@@ -171,11 +163,7 @@
         <div class="grid md:grid-cols-2 md:gap-6">
             <div class="mb-4">
                 <Label for="address" class="mb-2">Alamat</Label>
-                <Input
-                    id="address"
-                    placeholder="Alamat"
-                    name="address"
-                />
+                <Input id="address" placeholder="Alamat" name="address" />
                 {#if $errors.address}
                     <span class="text-sm text-red-500">{$errors.address}</span>
                 {/if}
@@ -217,11 +205,7 @@
             </div>
             <div class="mb-4">
                 <Label for="job" class="mb-2">Pekerjaan</Label>
-                <Input
-                    id="job"
-                    placeholder="Pekerjaan"
-                    name="job"
-                />
+                <Input id="job" placeholder="Pekerjaan" name="job" />
                 {#if $errors.job}
                     <span class="text-sm text-red-500">{$errors.job}</span>
                 {/if}
@@ -238,14 +222,14 @@
                 {#if $page.props.auth.user.role == "Admin"}
                     <Input
                         id="rt"
-                        placeholder="Pekerjaan"
+                        placeholder="RT"
                         name="rt_id"
                         value={$page.props.auth.user.rt_id}
                     />
                 {:else}
                     <Input
                         id="rt"
-                        placeholder="Pekerjaan"
+                        placeholder="RT"
                         name="rt_id"
                         readonly
                         value={$page.props.auth.user.rt_id}
@@ -287,8 +271,8 @@
                 <span class="text-sm text-red-500">{$errors.isFamilyHead}</span>
             {/if}
             <span class="w-full text-sm text-gray-600"
-                >*Pilih Status Kependudukan <br/> Sebelum Memutuskan Status
-                Kepala Keluarga</span
+                >*Pilih Status Kependudukan <br /> Sebelum Memutuskan Status Kepala
+                Keluarga</span
             >
         </div>
 

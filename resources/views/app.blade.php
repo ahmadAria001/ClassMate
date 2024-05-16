@@ -3,8 +3,9 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="icon" href="../assets/icons/KD_logo.svg" type="image/svg+xml" />
 
-        <title>Laravel</title>
+        <title>KawanDesa</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
