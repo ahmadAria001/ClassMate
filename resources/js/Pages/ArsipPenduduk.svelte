@@ -275,7 +275,7 @@
                             />
                         </div>
                         <div class="mb-4">
-                            <Label class="mb-2 w-full text-center"
+                            <Label class="mb-2 w-full text-left"
                                 >Tempat, Tanggal Lahir</Label
                             >
                             <div class="flex w-full gap-5">

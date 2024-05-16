@@ -101,7 +101,7 @@
             <h3
                 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400"
             >
-                Apa alasan data warga 'nama' dihapus?
+                Apa Alasan Data 'nama' Dihapus?
             </h3>
             <Select
                 class="my-2"
@@ -116,7 +116,7 @@
                 class="me-2"
                 on:click={() => {
                     confirm = true;
-                }}>Selanjutnya</Button
+                }}>Lanjutkan</Button
             >
             <Button color="alternative" on:click={() => (showState = false)}
                 >Batal</Button
@@ -130,11 +130,11 @@
             <h3
                 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400"
             >
-                Apakah yakin ingin menghapus warga ini?
+                Apakah Anda Yakin Ingin Menghapus Warga Ini?
             </h3>
-            <Button color="red" type="submit" class="me-2">Ya, yakin</Button>
+            <Button color="red" type="submit" class="me-2">Ya</Button>
             <Button color="alternative" on:click={() => (showState = false)}
-                >Tidak, batal</Button
+                >Tidak</Button
             >
         </div>
     </form>
