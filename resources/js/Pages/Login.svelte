@@ -75,11 +75,12 @@
             </a>
             <form use:form method="POST">
                 <Label class="space-y-2 mb-3">
-                    <span>NIK</span>
+                    <span class="text-black">NIK</span>
                     <Input
                         type="text"
                         name="username"
                         placeholder="Masukan NIK anda"
+                        class="dark:bg-white"
                         required
                     />
                 </Label>
@@ -87,11 +88,12 @@
                     <span class="text-sm text-red-500">{$errors.username}</span>
                 {/if}
                 <Label class="space-y-2 mb-3">
-                    <span>Password</span>
+                    <span class="text-black">Password</span>
                     <Input
                         type="password"
                         name="password"
                         placeholder="Masukan password anda"
+                        class="dark:bg-white"
                         required
                     />
                 </Label>
@@ -104,7 +106,9 @@
                     >
                 {/if}
                 <div class="flex items-start mb-3">
-                    <Checkbox color="blue">Ingat saya</Checkbox>
+                    <Checkbox color="blue" class="text-dark"
+                        >Ingat saya</Checkbox
+                    >
                     <a
                         href="/"
                         class="ml-auto text-sm font-bold text-blue-700 hover:underline dark:text-blue-500"
