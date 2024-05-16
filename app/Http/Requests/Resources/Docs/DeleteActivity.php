@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Resources\Environment;
+namespace App\Http\Requests\Resources\Docs;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateRequestDoc extends FormRequest
+class DeleteActivity extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,9 +23,6 @@ class UpdateRequestDoc extends FormRequest
     {
         return [
             'id' => 'required|integer|min:1',
-            'env_condition' => 'required|string',
-            'desc' => 'required|string',
-            'general_facility' => 'required|string',
         ];
     }
 }

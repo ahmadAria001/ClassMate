@@ -23,4 +23,13 @@ class ComplaintController extends Controller
 
         return Response()->json(['data' => $data], 200);
     }
+    public function create(){
+
+    }
+    public function edit(){
+
+    }
+    public function destroy(){
+        
+    }
 }
