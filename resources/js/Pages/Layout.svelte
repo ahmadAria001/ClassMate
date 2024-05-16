@@ -81,8 +81,8 @@
                 isOpenItems: false,
                 children: {
                     "Surat Ket. Warga": "/daftar-pengajuan-surat",
-                    "Laporan keuangan": "/keuangan",
-                    "Bantuan sosial": "/daftar-bansos",
+                    "Laporan Keuangan": "/keuangan",
+                    "Bantuan Sosial": "/daftar-bansos",
                 },
             },
             {
