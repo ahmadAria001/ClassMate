@@ -11,11 +11,7 @@
         TableHead,
         TableHeadCell,
     } from "flowbite-svelte";
-    import {
-        ArrowLeftToBracketOutline,
-        ArrowRightOutline,
-        CheckOutline,
-    } from "flowbite-svelte-icons";
+    import { ArrowRightOutline, CheckOutline } from "flowbite-svelte-icons";
     import Cards from "@C/LandingPage/cards/CardsAnnouncement.svelte";
     import Navbar from "@C/LandingPage/nav/Navbar.svelte";
     let pengumumans = [
@@ -48,103 +44,94 @@
     ];
     let admins = [
         {
-            name: "Budi",
-            photoProfile:
-                "https://cdn1-production-images-kly.akamaized.net/RjqqLpVI-PEjeh87P-dQqom409A=/1280x720/smart/filters:quality(75):strip_icc():format(webp)/kly-media-production/medias/3996307/original/045357600_1650004185-Bos_SpaceX_Elon_Musk__2_.jpg",
+            name: "Wisnu",
+            photoProfile: "https://jatim.kemenkumham.go.id/images/Wisnu.jpg",
             head: "RW 03",
             position: "",
             number: "085777123456",
             address: "Jl.Pahlawan No.510",
             greetings:
-                "Salam sejahtera! Saya Budi Kabudibudi, dengan keinginan kuat untuk membangun komunitas yang lebih baik dan harmonis bagi semua warga.",
+                "Salam sejahtera! Saya Wisnu, dengan keinginan kuat untuk membangun komunitas yang lebih baik dan harmonis bagi semua warga.",
         },
         {
-            name: "Rudy",
-            photoProfile:
-                "https://cdn1-production-images-kly.akamaized.net/RjqqLpVI-PEjeh87P-dQqom409A=/1280x720/smart/filters:quality(75):strip_icc():format(webp)/kly-media-production/medias/3996307/original/045357600_1650004185-Bos_SpaceX_Elon_Musk__2_.jpg",
+            name: "Subianto",
+            photoProfile: "https://jatim.kemenkumham.go.id/images/Subianta.jpg",
             head: "RW 03",
             position: "RT 01",
             number: "085777123456",
             address: "Jl.Pahlawan No.510",
             greetings:
-                "Salam sejahtera! Saya Budi Kabudibudi, dengan keinginan kuat untuk membangun komunitas yang lebih baik dan harmonis bagi semua warga.",
+                "Salam sejahtera! Saya Wisnu, dengan keinginan kuat untuk membangun komunitas yang lebih baik dan harmonis bagi semua warga.",
         },
         {
-            name: "Redy",
-            photoProfile:
-                "https://cdn1-production-images-kly.akamaized.net/RjqqLpVI-PEjeh87P-dQqom409A=/1280x720/smart/filters:quality(75):strip_icc():format(webp)/kly-media-production/medias/3996307/original/045357600_1650004185-Bos_SpaceX_Elon_Musk__2_.jpg",
+            name: "Jaya",
+            photoProfile: "https://jatim.kemenkumham.go.id/images/Jaya.jpg",
             head: "RW 03",
             position: "RT 02",
             number: "085777123456",
             address: "Jl.Pahlawan No.510",
             greetings:
-                "Salam sejahtera! Saya Budi Kabudibudi, dengan keinginan kuat untuk membangun komunitas yang lebih baik dan harmonis bagi semua warga.",
+                "Salam sejahtera! Saya Wisnu, dengan keinginan kuat untuk membangun komunitas yang lebih baik dan harmonis bagi semua warga.",
         },
         {
-            name: "Cahyo",
-            photoProfile:
-                "https://cdn1-production-images-kly.akamaized.net/RjqqLpVI-PEjeh87P-dQqom409A=/1280x720/smart/filters:quality(75):strip_icc():format(webp)/kly-media-production/medias/3996307/original/045357600_1650004185-Bos_SpaceX_Elon_Musk__2_.jpg",
+            name: "Gungun",
+            photoProfile: "https://jatim.kemenkumham.go.id/images/gungun.jpg",
             head: "RW 03",
             position: "RT 03",
             number: "085777123456",
             address: "Jl.Pahlawan No.510",
             greetings:
-                "Salam sejahtera! Saya Budi Kabudibudi, dengan keinginan kuat untuk membangun komunitas yang lebih baik dan harmonis bagi semua warga.",
+                "Salam sejahtera! Saya Wisnu, dengan keinginan kuat untuk membangun komunitas yang lebih baik dan harmonis bagi semua warga.",
         },
         {
-            name: "Nopi",
-            photoProfile:
-                "https://cdn1-production-images-kly.akamaized.net/RjqqLpVI-PEjeh87P-dQqom409A=/1280x720/smart/filters:quality(75):strip_icc():format(webp)/kly-media-production/medias/3996307/original/045357600_1650004185-Bos_SpaceX_Elon_Musk__2_.jpg",
+            name: "Indah",
+            photoProfile: "https://jatim.kemenkumham.go.id/images/Indah.jpg",
             head: "RW 03",
             position: "RT 04",
             number: "085777123456",
             address: "Jl.Pahlawan No.510",
             greetings:
-                "Salam sejahtera! Saya Budi Kabudibudi, dengan keinginan kuat untuk membangun komunitas yang lebih baik dan harmonis bagi semua warga.",
+                "Salam sejahtera! Saya Wisnu, dengan keinginan kuat untuk membangun komunitas yang lebih baik dan harmonis bagi semua warga.",
         },
         {
-            name: "Anto",
-            photoProfile:
-                "https://cdn1-production-images-kly.akamaized.net/RjqqLpVI-PEjeh87P-dQqom409A=/1280x720/smart/filters:quality(75):strip_icc():format(webp)/kly-media-production/medias/3996307/original/045357600_1650004185-Bos_SpaceX_Elon_Musk__2_.jpg",
+            name: "Ufi",
+            photoProfile: "https://jatim.kemenkumham.go.id/images/Ufi.jpg",
             head: "RW 03",
             position: "RT 05",
             number: "085777123456",
             address: "Jl.Pahlawan No.510",
             greetings:
-                "Salam sejahtera! Saya Budi Kabudibudi, dengan keinginan kuat untuk membangun komunitas yang lebih baik dan harmonis bagi semua warga.",
+                "Salam sejahtera! Saya Wisnu, dengan keinginan kuat untuk membangun komunitas yang lebih baik dan harmonis bagi semua warga.",
         },
         {
-            name: "Theo",
-            photoProfile:
-                "https://cdn1-production-images-kly.akamaized.net/RjqqLpVI-PEjeh87P-dQqom409A=/1280x720/smart/filters:quality(75):strip_icc():format(webp)/kly-media-production/medias/3996307/original/045357600_1650004185-Bos_SpaceX_Elon_Musk__2_.jpg",
+            name: "Ratno",
+            photoProfile: "https://jatim.kemenkumham.go.id/images/Ratno.jpg",
             head: "RW 03",
             position: "RT 06",
             number: "085777123456",
             address: "Jl.Pahlawan No.510",
             greetings:
-                "Salam sejahtera! Saya Budi Kabudibudi, dengan keinginan kuat untuk membangun komunitas yang lebih baik dan harmonis bagi semua warga.",
+                "Salam sejahtera! Saya Wisnu, dengan keinginan kuat untuk membangun komunitas yang lebih baik dan harmonis bagi semua warga.",
         },
         {
-            name: "Fani",
-            photoProfile:
-                "https://cdn1-production-images-kly.akamaized.net/RjqqLpVI-PEjeh87P-dQqom409A=/1280x720/smart/filters:quality(75):strip_icc():format(webp)/kly-media-production/medias/3996307/original/045357600_1650004185-Bos_SpaceX_Elon_Musk__2_.jpg",
+            name: "Meirina",
+            photoProfile: "https://jatim.kemenkumham.go.id/images/Meirina.jpg",
             head: "RW 03",
             position: "RT 07",
             number: "085777123456",
             address: "Jl.Pahlawan No.510",
             greetings:
-                "Salam sejahtera! Saya Budi Kabudibudi, dengan keinginan kuat untuk membangun komunitas yang lebih baik dan harmonis bagi semua warga.",
+                "Salam sejahtera! Saya Wisnu, dengan keinginan kuat untuk membangun komunitas yang lebih baik dan harmonis bagi semua warga.",
         },
         {
-            name: "Ruty",
-            photoProfile:
-                "https://cdn1-production-images-kly.akamaized.net/RjqqLpVI-PEjeh87P-dQqom409A=/1280x720/smart/filters:quality(75):strip_icc():format(webp)/kly-media-production/medias/3996307/original/045357600_1650004185-Bos_SpaceX_Elon_Musk__2_.jpg",
+            name: "Adi",
+            photoProfile: "https://jatim.kemenkumham.go.id/images/Adi.jpg",
             head: "RW 03",
             position: "RT 08",
             number: "085777123456",
             address: "Jl.Pahlawan No.510",
             greetings:
-                "Salam sejahtera! Saya Budi Kabudibudi, dengan keinginan kuat untuk membangun komunitas yang lebih baik dan harmonis bagi semua warga.",
+                "Salam sejahtera! Saya Wisnu, dengan keinginan kuat untuk membangun komunitas yang lebih baik dan harmonis bagi semua warga.",
         },
     ];
     let poins = [
@@ -280,7 +267,7 @@
             <img
                 src={admins[0].photoProfile}
                 alt=""
-                class="w-full md:w-2/5 object-cover rounded-lg"
+                class="max-w-md md:w-2/5 object-cover rounded-lg max-h-96 object-top"
             />
             <div
                 class="desc-profile p-4 md:p-8 flex-grow md:flex md:flex-col md:jusitfy-center md:items-center"
@@ -298,7 +285,7 @@
                     <img
                         src={admin.photoProfile}
                         alt=""
-                        class="w-full object-cover rounded-lg mb-3"
+                        class="w-full object-cover rounded-lg mb-3 max-h-64 object-top"
                     />
                     <Heading tag="h5" class="mb-2">{admin.name}</Heading>
                     <p class="text-gray-500 mb-2">

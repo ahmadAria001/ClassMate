@@ -221,8 +221,6 @@
         ];
     }
 
-    export let active: string = "";
-
     let site = {
         name: "KawanDesa",
         img: "assets/icons/KD_logo.svg",
@@ -437,9 +435,9 @@
                 </a>
             </Listgroup>
         </Dropdown>
-        <Dropdown triggeredBy="#avatar-menu">
+        <Dropdown triggeredBy="#avatar-menu" class="w-52">
             <DropdownHeader>
-                <span class="block text-sm"
+                <span class="block text-sm max-w-full truncate"
                     >{$page.props.auth.user.fullName}</span
                 >
                 <span class="block truncate text-sm font-medium">{role}</span>
@@ -520,7 +518,7 @@
     </main>
 </div>
 <Footer
-    class="w-full p-3 border-t-2 mt-5 flex justify-center max-md:static fixed bottom-0 bg-white z-0 mt-5"
+    class="w-full p-3 border-t-2 mt-5 flex justify-center max-md:static fixed bottom-0 bg-white dark:bg-gray-800 z-0 mt-5"
 >
     <FooterCopyright by="Simpang Lima Softwork" />
 </Footer>

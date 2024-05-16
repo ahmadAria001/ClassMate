@@ -14,9 +14,9 @@
     const currentUrl = writable("");
     onMount(() => {
         currentUrl.set(window.location.pathname);
-        currentUrl.subscribe(value =>{
-            console.log(value);
-        })
+        // currentUrl.subscribe(value =>{
+        //     console.log(value);
+        // })
     });
 
     let menus = [
@@ -25,27 +25,32 @@
             link: "/",
         },
         {
-            name: "Profile",
-            link: "/profile",
-        },
-        {
             name: "Pengumuman",
             link: "/pengumuman",
+        },
+        {
+            name: "Profile",
+            link: "/profile",
         },
     ];
 </script>
 
-<Navbar class="px-8 py-2.5 fixed w-full z-20 top-0 start-0 border-b container">
+<Navbar
+    class="px-8 md:px-16 py-2.5 fixed w-full z-20 top-0 start-0 border-b container"
+>
     <NavBrand href="/">
         <img src="assets/icons/KD_logo.svg" alt="KawanDesa Logo" class="h-8" />
     </NavBrand>
     <NavHamburger />
     <NavUl>
         {#each menus as menu}
-            <NavLi href={menu.link} class={twMerge(
-                "hover:text-black",
-                $currentUrl == menu.link ? "text-blue-600" : ""
-            )}>{menu.name}</NavLi>
+            <NavLi
+                href={menu.link}
+                class={twMerge(
+                    "hover:text-black",
+                    $currentUrl == menu.link ? "text-blue-600" : "",
+                )}>{menu.name}</NavLi
+            >
         {/each}
         <NavLi class="md:sr-only">
             <div class="login">

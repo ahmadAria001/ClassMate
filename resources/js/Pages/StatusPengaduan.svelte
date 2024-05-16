@@ -21,9 +21,9 @@
         ChevronLeftOutline,
         ChevronRightOutline,
     } from "flowbite-svelte-icons";
-        import { setCookie, getCookie } from "../Utils/Cokies";
+    import { setCookie, getCookie } from "../Utils/Cokies";
 
-    import axios from 'axios'
+    import axios from "axios";
 
     let items = [
         {
@@ -113,7 +113,7 @@
     );
 
     const getData = async (id: string | null = null) => {
-        const response = await axios.get(`/api/civiliant/${id}`, {
+        const response = await axios.get(`/api/complaint/${id}`, {
             headers: {
                 Accept: "*/*",
                 Authorization: `Bearer ${getCookie("token")}`,
@@ -122,7 +122,6 @@
 
         return response.data;
     };
-
 </script>
 
 <Layout>
@@ -221,8 +220,9 @@
             <TableHeadCell class="text-center">Status</TableHeadCell>
         </TableHead>
         <TableBody>
-            {#await getData() then data}
+            <!-- {#await getData() then data}
                 {#each filteredItems as item}
+                    {console.log(filteredItems)}
                     <TableBodyRow>
                         <TableBodyCell>{item.name}</TableBodyCell>
                         <TableBodyCell>{item.address}</TableBodyCell>
@@ -237,10 +237,26 @@
                                 <Badge color="indigo">{item.status}</Badge>
                             </TableBodyCell>
                         {/if}
+                    </TableBodyRow>
+                {/each}
+            {/await} -->
+            {#each items as item}
+                <TableBodyRow>
+                    <TableBodyCell>{item.name}</TableBodyCell>
+                    <TableBodyCell>{item.address}</TableBodyCell>
+                    <TableBodyCell>{item.noHp}</TableBodyCell>
+                    <TableBodyCell>{item.problem}</TableBodyCell>
+                    {#if item.status == "Selesai"}
+                        <TableBodyCell class="text-center">
+                            <Badge color="green">{item.status}</Badge>
+                        </TableBodyCell>
+                    {:else if item.status == "Dalam Proses"}
+                        <TableBodyCell class="text-center">
+                            <Badge color="indigo">{item.status}</Badge>
+                        </TableBodyCell>
+                    {/if}
                 </TableBodyRow>
             {/each}
-
-            {/await}
         </TableBody>
 
         <div
