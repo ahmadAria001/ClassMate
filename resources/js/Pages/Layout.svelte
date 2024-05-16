@@ -34,12 +34,17 @@
         BellSolid,
     } from "flowbite-svelte-icons";
     import { twMerge } from "tailwind-merge";
+    import { writable } from "svelte/store";
     import axiosInstance from "axios";
+
+    const url = writable("");
+    onMount(() => {
+        url.set(window.location.pathname);
+    });
 
     const axios = axiosInstance.create({ withCredentials: true });
 
     // tempat rolenya disini
-    // console.log($page.props);
     let role = $page.props.auth.user.role;
 
     let filtermenu: {
@@ -216,8 +221,6 @@
         ];
     }
 
-    export let active: string = "";
-
     let site = {
         name: "KawanDesa",
         img: "assets/icons/KD_logo.svg",
@@ -268,7 +271,7 @@
     const toggleDrawer = () => {
         // console.log("test");
         // drawerHidden = !drawerHidden;
-        drawerHidden = false;
+        drawerHidden = drawerHidden ? false : true;
     };
 
     let notifs = [
@@ -304,7 +307,7 @@
 <header class="flex-none w-full mx-auto bg-white dark:bg-slate-950">
     <Navbar let:hidden let:toggle class="border-b-2 h-16 fixed">
         <NavHamburger
-            on:click={toggleDrawer}
+            onClick={toggleDrawer}
             btnClass="focus:outline-none whitespace-normal rounded-lg focus:ring-2 p-1.5 focus:ring-gray-400 hover:bg-gray-100 dark:hover:bg-gray-600 m-0 mr-3 lg:hidden"
         />
         <NavBrand href="/" class="md:w-64">
@@ -398,7 +401,10 @@
             >
             <Avatar
                 id="avatar-menu"
-                src="https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?cs=srgb&dl=pexels-simon-robben-614810.jpg&fm=jpg"
+                src={$page.props.auth.user.pict
+                    ? `/assets/uploads/${$page.props.auth.user.pict}`
+                    : ""}
+                class="cursor-pointer"
             />
             <!-- <NavHamburger class1="w-full md:flex md:w-auto md:order-1" /> -->
         </div>
@@ -432,12 +438,14 @@
                 </a>
             </Listgroup>
         </Dropdown>
-        <Dropdown triggeredBy="#avatar-menu">
+        <Dropdown triggeredBy="#avatar-menu" class="w-52">
             <DropdownHeader>
-                <span class="block text-sm"
+                <span class="block text-sm max-w-full truncate"
                     >{$page.props.auth.user.fullName}</span
                 >
-                <span class="block truncate text-sm font-medium">{role}</span>
+                <span class="block truncate text-sm font-medium"
+                    ><b>{role}</b></span
+                >
             </DropdownHeader>
             <DropdownItem href="/profile">Profile</DropdownItem>
             <DropdownItem on:click={async () => await logout()}
@@ -460,7 +468,7 @@
     <div class="flex items-center">
         <CloseButton
             on:click={() => (drawerHidden = true)}
-            class="mb-4 dark:text-white lg:hidden"
+            class="mb- text-black dark:text-white lg:hidden"
         />
     </div>
     <Sidebar asideClass="w-54">
@@ -481,7 +489,9 @@
                                     spanClass="ml-9"
                                     class={twMerge(
                                         itemClass,
-                                        active == title ? "bg-gray-900" : "",
+                                        $url == href
+                                            ? "bg-gray-100 dark:bg-gray-900"
+                                            : "",
                                     )}
                                 />
                             {/each}
@@ -491,7 +501,12 @@
                             label={name}
                             {href}
                             spanClass="ml-3"
-                            class={itemClass}
+                            class={twMerge(
+                                itemClass,
+                                $url == href
+                                    ? "bg-gray-100 dark:bg-gray-900"
+                                    : "",
+                            )}
                         >
                             <svelte:component this={icon} slot="icon" />
                         </SidebarItem>
@@ -502,11 +517,13 @@
     </Sidebar>
 </Drawer>
 
-<div class="flex px-4 mx-auto w-full">
+<div class="flex px-4 mx-auto w-full mb-14">
     <main class="lg:ml-64 mt-4 w-full mx-auto" style="margin-top: 5rem">
         <slot />
     </main>
 </div>
-<Footer class="absolute bottom-0 start-0 z-20 w-full p-3 border-t-2">
+<Footer
+    class="w-full p-3 border-t-2 mt-5 flex justify-center max-md:static fixed bottom-0 bg-white dark:bg-gray-800 z-0 mt-5"
+>
     <FooterCopyright by="Simpang Lima Softwork" />
 </Footer>

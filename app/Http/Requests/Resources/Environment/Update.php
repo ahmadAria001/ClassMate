@@ -4,7 +4,7 @@ namespace App\Http\Requests\Resources\Environment;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class Update extends FormRequest
+class UpdateRequestDoc extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,9 +23,9 @@ class Update extends FormRequest
     {
         return [
             'id' => 'required|integer|min:1',
-            'env_condition' => 'required|string',
+            'title' => 'required|string',
             'desc' => 'required|string',
-            'general_facility' => 'required|string',
+            'attachment' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ];
     }
 }

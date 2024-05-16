@@ -11,10 +11,8 @@ use App\Models\Docs;
 use App\Models\Documentation;
 use App\Models\Dues;
 use App\Models\DuesPaymentLog;
-use App\Models\EnvironmentInfo;
-use App\Models\EnvirontmentInfo;
-use App\Models\Family;
 use App\Models\FinancialAssistance;
+use App\Models\News;
 use App\Models\RT;
 use App\Models\User;
 use Carbon\Carbon;
@@ -129,10 +127,9 @@ class TableSeeder extends Seeder
         }
 
         for ($i = 1; $i <= 5; $i++) {
-            EnvironmentInfo::create([
-                'env_condition' => $faker->sentence(),
+            News::create([
+                'title' => $faker->sentence(),
                 'desc' => $faker->sentences(2, true),
-                'general_facility' => $faker->sentence(),
                 'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
                 'created_by' => $i,
             ]);

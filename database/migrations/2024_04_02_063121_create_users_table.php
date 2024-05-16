@@ -6,8 +6,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      *
@@ -21,6 +20,7 @@ return new class extends Migration
             $table->string('password');
             $table->enum('role', ['RT', 'RW', 'Warga', 'Admin'])->nullable();
             $table->unsignedBigInteger('civilian_id')->index('fk_users_civilian')->nullable();
+            $table->text('pict')->nullable();
             $table->bigInteger('created_at');
             $table->unsignedBigInteger('created_by')->index('fk_user')->nullable();
             $table->bigInteger('updated_at')->nullable();

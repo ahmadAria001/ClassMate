@@ -17,11 +17,14 @@
         ButtonGroup,
         type SizeType,
         Select,
+        Popover,
     } from "flowbite-svelte";
     import {
         ChevronLeftOutline,
         ChevronRightOutline,
         ExclamationCircleOutline,
+        TerminalSolid,
+        QuestionCircleSolid,
     } from "flowbite-svelte-icons";
     import Create from "./../Components/PendudukByRT/Modals/Create.svelte";
     import Edit from "./../Components/PendudukByRT/Modals/Edit.svelte";
@@ -60,6 +63,7 @@
     ];
 
     let role = $page.props.auth.user.role;
+    // let role = "RT";
     // "RT";
     let addCivilian = false;
     let modalEdit = false;
@@ -148,7 +152,6 @@
                         Accept: "*/*",
                     },
                 });
-                console.log(response.data);
 
                 if (landing) {
                     let rawData = response.data;
@@ -215,7 +218,6 @@
     };
 
     const getCivil = async (id: string = "") => {
-        const token = getCookie("token");
         const response = await axios.get(`/api/civilian/${id}`, {
             headers: {
                 Accept: "application/json",
@@ -266,38 +268,30 @@
 
         <TableHead>
             {#if role === "RT"}
-                <TableHeadCell>Nama Kepala Keluarga</TableHeadCell>
-                <TableHeadCell>Alamaat</TableHeadCell>
+                <TableHeadCell width="25%">Nama Kepala Keluarga</TableHeadCell>
+                <TableHeadCell>Alamat</TableHeadCell>
                 <!-- <TableHeadCell>Pekerjaan</TableHeadCell> -->
-                <TableHeadCell class="text-center" width="20%"
-                    >Pekerjaan</TableHeadCell
-                >
+                <TableHeadCell width="10%">Pekerjaan</TableHeadCell>
                 <TableHeadCell class="text-center" width="20%"
                     >Status Kependudukan</TableHeadCell
                 >
-                <TableHeadCell>Status Penduduk</TableHeadCell>
                 <TableHeadCell class="sr-only"></TableHeadCell>
             {:else}
                 <TableHeadCell>RT</TableHeadCell>
                 <TableHeadCell>Ketua</TableHeadCell>
                 <TableHeadCell></TableHeadCell>
-                <!-- <TableHeadCell class="text-center" width="20%">Status</TableHeadCell -->
-                <!-- > -->
-                <!-- <TableHeadCell class="sr-only">Aksi</TableHeadCell> -->
             {/if}
         </TableHead>
         <TableBody>
             {#key builder}
                 {#if role === "RT"}
                     {#await getData("", true) then data}
-                        <!-- {console.log(data.data[0])} -->
                         {#each data as item, idx}
-                            <!-- {console.log(item)} -->
-
                             <TableBodyRow>
-                                <TableBodyCell>{item.fullName}</TableBodyCell>
+                                <TableBodyCell class="max-w-xs truncate"
+                                    >{item.fullName}</TableBodyCell
+                                >
                                 <TableBodyCell>{item.address}</TableBodyCell>
-                                <!-- <TableBodyCell>{item.noHp}</TableBodyCell> -->
                                 <TableBodyCell>{item.job}</TableBodyCell>
                                 {#if item.residentstatus == "PermanentResident"}
                                     <TableBodyCell class="text-center">
@@ -312,13 +306,13 @@
                                         <Badge color="yellow">Kos</Badge>
                                     </TableBodyCell>
                                 {/if}
-                                {#if item.status == "Aktif"}
+                                <!-- {#if item.status == "Aktif"}
                                     <TableBodyCell class="text-center">
                                         <Badge color="green"
                                             >{item.status}</Badge
                                         >
                                     </TableBodyCell>
-                                {/if}
+                                {/if} -->
                                 {#if item.status == "Meninggal"}
                                     <TableBodyCell class="text-center">
                                         <Badge color="red">{item.status}</Badge>
@@ -408,20 +402,20 @@
                                                 modalFamily = true;
                                             }}>Detail</Button
                                         >
-                                        <Button
-                                            color="yellow"
-                                            on:click={() => {
-                                                selected = item.id;
-                                                modalEdit = true;
-                                            }}>Edit</Button
-                                        >
-                                        <Button
-                                            color="red"
-                                            on:click={() => {
-                                                selDel = item.id;
-                                                modalDelete = true;
-                                            }}>Hapus</Button
-                                        >
+                                        <!-- <Button -->
+                                        <!--     color="yellow" -->
+                                        <!--     on:click={() => { -->
+                                        <!--         selected = item.id; -->
+                                        <!--         modalEdit = true; -->
+                                        <!--     }}>Edit</Button -->
+                                        <!-- > -->
+                                        <!-- <Button -->
+                                        <!--     color="red" -->
+                                        <!--     on:click={() => { -->
+                                        <!--         selDel = item.id; -->
+                                        <!--         modalDelete = true; -->
+                                        <!--     }}>Hapus</Button -->
+                                        <!-- > -->
                                     {/if}
                                 </TableBodyCell>
                             </TableBodyRow>
@@ -436,12 +430,12 @@
             <Modal
                 title="Data Keluarga"
                 bind:open={modalFamily}
-                size="lg"
+                size="xl"
                 autoclose
             >
                 <Table>
                     <TableHead>
-                        <TableHeadCell>Nama Lengkap</TableHeadCell>
+                        <TableHeadCell width="20%">Nama Lengkap</TableHeadCell>
                         <TableHeadCell>Alamat</TableHeadCell>
                         <TableHeadCell>Pekerjaan</TableHeadCell>
                         <TableHeadCell class="text-center"
@@ -459,12 +453,13 @@
                         {#if selected}
                             {#if role == "RT"}
                                 {#await getData("", false, custom) then data}
-                                    <!-- {console.log(data.data)} -->
                                     {#each data.data as item, idx}
                                         <TableBodyRow>
                                             <TableBodyCell
-                                                >{item.fullName}</TableBodyCell
+                                                class="max-w-xs truncate"
                                             >
+                                                {item.fullName}
+                                            </TableBodyCell>
                                             <TableBodyCell
                                                 >{item.address}</TableBodyCell
                                             >
@@ -523,6 +518,12 @@
                                                 </TableBodyCell>
                                             {/if}
 
+                                            <TableBodyCell class="text-center">
+                                                <Badge color="yellow"
+                                                    >{item.status}</Badge
+                                                >
+                                            </TableBodyCell>
+
                                             <TableBodyCell>
                                                 <Button
                                                     color="yellow"
@@ -530,6 +531,13 @@
                                                         modalEdit = true;
                                                         selEdit = item.id;
                                                     }}>Edit</Button
+                                                >
+                                                <Button
+                                                    color="red"
+                                                    on:click={() => {
+                                                        selDel = item.id;
+                                                        modalDelete = true;
+                                                    }}>Hapus</Button
                                                 >
                                             </TableBodyCell>
                                         </TableBodyRow>
@@ -540,11 +548,42 @@
                                     {#each data.data[0].civils as item, idx}
                                         <TableBodyRow>
                                             <TableBodyCell
-                                                >{item.fullName}</TableBodyCell
+                                                tdClass="flex gap-2 justify-center align-middle my-6"
                                             >
-                                            <TableBodyCell
-                                                >{item.address}</TableBodyCell
+                                                {#if item.isFamilyHead}
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        class="w-5 h-5 fill-white"
+                                                        viewBox="0 0 24 24"
+                                                        ><path
+                                                            d="m21 2-5 5-4-5-4 5-5-5v13h18zM5 21h14a2 2 0 0 0 2-2v-2H3v2a2 2 0 0 0 2 2z"
+                                                        ></path></svg
+                                                    >
+                                                {/if}
+
+                                                {item.fullName}
+                                            </TableBodyCell>
+                                            <Popover
+                                                class="w-64 text-sm text-white"
+                                                title="Alamat"
+                                                triggeredBy={`#address-${item.id}`}
                                             >
+                                                {item.address}
+                                            </Popover>
+                                            <TableBodyCell>
+                                                <div
+                                                    class="flex justify-between align-middle gap-2"
+                                                >
+                                                    <span
+                                                        class="w-1/2 truncate"
+                                                    >
+                                                        {item.address}
+                                                    </span>
+                                                    <QuestionCircleSolid
+                                                        id={`address-${item.id}`}
+                                                    />
+                                                </div>
+                                            </TableBodyCell>
                                             <TableBodyCell
                                                 >{item.job}</TableBodyCell
                                             >
