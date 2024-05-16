@@ -49,7 +49,6 @@ class NewsController extends Controller
                 $data = news::create([
                     'title' => $payload->get('title'),
                     'desc' => $payload->get('desc'),
-                    'attachment' => $payload->get('attachment'),
                 ]);
             } else {
                 $data = news::create([
