@@ -276,7 +276,7 @@
                 <TableHeadCell class="text-center" width="20%"
                     >Status Kependudukan</TableHeadCell
                 >
-                <TableHeadCell>Status Penduduk</TableHeadCell>
+                <TableHeadCell class="text-center">Status Penduduk</TableHeadCell>
                 <TableHeadCell class="sr-only"></TableHeadCell>
             {:else}
                 <TableHeadCell>RT</TableHeadCell>
@@ -292,7 +292,7 @@
                             <TableBodyRow>
                                 <TableBodyCell>{item.fullName}</TableBodyCell>
                                 <TableBodyCell>{item.address}</TableBodyCell>
-                                <TableBodyCell>{item.job}</TableBodyCell>
+                                <TableBodyCell class="text-center">{item.job}</TableBodyCell>
                                 {#if item.residentstatus == "PermanentResident"}
                                     <TableBodyCell class="text-center">
                                         <Badge color="green">Tetap</Badge>

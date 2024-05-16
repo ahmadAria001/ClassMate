@@ -155,7 +155,7 @@
             <TableHeadCell>Nama Lengkap</TableHeadCell>
             <TableHeadCell>Alamat</TableHeadCell>
             <TableHeadCell>Pekerjaan</TableHeadCell>
-            <TableHeadCell class="text-center">Status</TableHeadCell>
+            <TableHeadCell class="text-left">Status</TableHeadCell>
             <TableHeadCell class="sr-only">Aksi</TableHeadCell>
         </TableHead>
         <TableBody>
