@@ -22,9 +22,9 @@ class Create extends FormRequest
     public function rules(): array
     {
         return [
-            'env_condition' => 'required|string',
+            'title' => 'required|string',
             'desc' => 'required|string',
-            'general_facility' => 'required|string',
+            'attachment' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ];
     }
 }
