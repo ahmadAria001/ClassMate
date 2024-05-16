@@ -22,8 +22,6 @@ class CreateComplaint extends FormRequest
     public function rules(): array
     {
         return [
-            'docs_id'=> 'required|integer|min:1',
-            'complaintStatus' => 'string',
             'attachment' => 'image|mimes:jpg,jpeg,png|max:2048',
             //
             'description' => 'string',

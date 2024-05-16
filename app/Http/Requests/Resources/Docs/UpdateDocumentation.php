@@ -23,9 +23,9 @@ class UpdateDocumentation extends FormRequest
     {
         return [
             'id' => 'required|integer|min:1',
-            'docs_id' => 'required|integer|min:1',
             'contentType' => 'required|string',
             'contentDesc' => 'string',
+            'contentAttachment' => 'image|mimes:png,jpeg,jpg|max:2048',
             //
             'description' => 'string',
         ];

@@ -42,7 +42,7 @@ Route::prefix('/complaint')->group(function(){
     Route::get('/', [ComplaintController::class, 'get'])->middleware(GetComplaint::class);
     Route::get('/{filter}', [ComplaintController::class, 'get'])->middleware(GetComplaint::class);
     Route::post('/',[ComplaintController::class, 'create'])->middleware(CreateComplaint::class);
-    Route::put('/',[ComplaintController::class, 'edit'])->middleware(UpdateComplaint::class);
+    Route::post('/update',[ComplaintController::class, 'edit'])->middleware(UpdateComplaint::class);
     Route::delete('/',[ComplaintController::class, 'destroy'])->middleware(DeleteComplaint::class);
 });
 
@@ -50,7 +50,7 @@ Route::prefix('/documentation')->group(function(){
     Route::get('/', [DocumentationController::class, 'get'])->middleware(GetDocumentation::class);
     Route::get('/{filter}', [DocumentationController::class, 'get'])->middleware(GetDocumentation::class);
     Route::post('/',[DocumentationController::class, 'create'])->middleware(CreateDocumentation::class);
-    Route::put('/',[DocumentationController::class, 'edit'])->middleware(UpdateDocumentation::class);
+    Route::post('/update',[DocumentationController::class, 'edit'])->middleware(UpdateDocumentation::class);
     Route::delete('/',[DocumentationController::class, 'destroy'])->middleware(DeleteDocumentation::class);
 });
 

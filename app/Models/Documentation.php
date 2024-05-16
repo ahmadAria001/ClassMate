@@ -14,6 +14,7 @@ class Documentation extends Model
     protected $fillable = [
         'docs_id',
         'contentType',
+        'contentAttachment',
         'contentDesc',
         'created_at',
         'created_by',
