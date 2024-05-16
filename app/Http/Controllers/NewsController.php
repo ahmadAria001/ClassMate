@@ -46,10 +46,18 @@ class NewsController extends Controller
             $data = null;
 
             if ($payload->has('attachment')) {
+                $image = $req->file('attachment');
+
+                $name = Carbon::now() . '_' . $image->getClientOriginalName();
+                $path = public_path('assets/uploads') . '/' . $name;
+                // [$width, $height] = getimagesize($image->getFileInfo());
+
+                Image::read($image)->resize(480, 480)->toJpeg()->save($path);
+
                 $data = news::create([
                     'title' => $payload->get('title'),
                     'desc' => $payload->get('desc'),
-                    'attachment' => $payload->get('attachment'),
+                    'attachment' => $name,
                 ]);
             } else {
                 $data = news::create([
@@ -60,19 +68,6 @@ class NewsController extends Controller
 
             if ($data->wasRecentlyCreated) {
                 $data->created_at = Carbon::now()->timestamp;
-
-                if ($req->has('attachment')) {
-                    $image = $req->file('attachment');
-
-                    $name = Carbon::now() . '_' . $image->getClientOriginalName();
-                    $path = public_path('assets/uploads') . '/' . $name;
-                    // [$width, $height] = getimagesize($image->getFileInfo());
-
-                    Image::read($image)->resize(480, 480)->toJpeg()->save($path);
-
-                    $data->attachment = $name;
-                    $data->save();
-                }
 
                 if (str_contains($req->url(), 'api')) {
                     $token = $req->bearerToken();
