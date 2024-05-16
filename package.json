@@ -3,23 +3,36 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "vite build"
+        "build": "vite build",
+        "zodgen": "laravel-zodgen"
     },
     "devDependencies": {
+        "@7nohe/laravel-zodgen": "^0.1.6",
+        "@rollup/plugin-typescript": "^11.1.6",
+        "@tsconfig/svelte": "^5.0.4",
         "axios": "^1.6.4",
+        "flowbite-svelte-blocks": "^1.1.1",
         "laravel-vite-plugin": "^1.0.0",
+        "prettier": "^3.2.5",
+        "prettier-plugin-svelte": "^3.2.3",
+        "svelte-preprocess": "^5.1.3",
         "tailwindcss": "^3.4.1",
-        "vite": "^5.1.7"
-    },
+        "tsconfig.json": "link:@tsconfig/svelte/tsconfig.json",
+        "tslib": "^2.6.2",
+        "typescript": "^5.4.4",
     "dependencies": {
+        "@felte/validator-zod": "^1.0.17",
+        "@inertiajs/inertia": "^0.11.1",
         "@inertiajs/svelte": "^1.0.14",
         "@sveltejs/vite-plugin-svelte": "^3.0.2",
         "autoprefixer": "^10.4.17",
         "felte": "^1.2.14",
-        "svelte": "^4.2.11",
         "flowbite": "^2.3.0",
         "flowbite-svelte": "^0.44.24",
+        "flowbite-svelte-icons": "^1.5.0",
+        "svelte": "^4.2.11",
         "tailwind-merge": "^2.2.2",
         "zod": "^3.22.4"
-    }
+    },
+    "packageManager": "pnpm@8.15.4+sha1.c85a4305534f76d461407b59277b954bac97b5c4"
 }
