@@ -81,7 +81,6 @@
                         type="text"
                         name="username"
                         placeholder="Masukan NIK anda"
-                        class="dark:bg-white"
                         required
                     />
                 </Label>
@@ -95,7 +94,6 @@
                         type="password"
                         name="password"
                         placeholder="Masukan password anda"
-                        class="dark:bg-white"
                         required
                     />
                 </Label>

@@ -61,7 +61,7 @@
             {
                 name: "Data Warga",
                 icon: UsersGroupSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
                     "Lihat Data Warga": "/warga-rt",
                     "Arsip Warga": "/arsip-penduduk",
@@ -70,7 +70,7 @@
             {
                 name: "Pengaduan",
                 icon: FileSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
                     "Daftar Pengaduan": "/daftar-pengaduan",
                 },
@@ -78,7 +78,7 @@
             {
                 name: "Laporan",
                 icon: ClipboardSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
                     "Surat Ket. Warga": "/daftar-pengajuan-surat",
                     "Laporan keuangan": "/keuangan",
@@ -88,7 +88,7 @@
             {
                 name: "Informasi",
                 icon: VolumeUpSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
                     Pengumuman: "/pengumuman",
                     "Kegiatan Warga": "/kegiatan-warga",
@@ -101,7 +101,7 @@
             {
                 name: "Data Warga",
                 icon: UsersGroupSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
                     "Lihat Data Warga": "/daftar-rt",
                     "Arsip Warga": "/arsip-penduduk",
@@ -110,7 +110,7 @@
             {
                 name: "Pengaduan",
                 icon: FileSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
                     "Daftar Pengaduan": "/daftar-pengaduan",
                 },
@@ -118,7 +118,7 @@
             {
                 name: "Laporan",
                 icon: ClipboardSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
                     "Surat Ket. Warga": "/daftar-pengajuan-surat",
                     "Bantuan sosial": "/daftar-bansos",
@@ -127,7 +127,7 @@
             {
                 name: "Informasi",
                 icon: VolumeUpSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
                     Pengumuman: "/pengumuman",
                     "Kegiatan Warga": "/kegiatan-warga",
@@ -140,7 +140,7 @@
             {
                 name: "Data Warga",
                 icon: UsersGroupSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
                     "Lihat Data Warga": "/warga-rt",
                     "Lihat Data Warga RT": "/daftar-rt",
@@ -150,7 +150,7 @@
             {
                 name: "Pengaduan",
                 icon: FileSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
                     "Daftar Pengaduan": "/daftar-pengaduan",
                     "Status Pengaduan warga": "/status-pengaduan",
@@ -159,7 +159,7 @@
             {
                 name: "Laporan",
                 icon: ClipboardSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
                     "Surat Ket. Warga": "/daftar-pengajuan-surat",
                     "Bantuan sosial": "/daftar-bansos",
@@ -168,7 +168,7 @@
             {
                 name: "Surat",
                 icon: ClipboardSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
                     "Status Surat": "/status-pengajuan",
                 },
@@ -176,7 +176,7 @@
             {
                 name: "Informasi",
                 icon: VolumeUpSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
                     Pengumuman: "/pengumuman",
                     "Kegiatan Warga": "/kegiatan-warga",
@@ -185,7 +185,7 @@
             {
                 name: "Bantuan Sosial",
                 icon: VolumeUpSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
                     "Status Bantuan Sosial": "/status-bansos",
                 },
@@ -197,7 +197,7 @@
             {
                 name: "Pengaduan",
                 icon: FileSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
                     "Status pengaduan": "/status-pengaduan",
                 },
@@ -205,7 +205,7 @@
             {
                 name: "Surat",
                 icon: ClipboardSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
                     "Status Surat": "/status-pengajuan",
                 },
@@ -213,7 +213,7 @@
             {
                 name: "Bantuan Sosial",
                 icon: VolumeUpSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
                     "Status Bantuan Sosial": "/status-bansos",
                 },
@@ -304,8 +304,8 @@
 </script>
 
 <svelte:window bind:innerWidth={width} />
-<header class="flex-none w-full mx-auto bg-white dark:bg-slate-950">
-    <Navbar let:hidden let:toggle class="border-b-2 h-16 fixed m-0">
+<header class="flex-none w-full mx-auto bg-white">
+    <Navbar let:hidden let:toggle class="border-b-2 h-16 fixed m-0 dark:bg-gray-800">
         <NavHamburger
             onClick={toggleDrawer}
             btnClass="focus:outline-none whitespace-normal rounded-lg focus:ring-2 p-1.5 focus:ring-gray-400 hover:bg-gray-100 dark:hover:bg-gray-600 m-0 mr-3 lg:hidden"
@@ -517,8 +517,8 @@
     </Sidebar>
 </Drawer>
 
-<div class="flex px-4 mx-auto w-full mb-14">
-    <main class="lg:ml-64 mt-4 w-full mx-auto" style="margin-top: 5rem">
+<div class="dark:bg-gray-900 h-screen flex px-4 mx-auto w-full mb-14">
+    <main class=" lg:ml-64 mt-4 w-full mx-auto" style="margin-top: 5rem">
         <slot />
     </main>
 </div>

@@ -49,7 +49,6 @@ class NewsController extends Controller
                 $data = news::create([
                     'title' => $payload->get('title'),
                     'desc' => $payload->get('desc'),
-                    'attachment' => $payload->get('attachment'),
                 ]);
             } else {
                 $data = news::create([
@@ -61,6 +60,7 @@ class NewsController extends Controller
             if ($data->wasRecentlyCreated) {
                 $data->created_at = Carbon::now()->timestamp;
 
+                error_log($req->has('attachment'));
                 if ($req->has('attachment')) {
                     $image = $req->file('attachment');
 
@@ -68,10 +68,11 @@ class NewsController extends Controller
                     $path = public_path('assets/uploads') . '/' . $name;
                     // [$width, $height] = getimagesize($image->getFileInfo());
 
-                    Image::read($image)->resize(480, 480)->toJpeg()->save($path);
+                    Image::read($image)->resize(480, 480)->toJpeg()->save($path); 
 
                     $data->attachment = $name;
                     $data->save();
+                    error_log($data->attachment);
                 }
 
                 if (str_contains($req->url(), 'api')) {
