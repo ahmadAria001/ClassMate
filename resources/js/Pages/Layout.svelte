@@ -401,7 +401,10 @@
             >
             <Avatar
                 id="avatar-menu"
-                src="https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?cs=srgb&dl=pexels-simon-robben-614810.jpg&fm=jpg"
+                src={$page.props.auth.user.pict
+                    ? `/assets/uploads/${$page.props.auth.user.pict}`
+                    : ""}
+                class="cursor-pointer"
             />
             <!-- <NavHamburger class1="w-full md:flex md:w-auto md:order-1" /> -->
         </div>
@@ -440,7 +443,9 @@
                 <span class="block text-sm max-w-full truncate"
                     >{$page.props.auth.user.fullName}</span
                 >
-                <span class="block truncate text-sm font-medium">{role}</span>
+                <span class="block truncate text-sm font-medium"
+                    ><b>{role}</b></span
+                >
             </DropdownHeader>
             <DropdownItem href="/profile">Profile</DropdownItem>
             <DropdownItem on:click={async () => await logout()}
