@@ -101,7 +101,6 @@
                 id="full_name"
                 name="fullName"
                 placeholder="Nama Lengkap"
-                value="Susanto"
             />
             {#if $errors.fullName}
                 <span class="text-sm text-red-500">{$errors.fullName}</span>
@@ -110,14 +109,14 @@
         <div class="grid md:grid-cols-2 md:gap-6">
             <div class="mb-4">
                 <Label for="kk" class="mb-2">No KK</Label>
-                <Input id="kk" name="nkk" placeholder="No KK" value="6" />
+                <Input id="kk" name="nkk" placeholder="No KK" />
                 {#if $errors.nik}
                     <span class="text-sm text-red-500">{$errors.nik}</span>
                 {/if}
             </div>
             <div class="mb-4">
                 <Label for="nik" class="mb-2">NIK</Label>
-                <Input id="nik" placeholder="NIK" name="nik" value="312412" />
+                <Input id="nik" placeholder="NIK" name="nik"  />
                 {#if $errors.nik}
                     <span class="text-sm text-red-500">{$errors.nik}</span>
                 {/if}
@@ -130,7 +129,6 @@
                     id="religion"
                     placeholder="Agama"
                     name="religion"
-                    value="Konghuan"
                 />
                 {#if $errors.religion}
                     <span class="text-sm text-red-500">{$errors.religion}</span>
@@ -146,7 +144,6 @@
                             id="birthplace"
                             placeholder="Tempat Lahir"
                             name="birthplace"
-                            value="Malang"
                         />
                         {#if $errors.birthplace}
                             <span class="text-sm text-red-500"
@@ -178,7 +175,6 @@
                     id="address"
                     placeholder="Alamat"
                     name="address"
-                    value="Earth"
                 />
                 {#if $errors.address}
                     <span class="text-sm text-red-500">{$errors.address}</span>
@@ -191,7 +187,6 @@
                     id="phone"
                     placeholder="No. HP"
                     name="phone"
-                    value="08123415678"
                 />
                 {#if $errors.phone}
                     <span class="text-sm text-red-500">{$errors.phone}</span>
@@ -226,7 +221,6 @@
                     id="job"
                     placeholder="Pekerjaan"
                     name="job"
-                    value="Mahasiswa"
                 />
                 {#if $errors.job}
                     <span class="text-sm text-red-500">{$errors.job}</span>
