@@ -111,7 +111,7 @@
 
 <Layout>
     <TableSearch
-        placeholder="Cari pengaduan"
+        placeholder="Cari Pengaduan"
         hoverable={true}
         bind:inputValue={searchTerm}
         divClass="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg overflow-hidden"
