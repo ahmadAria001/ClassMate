@@ -246,7 +246,7 @@
 
 <Layout active={title}>
     <TableSearch
-        placeholder="Cari warga"
+        placeholder="Cari Warga"
         hoverable={true}
         bind:inputValue={searchTerm}
         divClass="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg overflow-hidden"
@@ -275,6 +275,7 @@
                 <TableHeadCell class="text-center" width="20%"
                     >Status Kependudukan</TableHeadCell
                 >
+                <TableHeadCell class="text-center">Status Penduduk</TableHeadCell>
                 <TableHeadCell class="sr-only"></TableHeadCell>
             {:else}
                 <TableHeadCell>RT</TableHeadCell>
@@ -292,7 +293,7 @@
                                     >{item.fullName}</TableBodyCell
                                 >
                                 <TableBodyCell>{item.address}</TableBodyCell>
-                                <TableBodyCell>{item.job}</TableBodyCell>
+                                <TableBodyCell class="text-center">{item.job}</TableBodyCell>
                                 {#if item.residentstatus == "PermanentResident"}
                                     <TableBodyCell class="text-center">
                                         <Badge color="green">Tetap</Badge>

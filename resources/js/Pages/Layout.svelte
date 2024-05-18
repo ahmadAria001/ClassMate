@@ -47,21 +47,23 @@
     // tempat rolenya disini
     let role = $page.props.auth.user.role;
 
-    let filtermenu: {
+    interface MenuItem {
         name: string;
         icon: any;
-        isOpenItems?: boolean;
-        children?: Record<string, string>;
         href?: string;
-    }[] = [];
+        isOpenItems?: boolean;
+        children?: { [key: string]: string };
+    }
 
-    if (role == "RT") {
+    let filtermenu: MenuItem[] = [];
+
+    if (role === "RT") {
         filtermenu = [
             { name: "Beranda", icon: ChartPieSolid, href: "/beranda" },
             {
                 name: "Data Warga",
                 icon: UsersGroupSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
                     "Lihat Data Warga": "/warga-rt",
                     "Arsip Warga": "/arsip-penduduk",
@@ -70,7 +72,7 @@
             {
                 name: "Pengaduan",
                 icon: FileSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
                     "Daftar Pengaduan": "/daftar-pengaduan",
                 },
@@ -78,7 +80,7 @@
             {
                 name: "Laporan",
                 icon: ClipboardSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
                     "Surat Ket. Warga": "/daftar-pengajuan-surat",
                     "Laporan keuangan": "/keuangan",
@@ -88,20 +90,20 @@
             {
                 name: "Informasi",
                 icon: VolumeUpSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
                     Pengumuman: "/pengumuman",
                     "Kegiatan Warga": "/kegiatan-warga",
                 },
             },
         ];
-    } else if (role == "RW") {
+    } else if (role === "RW") {
         filtermenu = [
             { name: "Beranda", icon: ChartPieSolid, href: "/beranda" },
             {
                 name: "Data Warga",
                 icon: UsersGroupSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
                     "Lihat Data Warga": "/daftar-rt",
                     "Arsip Warga": "/arsip-penduduk",
@@ -110,7 +112,7 @@
             {
                 name: "Pengaduan",
                 icon: FileSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
                     "Daftar Pengaduan": "/daftar-pengaduan",
                 },
@@ -118,7 +120,7 @@
             {
                 name: "Laporan",
                 icon: ClipboardSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
                     "Surat Ket. Warga": "/daftar-pengajuan-surat",
                     "Bantuan sosial": "/daftar-bansos",
@@ -127,20 +129,20 @@
             {
                 name: "Informasi",
                 icon: VolumeUpSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
                     Pengumuman: "/pengumuman",
                     "Kegiatan Warga": "/kegiatan-warga",
                 },
             },
         ];
-    } else if (role == "Admin") {
+    } else if (role === "Admin") {
         filtermenu = [
             { name: "Beranda", icon: ChartPieSolid, href: "/beranda" },
             {
                 name: "Data Warga",
                 icon: UsersGroupSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
                     "Lihat Data Warga": "/warga-rt",
                     "Lihat Data Warga RT": "/daftar-rt",
@@ -150,7 +152,7 @@
             {
                 name: "Pengaduan",
                 icon: FileSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
                     "Daftar Pengaduan": "/daftar-pengaduan",
                     "Status Pengaduan warga": "/status-pengaduan",
@@ -159,7 +161,7 @@
             {
                 name: "Laporan",
                 icon: ClipboardSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
                     "Surat Ket. Warga": "/daftar-pengajuan-surat",
                     "Bantuan sosial": "/daftar-bansos",
@@ -168,7 +170,7 @@
             {
                 name: "Surat",
                 icon: ClipboardSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
                     "Status Surat": "/status-pengajuan",
                 },
@@ -176,7 +178,7 @@
             {
                 name: "Informasi",
                 icon: VolumeUpSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
                     Pengumuman: "/pengumuman",
                     "Kegiatan Warga": "/kegiatan-warga",
@@ -185,7 +187,7 @@
             {
                 name: "Bantuan Sosial",
                 icon: VolumeUpSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
                     "Status Bantuan Sosial": "/status-bansos",
                 },
@@ -197,7 +199,7 @@
             {
                 name: "Pengaduan",
                 icon: FileSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
                     "Status pengaduan": "/status-pengaduan",
                 },
@@ -205,7 +207,7 @@
             {
                 name: "Surat",
                 icon: ClipboardSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
                     "Status Surat": "/status-pengajuan",
                 },
@@ -213,12 +215,19 @@
             {
                 name: "Bantuan Sosial",
                 icon: VolumeUpSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
                     "Status Bantuan Sosial": "/status-bansos",
                 },
             },
         ];
+    }
+
+    function isActiveChild(
+        children: { [key: string]: string },
+        currentUrl: string,
+    ): boolean {
+        return Object.values(children).includes(currentUrl);
     }
 
     let site = {
@@ -304,8 +313,12 @@
 </script>
 
 <svelte:window bind:innerWidth={width} />
-<header class="flex-none w-full mx-auto bg-white dark:bg-slate-950">
-    <Navbar let:hidden let:toggle class="border-b-2 h-16 fixed">
+<header class="flex-none w-full mx-auto bg-white">
+    <Navbar
+        let:hidden
+        let:toggle
+        class="border-b-2 h-16 fixed m-0 dark:bg-gray-800"
+    >
         <NavHamburger
             onClick={toggleDrawer}
             btnClass="focus:outline-none whitespace-normal rounded-lg focus:ring-2 p-1.5 focus:ring-gray-400 hover:bg-gray-100 dark:hover:bg-gray-600 m-0 mr-3 lg:hidden"
@@ -471,7 +484,7 @@
             class="mb- text-black dark:text-white lg:hidden"
         />
     </div>
-    <Sidebar asideClass="w-54">
+    <!-- <Sidebar asideClass="w-54">
         <SidebarWrapper class="rounded-none pt-0 bg-white">
             <SidebarGroup ulClass={groupClass} class="mb-3">
                 {#each filtermenu as { name, icon, children, href, isOpenItems } (name)}
@@ -514,11 +527,57 @@
                 {/each}
             </SidebarGroup>
         </SidebarWrapper>
+    </Sidebar> -->
+    <Sidebar asideClass="w-54">
+        <SidebarWrapper class="rounded-none pt-0 bg-white">
+            <SidebarGroup ulClass={groupClass} class="mb-3">
+                {#each filtermenu as { name, icon, children, href } (name)}
+                    {#if children}
+                        <SidebarDropdownWrapper
+                            label={name}
+                            class="pr-3 bg-gray-100 dark:bg-gray-700"
+                            isOpen={$url
+                                ? isActiveChild(children, $url)
+                                : false}
+                        >
+                            <svelte:component this={icon} slot="icon" />
+                            {#each Object.entries(children) as [title, href]}
+                                <SidebarItem
+                                    label={title}
+                                    {href}
+                                    spanClass="ml-9"
+                                    class={twMerge(
+                                        itemClass,
+                                        $url == href
+                                            ? "bg-gray-100 dark:bg-gray-900"
+                                            : "",
+                                    )}
+                                />
+                            {/each}
+                        </SidebarDropdownWrapper>
+                    {:else}
+                        <SidebarItem
+                            label={name}
+                            {href}
+                            spanClass="ml-3"
+                            class={twMerge(
+                                itemClass,
+                                $url == href
+                                    ? "bg-gray-100 dark:bg-gray-900"
+                                    : "",
+                            )}
+                        >
+                            <svelte:component this={icon} slot="icon" />
+                        </SidebarItem>
+                    {/if}
+                {/each}
+            </SidebarGroup>
+        </SidebarWrapper>
     </Sidebar>
 </Drawer>
 
-<div class="flex px-4 mx-auto w-full mb-14">
-    <main class="lg:ml-64 mt-4 w-full mx-auto" style="margin-top: 5rem">
+<div class="dark:bg-gray-900 h-screen flex px-4 mx-auto w-full mb-14">
+    <main class=" lg:ml-64 mt-4 w-full mx-auto" style="margin-top: 5rem">
         <slot />
     </main>
 </div>
