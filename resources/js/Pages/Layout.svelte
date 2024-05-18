@@ -47,15 +47,17 @@
     // tempat rolenya disini
     let role = $page.props.auth.user.role;
 
-    let filtermenu: {
+    interface MenuItem {
         name: string;
         icon: any;
-        isOpenItems?: boolean;
-        children?: Record<string, string>;
         href?: string;
-    }[] = [];
+        isOpenItems?: boolean;
+        children?: { [key: string]: string };
+    }
 
-    if (role == "RT") {
+    let filtermenu: MenuItem[] = [];
+
+    if (role === "RT") {
         filtermenu = [
             { name: "Beranda", icon: ChartPieSolid, href: "/beranda" },
             {
@@ -95,7 +97,7 @@
                 },
             },
         ];
-    } else if (role == "RW") {
+    } else if (role === "RW") {
         filtermenu = [
             { name: "Beranda", icon: ChartPieSolid, href: "/beranda" },
             {
@@ -134,7 +136,7 @@
                 },
             },
         ];
-    } else if (role == "Admin") {
+    } else if (role === "Admin") {
         filtermenu = [
             { name: "Beranda", icon: ChartPieSolid, href: "/beranda" },
             {
@@ -221,6 +223,13 @@
         ];
     }
 
+    function isActiveChild(
+        children: { [key: string]: string },
+        currentUrl: string,
+    ): boolean {
+        return Object.values(children).includes(currentUrl);
+    }
+
     let site = {
         name: "KawanDesa",
         img: "assets/icons/KD_logo.svg",
@@ -305,7 +314,11 @@
 
 <svelte:window bind:innerWidth={width} />
 <header class="flex-none w-full mx-auto bg-white">
-    <Navbar let:hidden let:toggle class="border-b-2 h-16 fixed m-0 dark:bg-gray-800">
+    <Navbar
+        let:hidden
+        let:toggle
+        class="border-b-2 h-16 fixed m-0 dark:bg-gray-800"
+    >
         <NavHamburger
             onClick={toggleDrawer}
             btnClass="focus:outline-none whitespace-normal rounded-lg focus:ring-2 p-1.5 focus:ring-gray-400 hover:bg-gray-100 dark:hover:bg-gray-600 m-0 mr-3 lg:hidden"
@@ -471,7 +484,7 @@
             class="mb- text-black dark:text-white lg:hidden"
         />
     </div>
-    <Sidebar asideClass="w-54">
+    <!-- <Sidebar asideClass="w-54">
         <SidebarWrapper class="rounded-none pt-0 bg-white">
             <SidebarGroup ulClass={groupClass} class="mb-3">
                 {#each filtermenu as { name, icon, children, href, isOpenItems } (name)}
@@ -480,6 +493,52 @@
                             label={name}
                             class="pr-3 bg-gray-100 dark:bg-gray-700"
                             isOpen={isOpenItems}
+                        >
+                            <svelte:component this={icon} slot="icon" />
+                            {#each Object.entries(children) as [title, href]}
+                                <SidebarItem
+                                    label={title}
+                                    {href}
+                                    spanClass="ml-9"
+                                    class={twMerge(
+                                        itemClass,
+                                        $url == href
+                                            ? "bg-gray-100 dark:bg-gray-900"
+                                            : "",
+                                    )}
+                                />
+                            {/each}
+                        </SidebarDropdownWrapper>
+                    {:else}
+                        <SidebarItem
+                            label={name}
+                            {href}
+                            spanClass="ml-3"
+                            class={twMerge(
+                                itemClass,
+                                $url == href
+                                    ? "bg-gray-100 dark:bg-gray-900"
+                                    : "",
+                            )}
+                        >
+                            <svelte:component this={icon} slot="icon" />
+                        </SidebarItem>
+                    {/if}
+                {/each}
+            </SidebarGroup>
+        </SidebarWrapper>
+    </Sidebar> -->
+    <Sidebar asideClass="w-54">
+        <SidebarWrapper class="rounded-none pt-0 bg-white">
+            <SidebarGroup ulClass={groupClass} class="mb-3">
+                {#each filtermenu as { name, icon, children, href } (name)}
+                    {#if children}
+                        <SidebarDropdownWrapper
+                            label={name}
+                            class="pr-3 bg-gray-100 dark:bg-gray-700"
+                            isOpen={$url
+                                ? isActiveChild(children, $url)
+                                : false}
                         >
                             <svelte:component this={icon} slot="icon" />
                             {#each Object.entries(children) as [title, href]}
