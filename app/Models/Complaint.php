@@ -14,6 +14,7 @@ class Complaint extends Model
     protected $fillable = [
         'description',
         'docs_id',
+        'complaintStatus',
         'created_at',
         'attachment',
         'created_by',
