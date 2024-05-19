@@ -22,8 +22,8 @@ class Reset extends FormRequest
     public function rules(): array
     {
         return [
-            'old_password' => 'required|min:1|string',
-            'new_password' => ['required', 'min:8', 'string', 'regex:/[~!@#\$%\^&\*\(\)_\+<>?:"{}\|,\.\/;\'\[\]\\\]/'],
+            'password' => 'required|min:1|string',
+            'new_password' => ['required', 'min:8', 'string', 'regex:/[~!@#\$%\^&\*\(\)_\+<>?:"{}\|,\.\/;\'\[\]\\\]/', 'confirmed'],
         ];
     }
 }

@@ -27,7 +27,7 @@ class UpdateComplaint
         $pat = PersonalAccessToken::findToken($token);
         if (!$pat) abort(401, 'Unauthorized');;
 
-        if ($pat->cant([\App\Http\Controllers\ComplaintController::class, 'edit']) && !($pat->can('*'))) {
+        if ($pat->cant('ComplaintController:edit') && !($pat->can('*'))) {
             return $next(null);
         }
 

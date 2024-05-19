@@ -125,7 +125,7 @@
         const dt = new DataTransfer();
         dt.items.add(file);
 
-        fileInput.files = dt.files;
+        if (fileInput) fileInput.files = dt.files;
     };
 
     const initialLoad = async (filter: string) => {
@@ -176,8 +176,8 @@
                         ? selectedImage
                         : `/assets/uploads/${item.data.attachment}`}
                     alt="Selected Image"
-                    class={item.data?.attachment || selectedImage
-                        ? "w-full h-auto object-cover rounded-lg border-gray-600 border-2"
+                    class={item.data.attachment || selectedImage
+                        ? "w-full h-auto max-h-72 mb-3 rounded-lg border-2 border-gray-500"
                         : "hidden"}
                 />
                 <div
@@ -230,10 +230,8 @@
                     >
                 {/if}
             </div>
-            <div class="block flex">
-                <Button type="submit" class="ml-auto" disabled={!isSubmitting}
-                    >Simpan</Button
-                >
+            <div class="flex">
+                <Button type="submit" disabled={!isSubmitting}>Simpan</Button>
             </div>
         </form>
     {/await}

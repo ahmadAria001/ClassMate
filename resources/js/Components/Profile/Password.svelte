@@ -32,8 +32,9 @@
         onSubmit: async (values) => {
             console.log(values);
             const response = await axios.post("/api/auth/pw/reset", {
-                old_password: values.old_password,
+                password: values.old_password,
                 new_password: values.new_password,
+                new_password_confirmation: values.confirm_pass,
                 _token: $page.props.csrf_token,
             });
 
