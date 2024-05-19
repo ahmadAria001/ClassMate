@@ -10,12 +10,13 @@ use App\Models\Docs;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 use Laravel\Sanctum\PersonalAccessToken;
 
 class DocRequestController extends Controller
 {
     public function __invoke(){
-
+        return Inertia::render('');
     }
     public function get($filter=null){
         $data = null;
@@ -48,9 +49,14 @@ class DocRequestController extends Controller
     
                     if (str_contains($request->url(), 'api')) {
                         $token = $request->bearerToken();
-                        $pat = PersonalAccessToken::findToken($token);
-    
-                        $model = $pat->tokenable();
+                        if (!$token) {
+                            $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+                            if (!$token) {
+                                return Response()->json(['message'=>'Unauthorized'],401);
+                            }
+                        }
+                    $pat = PersonalAccessToken::findToken($token);
+                    $model = $pat->tokenable();
     
                         $docs->created_by = ($model->get('id'))[0]->id;
                         $data->created_by = ($model->get('id'))[0]->id;
@@ -99,9 +105,15 @@ class DocRequestController extends Controller
                 }
                 else{
                     $token = $request->bearerToken();
+                    if (!$token) {
+                        $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+                        if (!$token) {
+                            return Response()->json(['message'=>'Unauthorized'],401);
+                        }
+                    }
+
                     $pat = PersonalAccessToken::findToken($token);
                     $model = $pat->tokenable();
-
                     $data->update([
                         'requestStatus' => ($payload->get('requestStatus')) ? $payload->get('requestStatus') : $data->requestStatus,
                         'request_by'=> ($payload->get('request_by')) ?  $payload->get('request_by') : $data->request_by,
@@ -142,8 +154,14 @@ class DocRequestController extends Controller
                     ]);
                 } else {
                     $token = $request->bearerToken();
-                    $pat = PersonalAccessToken::findToken($token);
+                    if (!$token) {
+                        $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+                        if (!$token) {
+                            return Response()->json(['message'=>'Unauthorized'],401);
+                        }
+                    }
 
+                    $pat = PersonalAccessToken::findToken($token);
                     $model = $pat->tokenable();
                     $data->update([
                         'deleted_by' => ($model->get('id'))[0]->id

@@ -22,9 +22,9 @@ class CreateComplaint extends FormRequest
     public function rules(): array
     {
         return [
-            'attachment' => 'image|mimes:jpg,jpeg,png|max:2048',
+            'attachment' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             //
-            'description' => 'string',
+            'description' => 'required|string',
         ];
     }
 }

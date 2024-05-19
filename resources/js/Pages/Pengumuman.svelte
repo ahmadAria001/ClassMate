@@ -22,6 +22,7 @@
 
     import Detail from "@C/Pengumuman/Modals/Detail.svelte";
     import Create from "@C/Pengumuman/Modals/Create.svelte";
+    import Delete from "@C/Pengumuman/Modals/Delete.svelte";
 
     import axiosInstance from "axios";
     import Edit from "@C/Pengumuman/Modals/Edit.svelte";
@@ -40,6 +41,7 @@
     let addAnnoucement = false;
     let modalEdit = false;
     let modalPreview = false;
+    let deleteModal = false;
     let searchTerm = "";
     let currentPosition = 0;
     const itemsPerPage = 10;
@@ -51,6 +53,11 @@
     let endPage: number;
 
     let selected = "";
+
+    let builder = {};
+    const rebuild = () => {
+        builder = {};
+    };
 
     const updateDataAndPagination = () => {
         const currentPageItems = items.slice(
@@ -127,7 +134,7 @@
         hoverable={true}
         bind:inputValue={searchTerm}
         divClass="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg overflow-hidden"
-        innerDivClass="flex items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4"
+        ss="flex items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4"
         classInput="text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2  pl-10"
     >
         <div
@@ -146,42 +153,67 @@
             <TableHeadCell class="sr-only">Aksi</TableHeadCell>
         </TableHead>
         <TableBody>
-            {#await getNewsData() then data}
-                {#each data.data as item}
-                    <TableBodyRow>
-                        <TableBodyCell>{item.title}</TableBodyCell>
-                        <TableBodyCell
-                            >{new Date(
-                                item.created_at,
-                            ).toLocaleDateString()}</TableBodyCell
-                        >
-                        <TableBodyCell class="text-end">
-                            <Button
-                                color="blue"
-                                on:click={() => {
-                                    selected = item.id;
-                                    modalPreview = true;
-                                }}>Preview</Button
+            {#key builder}
+                {#await getNewsData() then data}
+                    {#each data.data as item}
+                        <TableBodyRow>
+                            <TableBodyCell>{item.title}</TableBodyCell>
+                            <TableBodyCell
+                                >{new Date(
+                                    item.created_at,
+                                ).toLocaleDateString()}</TableBodyCell
                             >
-                            <Button
-                                color="blue"
-                                on:click={() => {
-                                    modalEdit = true;
-                                    selected = item.id;
-                                }}>Edit Data</Button
-                            >
-                        </TableBodyCell>
-                    </TableBodyRow>
-                {/each}
-            {/await}
+                            <TableBodyCell class="text-end">
+                                <Button
+                                    color="blue"
+                                    on:click={() => {
+                                        selected = item.id;
+                                        modalPreview = true;
+                                    }}>Preview</Button
+                                >
+                                <Button
+                                    color="blue"
+                                    class="ms-2"
+                                    on:click={() => {
+                                        modalEdit = true;
+                                        selected = item.id;
+                                    }}>Edit Data</Button
+                                >
+                                <Button
+                                    type="button"
+                                    on:click={() => {
+                                        selected = item.id;
+                                        deleteModal = true;
+                                    }}
+                                    class="ms-2"
+                                    color="red">Hapus</Button
+                                >
+                            </TableBodyCell>
+                        </TableBodyRow>
+                    {/each}
+                {/await}
+            {/key}
         </TableBody>
 
         <!-- modal -->
         <Create bind:showState={addAnnoucement} />
 
         {#if selected}
-            <Detail bind:showState={modalPreview} bind:items={selected} />
-            <Edit bind:showState={modalEdit} bind:target={selected} />
+            <Detail
+                bind:showState={modalPreview}
+                bind:items={selected}
+                on:comp={rebuild}
+            />
+            <Edit
+                bind:showState={modalEdit}
+                bind:target={selected}
+                on:comp={rebuild}
+            />
+            <Delete
+                bind:showState={deleteModal}
+                bind:target={selected}
+                on:comp={rebuild}
+            />
         {/if}
 
         <div

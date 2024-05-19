@@ -31,8 +31,8 @@ class Delete
             abort(401, 'Unauthorized');
         }
 
-        if ($pat->cant([\App\Http\Controllers\UserController::class, 'destroy']) && !$pat->can('*')) {
-            return $next(null);
+        if ($pat->cant('UserController:destroy') && !$pat->can('*')) {
+            abort(401, 'Unauthorized');
         }
 
         return $next($request);

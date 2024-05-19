@@ -13,7 +13,7 @@
     ];
 </script>
 
-<Card class="max-w-full">
+<Card class="max-w-full z-0">
     <h5
         class="mb-4 text-xl font-bold tracking-tight text-gray-900 dark:text-white"
     >
@@ -36,6 +36,7 @@
                 name="residentStatus"
                 placeholder="Status kependudukan"
                 disabled
+                class="z-0"
             >
                 {#each residentStatus as { value, name }, idx}
                     {#if value == data.data[0].civilian_id.residentstatus}

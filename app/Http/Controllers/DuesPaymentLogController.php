@@ -10,12 +10,13 @@ use App\Models\DuesPaymentLog;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 use Laravel\Sanctum\PersonalAccessToken;
 
 class DuesPaymentLogController extends Controller
 {
     public function __invoke(){
-
+        return Inertia::render();
     }
 
     public function get($filter = null){
@@ -63,8 +64,14 @@ class DuesPaymentLogController extends Controller
 
                 if (str_contains($req->url(), 'api')) {
                     $token = $req->bearerToken();
-                    $pat = PersonalAccessToken::findToken($token);
+                    if (!$token) {
+                        $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+                        if (!$token) {
+                            return Response()->json(['message'=>'Unauthorized'],401);
+                        }
+                    }
 
+                    $pat = PersonalAccessToken::findToken($token);
                     $model = $pat->tokenable();
 
                     $data->created_by = ($model->get('id'))[0]->id;
@@ -108,6 +115,13 @@ class DuesPaymentLogController extends Controller
                 }
                 else{
                     $token = $req->bearerToken();
+                    if (!$token) {
+                        $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+                        if (!$token) {
+                            return Response()->json(['message'=>'Unauthorized'],401);
+                        }
+                    }
+
                     $pat = PersonalAccessToken::findToken($token);
                     $model = $pat->tokenable();
 
@@ -164,8 +178,14 @@ class DuesPaymentLogController extends Controller
                     ]);
                 } else {
                     $token = $req->bearerToken();
-                    $pat = PersonalAccessToken::findToken($token);
+                    if (!$token) {
+                        $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+                        if (!$token) {
+                            return Response()->json(['message'=>'Unauthorized'],401);
+                        }
+                    }
 
+                    $pat = PersonalAccessToken::findToken($token);
                     $model = $pat->tokenable();
                     $data->update([
                         'deleted_by' => ($model->get('id'))[0]->id

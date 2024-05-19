@@ -25,12 +25,12 @@
             link: "/",
         },
         {
-            name: "Pengumuman",
-            link: "/pengumuman",
+            name: "Profile",
+            link: "/lp-profile",
         },
         {
-            name: "Profile",
-            link: "/profile",
+            name: "Pengumuman",
+            link: "/lp-pengumuman",
         },
     ];
 </script>

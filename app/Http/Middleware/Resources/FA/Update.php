@@ -21,15 +21,16 @@ class Update
         if (!$token) {
             $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
 
-            if (!$token)
+            if (!$token) {
                 abort(401, 'Unauthorized');
+            }
         }
 
         $pat = PersonalAccessToken::findToken($token);
-        if (!$pat) abort(401, 'Unauthorized');;
+        if (!$pat) abort(401, 'Unauthorized');
 
-        if ($pat->cant([\App\Http\Controllers\FinancialAssistanceController::class, 'edit']) && !($pat->can('*'))) {
-            return $next(null);
+        if ($pat->cant('FinancialAssistanceController:edit') && !($pat->can('*'))) {
+            abort(401, 'Unauthorized');
         }
 
         return $next($request);

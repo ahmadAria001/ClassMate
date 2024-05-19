@@ -15,12 +15,20 @@
         Label,
         Input,
         ButtonGroup,
+        Popover,
     } from "flowbite-svelte";
     import {
         ChevronLeftOutline,
         ChevronRightOutline,
         ImageOutline,
+        QuestionCircleSolid,
     } from "flowbite-svelte-icons";
+
+    import axiosInstance from "axios";
+    import Edit from "@C/Pengaduan/Modals/Edit.svelte";
+
+    const axios = axiosInstance.create({ withCredentials: true });
+
     let items = [
         {
             id: 1,
@@ -49,6 +57,13 @@
     let totalItems: number = items.length;
     let startPage: number;
     let endPage: number;
+    let selected: string | null = null;
+
+    let builder = {};
+
+    const rebuild = () => {
+        builder = {};
+    };
 
     const updateDataAndPagination = () => {
         const currentPageItems = items.slice(
@@ -91,6 +106,19 @@
         updateDataAndPagination();
     };
 
+    const getComplaints = async (id: string = "") => {
+        try {
+            const response = await axios.get(`/api/docs/complaint/${id}`, {
+                headers: {
+                    Accept: "*/*",
+                },
+            });
+            return response.data;
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     $: startRange = currentPosition + 1;
     $: endRange = Math.min(currentPosition + itemsPerPage, totalItems);
 
@@ -111,7 +139,7 @@
 
 <Layout>
     <TableSearch
-        placeholder="Cari pengaduan"
+        placeholder="Cari Pengaduan"
         hoverable={true}
         bind:inputValue={searchTerm}
         divClass="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg overflow-hidden"
@@ -131,101 +159,165 @@
             <TableHeadCell class="sr-only">Aksi</TableHeadCell>
         </TableHead>
         <TableBody>
-            {#each filteredItems as item}
-                <TableBodyRow>
-                    <TableBodyCell>{item.name}</TableBodyCell>
-                    <TableBodyCell>{item.address}</TableBodyCell>
-                    <TableBodyCell>{item.noHp}</TableBodyCell>
-                    <TableBodyCell>{item.problem}</TableBodyCell>
-                    {#if item.status == "Selesai"}
-                        <TableBodyCell class="text-center">
-                            <Badge color="green">{item.status}</Badge>
-                        </TableBodyCell>
-                    {:else if item.status == "Dalam Proses"}
-                        <TableBodyCell class="text-center">
-                            <Badge color="indigo">Menunggu</Badge>
-                        </TableBodyCell>
-                    {/if}
-                    <TableBodyCell>
-                        <Button
-                            color="blue"
-                            on:click={() => {
-                                modalDetailPengaduan = true;
-                            }}>Detail</Button
+            {#key builder}
+                {#await getComplaints() then data}
+                    {#each data.data as item}
+                        <TableBodyRow>
+                            <TableBodyCell>
+                                <span
+                                    class="w-1/4 truncate
+"
+                                >
+                                    {item.created_by.civilian_id.fullName}
+                                </span>
+                            </TableBodyCell>
+                            <TableBodyCell tdClass="max-w-52">
+                                <div
+                                    class="flex justify-between align-middle gap-2"
+                                >
+                                    <span class="w-full truncate">
+                                        {item.created_by.civilian_id.address}
+                                    </span>
+                                    <QuestionCircleSolid
+                                        id={`address-${item.id}`}
+                                    />
+                                </div>
+                            </TableBodyCell>
+                            <TableBodyCell
+                                >{item.created_by.civilian_id
+                                    .phone}</TableBodyCell
+                            >
+                            <TableBodyCell class="w-20">
+                                <div
+                                    class="flex justify-between max-w-52 align-middle gap-2"
+                                >
+                                    <span class="w-full truncate">
+                                        {item.docs_id.description}
+                                    </span>
+                                    <QuestionCircleSolid
+                                        id={`desc-${item.id}`}
+                                    />
+                                </div>
+                            </TableBodyCell>
+                            {#if item.complaintStatus == "Resolved"}
+                                <TableBodyCell class="text-center">
+                                    <Badge color="green"
+                                        >{item.complaintStatus}</Badge
+                                    >
+                                </TableBodyCell>
+                            {:else if item.complaintStatus == "Open"}
+                                <TableBodyCell class="text-center">
+                                    <Badge color="primary"
+                                        >{item.complaintStatus}</Badge
+                                    >
+                                </TableBodyCell>
+                            {:else}
+                                <TableBodyCell class="text-center">
+                                    <Badge color="red"
+                                        >{item.complaintStatus}</Badge
+                                    >
+                                </TableBodyCell>
+                            {/if}
+
+                            <TableBodyCell>
+                                <Button
+                                    color="blue"
+                                    on:click={() => {
+                                        selected = item.id;
+                                        modalDetailPengaduan = true;
+                                    }}>Detail</Button
+                                >
+                            </TableBodyCell>
+                        </TableBodyRow>
+
+                        <Popover
+                            class="w-64 text-sm text-white"
+                            title="Alamat"
+                            triggeredBy={`#address-${item.id}`}
                         >
-                    </TableBodyCell>
-                </TableBodyRow>
-            {/each}
+                            {item.created_by.civilian_id.address}
+                        </Popover>
+
+                        <Popover
+                            class="w-64 text-sm text-white"
+                            title="Masalah"
+                            triggeredBy={`#desc-${item.id}`}
+                        >
+                            {item.docs_id.description}
+                        </Popover>
+                    {/each}
+                {/await}
+            {/key}
         </TableBody>
 
-        <Modal
-            title="Deskripsi Pengaduan"
-            bind:open={modalDetailPengaduan}
-            autoclose
-        >
-            <form method="POST">
-                <div class="mb-4">
-                    <Label for="full_name" class="mb-2">Nama Pelapor</Label>
-                    <Input id="full_name" placeholder="Nama Pelapor" />
-                </div>
-                <!-- <div class="grid md:grid-cols-2 md:gap-6">
-                    <div class="mb-4">
-                        <Label for="no_hp" class="mb-2">No HP</Label>
-                        <Input id="no_hp" placeholder="No HP" />
-                    </div>
-                    <div class="mb-4">
-                        <Label for="address" class="mb-2">Alamat</Label>
-                        <Input id="address" placeholder="Alamat" />
-                    </div>
-                </div> -->
-                <div class="mb-4">
-                    <Label for="no_hp" class="mb-2">No HP</Label>
-                    <Input id="no_hp" placeholder="No HP" />
-                </div>
-                <div class="mb-4">
-                    <Label for="address" class="mb-2">Alamat</Label>
-                    <Input id="address" placeholder="Alamat" />
-                </div>
-                <div class="mb-4">
-                    <Label for="timeUpload" class="mb-2">Waktu Dikirim</Label>
-                    <Input id="timeUpload" placeholder="Waktu Dikirim" />
-                </div>
-                <div class="mb-4">
-                    <Label for="problems" class="mb-2">Permasalahan</Label>
-                    <Input id="problems" placeholder="Permasalahan" />
-                </div>
-                <div class="mb-4">
-                    <div class="flex items-center justify-center w-full">
-                        <label
-                            for="dropzone-file"
-                            class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
-                        >
-                            <div
-                                class="flex flex-col items-center justify-center pt-5 pb-6"
-                            >
-                                <ImageOutline size="xl" />
-                                <p
-                                    class="mb-2 text-sm text-gray-500 dark:text-gray-400 font-semibold"
-                                ></p>
-                            </div>
-                            <input
-                                id="dropzone-file"
-                                type="file"
-                                class="hidden"
-                            />
-                        </label>
-                    </div>
-                </div>
-                <div class="block flex">
-                    <div class="ml-auto">
-                        <Button type="submit" class="mr-3" color="red"
-                            >Lanjutkan ke RW</Button
-                        >
-                        <Button type="submit">Proses Pengaduan</Button>
-                    </div>
-                </div>
-            </form>
-        </Modal>
+        <!-- <Modal -->
+        <!--     title="Deskripsi Pengaduan" -->
+        <!--     bind:open={modalDetailPengaduan} -->
+        <!--     autoclose -->
+        <!-- > -->
+        <!--     <form method="POST"> -->
+        <!--         <div class="mb-4"> -->
+        <!--             <Label for="full_name" class="mb-2">Nama Pelapor</Label> -->
+        <!--             <Input id="full_name" placeholder="Nama Pelapor" /> -->
+        <!--         </div> -->
+        <!--         <!-- <div class="grid md:grid-cols-2 md:gap-6"> -->
+        <!--             <div class="mb-4"> -->
+        <!--                 <Label for="no_hp" class="mb-2">No HP</Label> -->
+        <!--                 <Input id="no_hp" placeholder="No HP" /> -->
+        <!--             </div> -->
+        <!--             <div class="mb-4"> -->
+        <!--                 <Label for="address" class="mb-2">Alamat</Label> -->
+        <!--                 <Input id="address" placeholder="Alamat" /> -->
+        <!--             </div> -->
+        <!--         </div> -->
+        <!--         <div class="mb-4"> -->
+        <!--             <Label for="no_hp" class="mb-2">No HP</Label> -->
+        <!--             <Input id="no_hp" placeholder="No HP" /> -->
+        <!--         </div> -->
+        <!--         <div class="mb-4"> -->
+        <!--             <Label for="address" class="mb-2">Alamat</Label> -->
+        <!--             <Input id="address" placeholder="Alamat" /> -->
+        <!--         </div> -->
+        <!--         <div class="mb-4"> -->
+        <!--             <Label for="timeUpload" class="mb-2">Waktu Dikirim</Label> -->
+        <!--             <Input id="timeUpload" placeholder="Waktu Dikirim" /> -->
+        <!--         </div> -->
+        <!--         <div class="mb-4"> -->
+        <!--             <Label for="problems" class="mb-2">Permasalahan</Label> -->
+        <!--             <Input id="problems" placeholder="Permasalahan" /> -->
+        <!--         </div> -->
+        <!--         <div class="mb-4"> -->
+        <!--             <div class="flex items-center justify-center w-full"> -->
+        <!--                 <label -->
+        <!--                     for="dropzone-file" -->
+        <!--                     class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600" -->
+        <!--                 > -->
+        <!--                     <div -->
+        <!--                         class="flex flex-col items-center justify-center pt-5 pb-6" -->
+        <!--                     > -->
+        <!--                         <ImageOutline size="xl" /> -->
+        <!--                         <p -->
+        <!--                             class="mb-2 text-sm text-gray-500 dark:text-gray-400 font-semibold" -->
+        <!--                         ></p> -->
+        <!--                     </div> -->
+        <!--                     <input -->
+        <!--                         id="dropzone-file" -->
+        <!--                         type="file" -->
+        <!--                         class="hidden" -->
+        <!--                     /> -->
+        <!--                 </label> -->
+        <!--             </div> -->
+        <!--         </div> -->
+        <!--         <div class="block flex"> -->
+        <!--             <div class="ml-auto"> -->
+        <!--                 <Button type="submit" class="mr-3" color="red" -->
+        <!--                     >Lanjutkan ke RW</Button -->
+        <!--                 > -->
+        <!--                 <Button type="submit">Proses Pengaduan</Button> -->
+        <!--             </div> -->
+        <!--         </div> -->
+        <!--     </form> -->
+        <!-- </Modal> -->
 
         <div
             slot="footer"
@@ -262,3 +354,11 @@
         </div>
     </TableSearch>
 </Layout>
+
+{#if selected}
+    <Edit
+        bind:showState={modalDetailPengaduan}
+        bind:target={selected}
+        on:comp={rebuild}
+    />
+{/if}

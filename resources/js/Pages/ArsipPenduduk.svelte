@@ -139,7 +139,7 @@
 </svelte:head>
 <Layout active={title}>
     <TableSearch
-        placeholder="Cari warga"
+        placeholder="Cari Warga"
         hoverable={true}
         bind:inputValue={searchTerm}
         divClass="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg overflow-hidden"
@@ -155,7 +155,7 @@
             <TableHeadCell>Nama Lengkap</TableHeadCell>
             <TableHeadCell>Alamat</TableHeadCell>
             <TableHeadCell>Pekerjaan</TableHeadCell>
-            <TableHeadCell class="text-center">Status</TableHeadCell>
+            <TableHeadCell class="text-left">Status</TableHeadCell>
             <TableHeadCell class="sr-only">Aksi</TableHeadCell>
         </TableHead>
         <TableBody>
@@ -168,11 +168,11 @@
                                 <TableBodyCell>{item.address}</TableBodyCell>
                                 <TableBodyCell>{item.job}</TableBodyCell>
                                 {#if item.status == "Meninggal"}
-                                    <TableBodyCell class="text-center">
+                                    <TableBodyCell>
                                         <Badge color="red">{item.status}</Badge>
                                     </TableBodyCell>
                                 {:else if item.status == "Pindah"}
-                                    <TableBodyCell class="text-center">
+                                    <TableBodyCell>
                                         <Badge color="yellow"
                                             >{item.status}</Badge
                                         >

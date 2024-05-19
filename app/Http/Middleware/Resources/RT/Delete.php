@@ -21,15 +21,16 @@ class Delete
         if (!$token) {
             $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
 
-            if (!$token)
+            if (!$token) {
                 abort(401, 'Unauthorized');
+            }
         }
 
         $pat = PersonalAccessToken::findToken($token);
-        if (!$pat) abort(401, 'Unauthorized');;
+        if (!$pat) abort(401, 'Unauthorized');
 
-        if ($pat->cant([\App\Http\Controllers\RtController::class, 'destroy']) && !($pat->can('*'))) {
-            return $next(null);
+        if ($pat->cant('FinancialAssistanceController:destroy') && !($pat->can('*')) && $pat->cant('RtController:create') ) {
+            abort(401, 'Unauthorized');
         }
 
         return $next($request);

@@ -21,15 +21,16 @@ class DeleteActivity
         if (!$token) {
             $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
 
-            if (!$token)
+            if (!$token) {
                 abort(401, 'Unauthorized');
+            }
         }
 
         $pat = PersonalAccessToken::findToken($token);
-        if (!$pat) abort(401, 'Unauthorized');;
+        if (!$pat) abort(401, 'Unauthorized');
 
-        if ($pat->cant([\App\Http\Controllers\ActivityController::class, 'destroy']) && !($pat->can('*'))) {
-            return $next(null);
+        if ($pat->cant('ActivityController:destroy') && !($pat->can('*'))) {
+            abort(401, 'Unauthorized');
         }
 
         return $next($request);
