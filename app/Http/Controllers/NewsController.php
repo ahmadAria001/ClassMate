@@ -74,9 +74,12 @@ class NewsController extends Controller
 
                     $name = Carbon::now() . '_' . $image->getClientOriginalName();
                     $path = public_path('assets/uploads') . '/' . $name;
-                    // [$width, $height] = getimagesize($image->getFileInfo());
+                    [$width, $height] = getimagesize($image->getFileInfo());
 
-                    Image::read($image)->resize(480, 480)->toJpeg()->save($path); 
+                    Image::read($image)
+                        ->resize($width > 1080 ? 1080 : $width, $height > 1080 ? 1080 : $height)
+                        ->toJpeg()
+                        ->save($path);
 
                     $data->attachment = $name;
                     $data->save();
@@ -207,8 +210,10 @@ class NewsController extends Controller
     {
         $payload = $req->safe()->collect();
 
+        error_log('hitted');
+
         try {
-            $data = News::withTrashed()
+            $data = News::withoutTrashed()
                 ->find(['id' => $payload->get('id')])
                 ->first();
             if ($data) {
@@ -241,7 +246,6 @@ class NewsController extends Controller
                 }
 
                 $data->save();
-
                 $data->delete();
 
                 return Response()->json([

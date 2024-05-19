@@ -451,7 +451,7 @@
                 </a>
             </Listgroup>
         </Dropdown>
-        <Dropdown triggeredBy="#avatar-menu" class="w-52">
+        <Dropdown triggeredBy="#avatar-menu" class="w-52 z-[100]">
             <DropdownHeader>
                 <span class="block text-sm max-w-full truncate"
                     >{$page.props.auth.user.fullName}</span

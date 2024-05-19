@@ -1,8 +1,6 @@
 <script lang="ts">
     import {
         A,
-        Footer,
-        FooterCopyright,
         Heading,
         Table,
         TableBody,
@@ -12,8 +10,9 @@
         TableHeadCell,
     } from "flowbite-svelte";
     import { ArrowRightOutline, CheckOutline } from "flowbite-svelte-icons";
-    import Cards from "@C/LandingPage/cards/CardsAnnouncement.svelte";
-    import Navbar from "@C/LandingPage/nav/Navbar.svelte";
+    import Cards from "@C/LandingPage/Cards/CardsAnnouncement.svelte";
+    import Navbar from "@C/LandingPage/Nav/Navbar.svelte";
+    import Footer from "@C/LandingPage/Footer/Footer.svelte";
     let pengumumans = [
         {
             img: "https://media.kompas.tv/library/image/content_article/article_img/20231204072833.jpg",
@@ -219,6 +218,7 @@
                         classCard="mb-3 d-block"
                         title={pengumuman.title}
                         description={pengumuman.desc}
+                        date={pengumuman.date}
                     />
                 {/each}
             </div>
@@ -267,14 +267,20 @@
             <img
                 src={admins[0].photoProfile}
                 alt=""
-                class="max-w-md md:w-2/5 object-cover rounded-lg max-h-96 object-top"
+                class="max-w-md md:w-4/5 object-cover rounded-lg max-h-96 object-top"
             />
             <div
-                class="desc-profile p-4 md:p-8 flex-grow md:flex md:flex-col md:jusitfy-center md:items-center"
+                class="desc-profile p-4 md:p-8 md:flex md:justify-center md:align-center"
             >
-                <Heading tag="h4" class="mb-2">{admins[0].name}</Heading>
-                <Heading tag="h5" class="mb-2">Ketua {admins[0].head}</Heading>
-                <p class="text-gray-500">{admins[0].greetings}</p>
+                <div
+                    class="w-4/5 md:flex md:flex-col md:justify-center md:align-center"
+                >
+                    <Heading tag="h4" class="mb-2">{admins[0].name}</Heading>
+                    <Heading tag="h5" class="mb-2"
+                        >Ketua {admins[0].head}</Heading
+                    >
+                    <p class="text-gray-500">{admins[0].greetings}</p>
+                </div>
             </div>
         </div>
         <div
@@ -324,7 +330,5 @@
             {/each}
         </div>
     </div>
-    <Footer class="absolute bottom-0 start-0 z-20 w-full p-3 border-t-2">
-        <FooterCopyright by="Simpang Lima Softwork" />
-    </Footer>
+    <Footer />
 </div>

@@ -6,6 +6,7 @@ use App\Http\Requests\Resources\User\Pict\Create;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Intervention\Image\Laravel\Facades\Image;
 use Laravel\Sanctum\PersonalAccessToken;
 
@@ -50,6 +51,7 @@ class ProfileImageController extends Controller
 
         $model = User::withoutTrashed()->where('id', $user)->first();
 
+        // File::makeDirectory(public_path('assets/uploads/'), 0755, true, true);
         $name = Carbon::now() . '_' . $image->getClientOriginalName();
         $path = public_path('assets/uploads') . '/' . $name;
         // [$width, $height] = getimagesize($image->getFileInfo());

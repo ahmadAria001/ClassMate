@@ -23,8 +23,8 @@ class UpdateComplaint extends FormRequest
     {
         return [
             'id' => 'required|integer|min:1',
-            'complaintStatus' => 'string',
-            'attachment' => 'image|mimes:jpg,jpeg,png|max:2048',
+            'complaintStatus' => 'required|string',
+            'attachment' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             //Docs Attr
             'description' => 'string',//Type Fixed on Controller
         ];

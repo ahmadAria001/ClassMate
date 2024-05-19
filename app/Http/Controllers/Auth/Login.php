@@ -113,7 +113,7 @@ class Login extends Controller
             $user = Auth::attempt($req->only('username', 'password'));
             return Inertia::render('Auth/Civilian');
         } catch (\Throwable $th) {
-            // error_log($th);
+            error_log($th);
 
             if (str_contains($req->url(), 'api')) {
                 return Response()->json(['status' => false, 'err' => $this->errMsg], 404);

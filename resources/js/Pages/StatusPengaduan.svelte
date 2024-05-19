@@ -21,9 +21,11 @@
         ChevronLeftOutline,
         ChevronRightOutline,
     } from "flowbite-svelte-icons";
-    import { setCookie, getCookie } from "../Utils/Cokies";
+    import Create from "@C/Pengaduan/Modals/Create.svelte";
 
-    import axios from "axios";
+    import axiosInstance from "axios";
+
+    const axios = axiosInstance.create({ withCredentials: true });
 
     let items = [
         {
@@ -53,6 +55,12 @@
     let totalItems: number = items.length;
     let startPage: number;
     let endPage: number;
+
+    let builder = {};
+
+    const rebuild = () => {
+        builder = {};
+    };
 
     const updateDataAndPagination = () => {
         const currentPageItems = items.slice(
@@ -104,7 +112,7 @@
     });
 
     $: currentPageItems = items.slice(
-        currentPosition,
+        // currentPosition,
         currentPosition + itemsPerPage,
     );
     $: filteredItems = items.filter(
@@ -112,15 +120,17 @@
             item.problem.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1,
     );
 
-    const getData = async (id: string | null = null) => {
-        const response = await axios.get(`/api/complaint/${id}`, {
-            headers: {
-                Accept: "*/*",
-                Authorization: `Bearer ${getCookie("token")}`,
-            },
-        });
-
-        return response.data;
+    const getComplaints = async (id: string = "") => {
+        try {
+            const response = await axios.get(`/api/docs/complaint/${id}`, {
+                headers: {
+                    Accept: "*/*",
+                },
+            });
+            return response.data;
+        } catch (error) {
+            console.error(error);
+        }
     };
 </script>
 
@@ -143,75 +153,6 @@
                 }}>+ Buat Pengaduan</Button
             >
         </div>
-        <Modal
-            title="Buat Pengaduan Masalah"
-            bind:open={addComplaintModal}
-            autoclose
-        >
-            <form method="POST">
-                <div class="mb-4">
-                    <Label for="full_name" class="mb-2">Nama Lengkap</Label>
-                    <Input id="full_name" placeholder="Nama Lengkap" />
-                </div>
-                <div class="grid md:grid-cols-2 md:gap-6">
-                    <div class="mb-4">
-                        <Label for="no_hp" class="mb-2">No HP</Label>
-                        <Input id="no_hp" placeholder="No HP" />
-                    </div>
-                    <div class="mb-4">
-                        <Label for="address" class="mb-2">Alamat</Label>
-                        <Input id="address" placeholder="Alamat" />
-                    </div>
-                </div>
-                <div class="mb-4">
-                    <Label for="problems" class="mb-2">Permasalahan</Label>
-                    <Input id="problems" placeholder="Permasalahan" />
-                </div>
-                <div class="mb-4">
-                    <div class="flex items-center justify-center w-full">
-                        <label
-                            for="dropzone-file"
-                            class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
-                        >
-                            <div
-                                class="flex flex-col items-center justify-center pt-5 pb-6"
-                            >
-                                <svg
-                                    class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400"
-                                    aria-hidden="true"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 20 16"
-                                >
-                                    <path
-                                        stroke="currentColor"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
-                                    />
-                                </svg>
-                                <p
-                                    class="mb-2 text-sm text-gray-500 dark:text-gray-400 font-semibold"
-                                >
-                                    Upload Gambar
-                                </p>
-                            </div>
-                            <input
-                                id="dropzone-file"
-                                type="file"
-                                class="hidden"
-                            />
-                        </label>
-                    </div>
-                </div>
-                <div class="block flex">
-                    <Button type="submit" class="ml-auto"
-                        >Kirim Pengaduan</Button
-                    >
-                </div>
-            </form>
-        </Modal>
         <TableHead>
             <TableHeadCell>Nama</TableHeadCell>
             <TableHeadCell>Alamat</TableHeadCell>
@@ -220,43 +161,48 @@
             <TableHeadCell class="text-center">Status</TableHeadCell>
         </TableHead>
         <TableBody>
-            <!-- {#await getData() then data}
-                {#each filteredItems as item}
-                    {console.log(filteredItems)}
-                    <TableBodyRow>
-                        <TableBodyCell>{item.name}</TableBodyCell>
-                        <TableBodyCell>{item.address}</TableBodyCell>
-                        <TableBodyCell>{item.noHp}</TableBodyCell>
-                        <TableBodyCell>{item.problem}</TableBodyCell>
-                        {#if item.status == "Selesai"}
-                            <TableBodyCell class="text-center">
-                                <Badge color="green">{item.status}</Badge>
-                            </TableBodyCell>
-                        {:else if item.status == "Dalam Proses"}
-                            <TableBodyCell class="text-center">
-                                <Badge color="indigo">{item.status}</Badge>
-                            </TableBodyCell>
-                        {/if}
-                    </TableBodyRow>
-                {/each}
-            {/await} -->
-            {#each items as item}
-                <TableBodyRow>
-                    <TableBodyCell>{item.name}</TableBodyCell>
-                    <TableBodyCell>{item.address}</TableBodyCell>
-                    <TableBodyCell>{item.noHp}</TableBodyCell>
-                    <TableBodyCell>{item.problem}</TableBodyCell>
-                    {#if item.status == "Selesai"}
-                        <TableBodyCell class="text-center">
-                            <Badge color="green">{item.status}</Badge>
-                        </TableBodyCell>
-                    {:else if item.status == "Dalam Proses"}
-                        <TableBodyCell class="text-center">
-                            <Badge color="indigo">{item.status}</Badge>
-                        </TableBodyCell>
-                    {/if}
-                </TableBodyRow>
-            {/each}
+            {#key builder}
+                {#await getComplaints() then data}
+                    {#each data.data as item}
+                        <TableBodyRow>
+                            <TableBodyCell
+                                >{item.created_by.civilian_id
+                                    .fullName}</TableBodyCell
+                            >
+                            <TableBodyCell
+                                >{item.created_by.civilian_id
+                                    .address}</TableBodyCell
+                            >
+                            <TableBodyCell
+                                >{item.created_by.civilian_id
+                                    .phone}</TableBodyCell
+                            >
+                            <TableBodyCell
+                                >{item.docs_id.description}</TableBodyCell
+                            >
+                            {#if item.complaintStatus == "Resolved"}
+                                <TableBodyCell class="text-center">
+                                    <Badge color="green"
+                                        >{item.complaintStatus}</Badge
+                                    >
+                                </TableBodyCell>
+                            {:else if item.complaintStatus == "Open"}
+                                <TableBodyCell class="text-center">
+                                    <Badge color="primary"
+                                        >{item.complaintStatus}</Badge
+                                    >
+                                </TableBodyCell>
+                            {:else}
+                                <TableBodyCell class="text-center">
+                                    <Badge color="red"
+                                        >{item.complaintStatus}</Badge
+                                    >
+                                </TableBodyCell>
+                            {/if}
+                        </TableBodyRow>
+                    {/each}
+                {/await}
+            {/key}
         </TableBody>
 
         <div
@@ -294,3 +240,5 @@
         </div>
     </TableSearch>
 </Layout>
+
+<Create bind:showState={addComplaintModal} on:comp={rebuild} />
