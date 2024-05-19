@@ -31,7 +31,7 @@ class Create
             abort(401, 'Unauthorized');
         }
 
-        if ($pat->cant([\App\Http\Controllers\ProfileImageController::class, 'create']) && !$pat->can('*')) {
+        if ($pat->cant('ProfileImageController:create') && !$pat->can('*')) {
             abort(401, 'Unauthorized');
         }
 
