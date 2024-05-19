@@ -20,6 +20,12 @@ use Inertia\Inertia;
 Route::get('/', function () {
     return Inertia::render('LandingPage');
 });
+Route::get('/lp-pengumuman', function () {
+    return Inertia::render('LandingPagePengumuman');
+});
+Route::get('/lp-profile', function () {
+    return Inertia::render('LandingPageProfile');
+});
 
 Route::get('/beranda', function () {
     return Inertia::render('HomePage');
