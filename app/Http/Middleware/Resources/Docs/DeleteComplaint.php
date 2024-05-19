@@ -35,4 +35,3 @@ class DeleteComplaint
         return $next($request);
     }
 }
-}
