@@ -45,7 +45,13 @@ class Login extends Controller
                     $token_abilities = ['*'];
                 }
                 if ($user->role === 'Warga') {
-                    $token_abilities = ['complaint:view,create,edit,destroy'];
+                    $token_abilities = [
+                        'ComplaintController:get',
+                        'ComplaintController:create',
+                        'ComplaintController:edit',
+                        'ComplaintController:destroy',
+                        'NewsController:get'
+                    ];
                 }
 
                 $generatedToken = $user->createToken('access_token', $token_abilities, now()->addWeek());
@@ -65,7 +71,7 @@ class Login extends Controller
             $user = Auth::attempt($req->only('username', 'password'));
             return Inertia::render('Auth/Civilian');
         } catch (\Throwable $th) {
-            // error_log($th);
+            error_log($th);
 
             if (str_contains($req->url(), 'api')) {
                 return Response()->json(['status' => false, 'err' => $this->errMsg], 404);
