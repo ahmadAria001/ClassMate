@@ -16,13 +16,12 @@ class GetDues
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+        $token = $request->bearerToken();
 
+        if (!$token) {
+            $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
 
-        if ($token === null) {
-            $token = $request->bearerToken();
-
-            if ($token === null) {
+            if (!$token) {
                 abort(401, 'Unauthorized');
             }
         }
@@ -32,8 +31,8 @@ class GetDues
             abort(401, 'Unauthorized');
         }
 
-        if ($pat->cant([\App\Http\Controllers\DuesController::class, 'get']) && !$pat->can('*')) {
-            return $next(null);
+        if ($pat->cant('DuesController:get') && !$pat->can('*')) {
+            abort(401, 'Unauthorized');
         }
 
         return $next($request);

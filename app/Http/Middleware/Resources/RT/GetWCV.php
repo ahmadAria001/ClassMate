@@ -28,12 +28,10 @@ class GetWCV
         }
 
         $pat = PersonalAccessToken::findToken($token);
-        if (!$pat) {
-            abort(401, 'Unauthorized');
-        }
+        if (!$pat) abort(401, 'Unauthorized');
 
-        if ($pat->cant([[\App\Http\Controllers\RtController::class, 'get'], [CivilianController::class, 'get']]) && !$pat->can('*')) {
-            return $next(null);
+        if ($pat->cant('FinancialAssistanceController:get') && !($pat->can('*')) && $pat->cant('RtController:get') ) {
+            abort(401, 'Unauthorized');
         }
 
         return $next($request);

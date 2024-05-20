@@ -22,11 +22,9 @@ class GetComplaint
         }
 
         $pat = PersonalAccessToken::findToken($token);
-        if (!$pat) {
-            abort(401, 'Unauthorized');
-        }
+        if (!$pat) abort(401, 'Unauthorized');
 
-        if ($pat->cant('ComplaintController:get') && !$pat->can('*')) {
+        if ($pat->cant('ComplaintController:get') && !($pat->can('*'))) {
             abort(401, 'Unauthorized');
         }
 

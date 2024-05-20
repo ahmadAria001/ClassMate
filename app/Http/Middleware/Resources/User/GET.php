@@ -31,8 +31,8 @@ class GET
             abort(401, 'Unauthorized');
         }
 
-        if ($pat->cant([\App\Http\Controllers\UserController::class, 'get']) && !$pat->can('*')) {
-            return $next(null);
+        if ($pat->cant('UserController:get') && !$pat->can('*')) {
+            abort(401, 'Unauthorized');
         }
 
         return $next($request);

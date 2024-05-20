@@ -27,12 +27,10 @@ class Reset
         }
 
         $pat = PersonalAccessToken::findToken($token);
-        if (!$pat) {
-            abort(401, 'Unauthorized');
-        }
+        if (!$pat) abort(401, 'Unauthorized');
 
-        if ($pat->cant([\App\Http\Controllers\PasswordController::class, 'reset']) && !$pat->can('*')) {
-            return $next(null);
+        if ($pat->cant('PasswordController:create') && !($pat->can('*'))) {
+            abort(401, 'Unauthorized');
         }
 
         return $next($request);

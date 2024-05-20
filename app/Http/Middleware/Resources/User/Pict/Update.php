@@ -31,8 +31,10 @@ class Update
             abort(401, 'Unauthorized');
         }
 
-        if ($pat->cant([\App\Http\Controllers\ProfileImageController::class, 'edit']) && !$pat->can('*')) {
-            return $next(null);
+        if ($pat->cant('ProfileImageController:edit') && !$pat->can('*')) {
+            abort(401, 'Unauthorized');
         }
+
+        return $next($request);
     }
 }

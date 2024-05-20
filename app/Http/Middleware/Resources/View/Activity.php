@@ -1,12 +1,13 @@
 <?php
-namespace App\Http\Middleware\Resources\Docs;
+
+namespace App\Http\Middleware\Resources\View;
 
 use Closure;
 use Illuminate\Http\Request;
 use Laravel\Sanctum\PersonalAccessToken;
 use Symfony\Component\HttpFoundation\Response;
 
-class UpdateRequest
+class Activity
 {
     /**
      * Handle an incoming request.
@@ -28,7 +29,7 @@ class UpdateRequest
         $pat = PersonalAccessToken::findToken($token);
         if (!$pat) abort(401, 'Unauthorized');
 
-        if ($pat->cant('DocRequestController:edit') && !($pat->can('*'))) {
+        if ($pat->cant('ActivityController:__invoke') && !($pat->can('*'))) {
             abort(401, 'Unauthorized');
         }
 

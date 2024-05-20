@@ -11,12 +11,14 @@ use Carbon\Carbon;
 use Intervention\Image\Laravel\Facades\Image;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 use Laravel\Sanctum\PersonalAccessToken;
 
 class ComplaintController extends Controller
 {
     public function __invoke()
     {
+        return Inertia::render();
     }
 
     public function get($filter = null)
@@ -81,22 +83,14 @@ class ComplaintController extends Controller
 
                 if (str_contains($request->url(), 'api')) {
                     $token = $request->bearerToken();
-
                     if (!$token) {
                         $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
-
                         if (!$token) {
-                            return Response()->json(
-                                [
-                                    'message' => 'Unauthorized',
-                                ],
-                                401,
-                            );
+                            return Response()->json(['message'=>'Unauthorized'],401);
                         }
                     }
 
                     $pat = PersonalAccessToken::findToken($token);
-
                     $model = $pat->tokenable();
 
                     $docs->created_by = $model->get('id')[0]->id;
@@ -151,17 +145,10 @@ class ComplaintController extends Controller
                     ]);
                 } else {
                     $token = $request->bearerToken();
-
                     if (!$token) {
                         $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
-
                         if (!$token) {
-                            return Response()->json(
-                                [
-                                    'message' => 'Unauthorized',
-                                ],
-                                401,
-                            );
+                            return Response()->json(['message'=>'Unauthorized'],401);
                         }
                     }
 
@@ -238,22 +225,14 @@ class ComplaintController extends Controller
                     ]);
                 } else {
                     $token = $request->bearerToken();
-
                     if (!$token) {
                         $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
-
                         if (!$token) {
-                            return Response()->json(
-                                [
-                                    'message' => 'Unauthorized',
-                                ],
-                                401,
-                            );
+                            return Response()->json(['message'=>'Unauthorized'],401);
                         }
                     }
 
                     $pat = PersonalAccessToken::findToken($token);
-
                     $model = $pat->tokenable();
                     $data->update([
                         'deleted_by' => $model->get('id')[0]->id,

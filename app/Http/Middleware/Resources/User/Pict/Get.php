@@ -31,9 +31,10 @@ class Get
             abort(401, 'Unauthorized');
         }
 
-        if ($pat->cant([\App\Http\Controllers\ProfileImageController::class, 'get']) && !$pat->can('*')) {
+        if ($pat->cant('ProfileImageController:get') && !$pat->can('*')) {
             abort(401, 'Unauthorized');
         }
+
         return $next($request);
     }
 }
