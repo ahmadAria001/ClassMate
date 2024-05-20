@@ -25,7 +25,7 @@
     } from "flowbite-svelte-icons";
 
     import axiosInstance from "axios";
-    import Edit from "@C/Pengaduan/Modals/Edit.svelte";
+    import Edit from "@C/Pengaduan/Modals/Detail.svelte";
 
     const axios = axiosInstance.create({ withCredentials: true });
 
@@ -231,7 +231,7 @@
                         </TableBodyRow>
 
                         <Popover
-                            class="w-64 text-sm text-white"
+                            class="w-64 text-sm text-black dark:text-white"
                             title="Alamat"
                             triggeredBy={`#address-${item.id}`}
                         >
@@ -239,7 +239,7 @@
                         </Popover>
 
                         <Popover
-                            class="w-64 text-sm text-white"
+                            class="w-64 text-sm text-black dark:text-white"
                             title="Masalah"
                             triggeredBy={`#desc-${item.id}`}
                         >
