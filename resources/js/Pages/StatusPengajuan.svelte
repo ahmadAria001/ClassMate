@@ -1,9 +1,9 @@
 <script lang="ts">
     import { onMount } from "svelte";
+
     import Layout from "./Layout.svelte";
     import {
         Badge,
-        Table,
         TableBody,
         TableBodyCell,
         TableBodyRow,
@@ -11,15 +11,26 @@
         TableHeadCell,
         TableSearch,
         Button,
-        Modal,
-        Label,
-        Input,
         ButtonGroup,
     } from "flowbite-svelte";
     import {
         ChevronLeftOutline,
         ChevronRightOutline,
     } from "flowbite-svelte-icons";
+
+    import axiosInstance from "axios";
+    import Create from "@C/PengajuanSurat/Modals/Create.svelte";
+
+    const axios = axiosInstance.create({ withCredentials: true });
+    let builder = {};
+
+    const rebuild = async () => {
+        await initData();
+        builder = {};
+    };
+
+    let data: any | null = null;
+
     let items = [
         {
             id: 1,
@@ -48,6 +59,7 @@
     let totalItems: number = items.length;
     let startPage: number;
     let endPage: number;
+    let currentPage = 1;
 
     const updateDataAndPagination = () => {
         const currentPageItems = items.slice(
@@ -90,12 +102,27 @@
         updateDataAndPagination();
     };
 
+    const getRequestDocs = async (page = 1) => {
+        const response = await axios.get(
+            `/api/docs/request/p/${encodeURIComponent(page)}`,
+        );
+
+        return response.data;
+    };
+
+    const initData = async () => {
+        data = await getRequestDocs(currentPage);
+        console.log(data);
+    };
+
     $: startRange = currentPosition + 1;
     $: endRange = Math.min(currentPosition + itemsPerPage, totalItems);
 
-    onMount(() => {
+    onMount(async () => {
         // Call renderPagination when the component initially mounts
         renderPagination(items.length);
+
+        await initData();
     });
 
     $: currentPageItems = items.slice(
@@ -127,38 +154,8 @@
                 }}>+ Buat Pengajuan</Button
             >
         </div>
-        <Modal
-            title="Buat Pengajuan Surat"
-            bind:open={addCertificate}
-            autoclose
-        >
-            <form method="POST">
-                <div class="mb-4">
-                    <Label for="full_name" class="mb-2">Nama Lengkap</Label>
-                    <Input id="full_name" placeholder="Nama Lengkap" />
-                </div>
-                <div class="grid md:grid-cols-2 md:gap-6">
-                    <div class="mb-4">
-                        <Label for="no_hp" class="mb-2">No HP</Label>
-                        <Input id="no_hp" placeholder="No HP" />
-                    </div>
-                    <div class="mb-4">
-                        <Label for="address" class="mb-2">Alamat</Label>
-                        <Input id="address" placeholder="Alamat" />
-                    </div>
-                </div>
-                <div class="mb-4">
-                    <Label for="problems" class="mb-2">Keterangan</Label>
-                    <Input id="problems" placeholder="Keterangan Surat" />
-                </div>
-                <div class="block flex">
-                    <Button type="submit" class="ml-auto"
-                        >Kirim Pengajuan</Button
-                    >
-                </div>
-            </form>
-        </Modal>
         <TableHead>
+            <TableHeadCell>No.</TableHeadCell>
             <TableHeadCell>Nama</TableHeadCell>
             <TableHeadCell>Alamat</TableHeadCell>
             <TableHeadCell>No. HP</TableHeadCell>
@@ -166,23 +163,41 @@
             <TableHeadCell class="text-center">Status</TableHeadCell>
         </TableHead>
         <TableBody>
-            {#each filteredItems as item}
-                <TableBodyRow>
-                    <TableBodyCell>{item.name}</TableBodyCell>
-                    <TableBodyCell>{item.address}</TableBodyCell>
-                    <TableBodyCell>{item.noHp}</TableBodyCell>
-                    <TableBodyCell>{item.desc}</TableBodyCell>
-                    {#if item.status == "Selesai"}
-                        <TableBodyCell class="text-center">
-                            <Badge color="green">{item.status}</Badge>
-                        </TableBodyCell>
-                    {:else if item.status == "Dalam Proses"}
-                        <TableBodyCell class="text-center">
-                            <Badge color="indigo">{item.status}</Badge>
-                        </TableBodyCell>
-                    {/if}
-                </TableBodyRow>
-            {/each}
+            {#key builder}
+                {#if data}
+                    {#each data.data as item, idx}
+                        <TableBodyRow>
+                            <TableBodyCell>{idx + 1}</TableBodyCell>
+
+                            <TableBodyCell
+                                >{item.request_by.fullName}</TableBodyCell
+                            >
+                            <TableBodyCell
+                                >{item.request_by.address}</TableBodyCell
+                            >
+                            <TableBodyCell
+                                >{item.request_by.phone}</TableBodyCell
+                            >
+                            <TableBodyCell
+                                >{item.docs_id.description}</TableBodyCell
+                            >
+                            {#if item.requestStatus == "Resolved"}
+                                <TableBodyCell class="text-center">
+                                    <Badge color="green">Disetujui</Badge>
+                                </TableBodyCell>
+                            {:else if item.requestStatus == "Open"}
+                                <TableBodyCell class="text-center">
+                                    <Badge color="indigo">Dalam Proses</Badge>
+                                </TableBodyCell>
+                            {:else}
+                                <TableBodyCell class="text-center">
+                                    <Badge color="red">Ditolak</Badge>
+                                </TableBodyCell>
+                            {/if}
+                        </TableBodyRow>
+                    {/each}
+                {/if}
+            {/key}
         </TableBody>
 
         <div
@@ -190,33 +205,49 @@
             class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0 p-4"
             aria-label="Table navigation"
         >
-            <span class="text-sm font-normal text-gray-500 dark:text-gray-400">
-                Showing
-                <span class="font-semibold text-gray-900 dark:text-white"
-                    >{startRange}-{endRange}</span
+            {#if data}
+                <span
+                    class="text-sm font-normal text-gray-500 dark:text-gray-400"
                 >
-                of
-                <span class="font-semibold text-gray-900 dark:text-white"
-                    >{totalItems}</span
-                >
-            </span>
-            <ButtonGroup>
-                <Button
-                    on:click={loadPreviousPage}
-                    disabled={currentPosition === 0}
-                    ><ChevronLeftOutline /></Button
-                >
-                {#each pagesToShow as pageNumber}
-                    <Button on:click={() => goToPage(pageNumber)}
-                        >{pageNumber}</Button
+                    Showing
+                    <span class="font-semibold text-gray-900 dark:text-white">
+                        {currentPage < 2
+                            ? 1
+                            : data.data.length < 5
+                              ? data.length - data.data.length + 1
+                              : data.data.length + 1}
+                        -
+                        {data.data.length < 5
+                            ? data.length
+                            : data.data.length * currentPage}
+                    </span>
+                    of
+                    <span class="font-semibold text-gray-900 dark:text-white"
+                        >{data.length}</span
                     >
-                {/each}
-                <Button
-                    on:click={loadNextPage}
-                    disabled={totalPages === endPage}
-                    ><ChevronRightOutline /></Button
-                >
-            </ButtonGroup>
+                </span>
+                <ButtonGroup>
+                    <Button
+                        disabled={currentPage < 2}
+                        on:click={async () => {
+                            currentPage--;
+                            await initData();
+                        }}><ChevronLeftOutline /></Button
+                    >
+                    <!-- {#each data.length as pageNumber} -->
+                    <Button disabled>{currentPage}</Button>
+                    <!-- {/each} -->
+                    <Button
+                        disabled={currentPage >= data.length / 5}
+                        on:click={async () => {
+                            currentPage++;
+                            await initData();
+                        }}><ChevronRightOutline /></Button
+                    >
+                </ButtonGroup>
+            {/if}
         </div>
     </TableSearch>
 </Layout>
+
+<Create bind:showState={addCertificate} on:comp={rebuild} />

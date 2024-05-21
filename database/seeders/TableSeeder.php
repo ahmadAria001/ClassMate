@@ -114,15 +114,26 @@ class TableSeeder extends Seeder
             ]);
         }
 
-        for ($i = 1; $i <= 3; $i++) {
+        $paidBy = 1;
+        $dues = 1;
+
+        for ($i = 1; $i <= 365 * 20; $i++) {
+            if ($paidBy >= 5) {
+                $paidBy = 1;
+            }
+
+            if ($dues >= 3) {
+                $dues = 1;
+            }
+
             DuesPaymentLog::create([
-                'dues_id' => $i,
-                'paid_by' => $i,
+                'dues_id' => $dues++,
+                'paid_by' => $paidBy++,
                 'amount_paid' => $faker->numberBetween(0, 5000),
                 'exchange' => 0,
                 'debt' => 0,
-                'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
-                'created_by' => $i,
+                'created_at' => Carbon::createFromDate($faker->dateTimeBetween('-5 years', 'now'))->getTimestamp(),
+                'created_by' => 6,
             ]);
         }
 
@@ -170,6 +181,7 @@ class TableSeeder extends Seeder
             'startDate' => Carbon::createFromDate($faker->dateTimeBetween())->getTimestamp(),
             'endDate' => Carbon::createFromDate($faker->dateTimeBetween())->getTimestamp(),
             'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
+            'location' => $faker->address(),
             'created_by' => 1,
         ]);
 
@@ -191,7 +203,7 @@ class TableSeeder extends Seeder
             'docs_id' => 4,
             'request_by' => 1,
             'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
-            'created_by' => 1
+            'created_by' => 1,
         ]);
     }
 }

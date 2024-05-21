@@ -93,6 +93,7 @@ class HandleInertiaRequests extends Middleware
                         'nik' => $user->nik,
                         'rt_id' => $rt,
                         'pict' => $model->get('pict')->first()->pict,
+                        'civ_id' => $user->id,
                     ];
                 } else {
                     return $request->user() ? $request->user()->only('id', 'username', 'role') : null;

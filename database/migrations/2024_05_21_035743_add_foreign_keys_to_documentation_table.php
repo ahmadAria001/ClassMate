@@ -13,11 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('news', function (Blueprint $table) {
-            $table->foreign(
-                ['created_by'],
-                'fk_created_env'
-            )->references(['id'])->on('users')->onUpdate('restrict')->onDelete('restrict');
+        Schema::table('documentation', function (Blueprint $table) {
+            $table->foreign(['docs_id'], 'fk_documentantion_docs')->references(['id'])->on('docs')->onUpdate('restrict')->onDelete('restrict');
         });
     }
 
@@ -28,8 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('environmentinfo', function (Blueprint $table) {
-            $table->dropForeign('fk_created_env');
+        Schema::table('documentation', function (Blueprint $table) {
+            $table->dropForeign('fk_documentantion_docs');
         });
     }
 };

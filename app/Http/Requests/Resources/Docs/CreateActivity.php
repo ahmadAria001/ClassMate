@@ -25,6 +25,7 @@ class CreateActivity extends FormRequest
             'name' => 'required|string',
             'startDate' => 'required|date',
             'endDate' => 'required|date',
+            'location' => 'required|string',
             //Docs Attr
             'description' => 'string',
         ];

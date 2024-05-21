@@ -26,8 +26,9 @@ class UpdateActivity extends FormRequest
             'name' => 'string',
             'startDate' => 'date',
             'endDate' => 'date',
+            'location' => 'string',
             //Docs Attr
-            'description' => 'string',//Type Fixed on Controller
+            'description' => 'string', //Type Fixed on Controller
         ];
     }
 }

@@ -31,6 +31,8 @@ Route::prefix('/docs')->group(function () {
     Route::prefix('/request')->group(function () {
         Route::get('/', [DocRequestController::class, 'get'])->middleware(GetRequest::class);
         Route::get('/{filter}', [DocRequestController::class, 'get'])->middleware(GetRequest::class);
+        Route::get('/p/{page}', [DocRequestController::class, 'getPaged'])->middleware(GetRequest::class);
+
         Route::post('/', [DocRequestController::class, 'create'])->middleware(CreateRequest::class);
         Route::put('/', [DocRequestController::class, 'edit'])->middleware(UpdateRequest::class);
         Route::delete('/', [DocRequestController::class, 'destroy'])->middleware(DeleteRequest::class);
@@ -55,6 +57,8 @@ Route::prefix('/docs')->group(function () {
     Route::prefix('/activity')->group(function () {
         Route::get('/', [ActivityController::class, 'get'])->middleware(GetActivity::class);
         Route::get('/{filter}', [ActivityController::class, 'get'])->middleware(GetActivity::class);
+        Route::get('/p/{page}', [ActivityController::class, 'getPaged'])->middleware(GetActivity::class);
+
         Route::post('/', [ActivityController::class, 'create'])->middleware(CreateActivity::class);
         Route::put('/', [ActivityController::class, 'edit'])->middleware(UpdateActivity::class);
         Route::delete('/', [ActivityController::class, 'destroy'])->middleware(DeleteActivity::class);

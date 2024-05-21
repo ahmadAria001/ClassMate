@@ -10,25 +10,20 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class DocRequest extends Model
 {
     use HasFactory, SoftDeletes;
-    
+
     protected $table = 'doc_request';
-    protected $fillable = [
-        'requestStatus',
-        'request_by',
-        'docs_id',
-        'created_at',
-        'created_by',
-        'updated_at',
-        'updated_by',
-        'deleted_at',
-        'deleted_by'
-    ];
+    protected $fillable = ['requestStatus', 'request_by', 'docs_id', 'created_at', 'created_by', 'updated_at', 'updated_by', 'deleted_at', 'deleted_by'];
 
     protected $dateFormat = 'U';
 
+    public function docs_id(): BelongsTo
+    {
+        return $this->belongsTo(Docs::class, 'docs_id', 'id');
+    }
+
     public function request_by(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'request_by', 'id');
+        return $this->belongsTo(Civilian::class, 'request_by', 'id');
     }
 
     public function created_by(): BelongsTo

@@ -1,7 +1,7 @@
 <script>
     import { Heading, Select } from "flowbite-svelte";
-    import Cards from "@C/LandingPage/Cards/CardsAnnouncement.svelte";
-    import Navbar from "@C/LandingPage/Nav/Navbar.svelte";
+    import Cards from "@C/LandingPage/cards/CardsAnnouncement.svelte";
+    import Navbar from "@C/LandingPage/nav/Navbar.svelte";
     import Footer from "@C/LandingPage/Footer/Footer.svelte";
 
     let pengumumans = [

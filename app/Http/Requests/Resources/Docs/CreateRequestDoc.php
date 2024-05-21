@@ -23,7 +23,6 @@ class CreateRequestDoc extends FormRequest
     {
         return [
             'request_by'=>'required|integer',
-            //
             'description' => 'string',
         ];
     }

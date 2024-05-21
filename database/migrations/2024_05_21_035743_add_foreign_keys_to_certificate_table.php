@@ -13,8 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('civilian', function (Blueprint $table) {
-            $table->foreign(['rt_id'], 'fk_civilian_rt')->references(['id'])->on('rt')->onUpdate('restrict')->onDelete('restrict');
+        Schema::table('certificate', function (Blueprint $table) {
+            $table->foreign(['request_by'], 'fk_docs_user')->references(['id'])->on('users')->onUpdate('restrict')->onDelete('restrict');
         });
     }
 
@@ -25,8 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('civilian', function (Blueprint $table) {
-            $table->dropForeign('fk_civilian_family');
+        Schema::table('certificate', function (Blueprint $table) {
+            $table->dropForeign('fk_docs_user');
         });
     }
 };

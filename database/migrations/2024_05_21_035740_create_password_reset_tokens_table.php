@@ -13,8 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('certificate', function (Blueprint $table) {
-            $table->foreign(['request_by'], 'fk_docs_user')->references(['id'])->on('users')->onUpdate('restrict')->onDelete('restrict');
+        Schema::create('password_reset_tokens', function (Blueprint $table) {
+            $table->string('email')->primary();
+            $table->string('token');
+            $table->timestamp('created_at')->nullable();
         });
     }
 
@@ -25,9 +27,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('certificate', function (Blueprint $table) {
-            $table->dropForeign('fk_certificate_created');
-            $table->dropForeign('fk_certificate_updated');
-        });
+        Schema::dropIfExists('password_reset_tokens');
     }
 };

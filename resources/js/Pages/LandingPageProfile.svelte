@@ -1,6 +1,6 @@
 <script>
     import { Heading } from "flowbite-svelte";
-    import Navbar from "@C/LandingPage/Nav/Navbar.svelte";
+    import Navbar from "@C/LandingPage/nav/Navbar.svelte";
     import Footer from "@C/LandingPage/Footer/Footer.svelte";
 
     let admins = [

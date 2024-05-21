@@ -21,6 +21,13 @@
         ChevronRightOutline,
         ImageOutline,
     } from "flowbite-svelte-icons";
+
+    import axiosInstance from "axios";
+    import Edit from "@C/PengajuanSurat/Modals/Edit.svelte";
+
+    const axios = axiosInstance.create({ withCredentials: true });
+    let data: any | null = null;
+
     let items = [
         {
             id: 1,
@@ -39,6 +46,7 @@
             status: "Dalam Proses",
         },
     ];
+
     let modalDetailSurat = false;
     let searchTerm = "";
     let currentPosition = 0;
@@ -49,6 +57,29 @@
     let totalItems: number = items.length;
     let startPage: number;
     let endPage: number;
+    let currentPage = 1;
+
+    let selected: string | null = null;
+
+    let builder = {};
+    const rebuild = async () => {
+        selected = null;
+        await initData();
+        builder = {};
+    };
+
+    const getRequestDocs = async (page = 1) => {
+        const response = await axios.get(
+            `/api/docs/request/p/${encodeURIComponent(page)}`,
+        );
+
+        return response.data;
+    };
+
+    const initData = async () => {
+        data = await getRequestDocs(currentPage);
+        console.log(data);
+    };
 
     const updateDataAndPagination = () => {
         const currentPageItems = items.slice(
@@ -94,9 +125,11 @@
     $: startRange = currentPosition + 1;
     $: endRange = Math.min(currentPosition + itemsPerPage, totalItems);
 
-    onMount(() => {
+    onMount(async () => {
         // Call renderPagination when the component initially mounts
         renderPagination(items.length);
+
+        await initData();
     });
 
     $: currentPageItems = items.slice(
@@ -131,81 +164,106 @@
             <TableHeadCell class="sr-only">Aksi</TableHeadCell>
         </TableHead>
         <TableBody>
-            {#each filteredItems as item}
-                <TableBodyRow>
-                    <TableBodyCell>{item.name}</TableBodyCell>
-                    <TableBodyCell>{item.address}</TableBodyCell>
-                    <TableBodyCell>{item.noHp}</TableBodyCell>
-                    <TableBodyCell>{item.name}</TableBodyCell>
-                    {#if item.status == "Selesai"}
-                        <TableBodyCell class="text-center">
-                            <Badge color="green">{item.status}</Badge>
-                        </TableBodyCell>
-                    {:else if item.status == "Dalam Proses"}
-                        <TableBodyCell class="text-center">
-                            <Badge color="indigo">Menunggu</Badge>
-                        </TableBodyCell>
-                    {/if}
-                    <TableBodyCell>
-                        <Button
-                            color="blue"
-                            on:click={() => {
-                                modalDetailSurat = true;
-                            }}>Detail</Button
-                        >
-                    </TableBodyCell>
-                </TableBodyRow>
-            {/each}
+            {#key builder}
+                {#if data}
+                    {#each data.data as item}
+                        <TableBodyRow>
+                            <TableBodyCell>
+                                {item.request_by.fullName}
+                            </TableBodyCell>
+                            <TableBodyCell
+                                >{item.request_by.address}</TableBodyCell
+                            >
+                            <TableBodyCell
+                                >{item.request_by.phone}</TableBodyCell
+                            >
+                            <TableBodyCell
+                                >{item.docs_id.description}</TableBodyCell
+                            >
+                            {#if item.requestStatus == "Resolved"}
+                                <TableBodyCell class="text-center">
+                                    <Badge color="green">Disetujui</Badge>
+                                </TableBodyCell>
+                            {:else if item.requestStatus == "Open"}
+                                <TableBodyCell class="text-center">
+                                    <Badge color="indigo">Dalam Proses</Badge>
+                                </TableBodyCell>
+                            {:else}
+                                <TableBodyCell class="text-center">
+                                    <Badge color="red">Ditolak</Badge>
+                                </TableBodyCell>
+                            {/if}
+                            <TableBodyCell>
+                                <Button
+                                    color="blue"
+                                    on:click={() => {
+                                        selected = item.id;
+                                        modalDetailSurat = true;
+                                    }}>Detail</Button
+                                >
+                            </TableBodyCell>
+                        </TableBodyRow>
+                    {/each}
+                {/if}
+            {/key}
         </TableBody>
-
-        <Modal title="Deskripsi Surat" bind:open={modalDetailSurat} autoclose>
-            <form method="POST">
-                <div class="mb-4">
-                    <Label for="full_name" class="mb-2">Nama Pemohon</Label>
-                    <Input id="full_name" placeholder="Nama Pemohon" />
-                </div>
-                <div class="mb-4">
-                    <Label for="problems" class="mb-2">Permasalahan</Label>
-                    <Input id="problems" placeholder="Permasalahan" />
-                </div>
-                <div class="block text-end">
-                    <Button type="submit">Buat Surat</Button>
-                </div>
-            </form>
-        </Modal>
 
         <div
             slot="footer"
             class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0 p-4"
             aria-label="Table navigation"
         >
-            <span class="text-sm font-normal text-gray-500 dark:text-gray-400">
-                Showing
-                <span class="font-semibold text-gray-900 dark:text-white"
-                    >{startRange}-{endRange}</span
+            {#if data}
+                <span
+                    class="text-sm font-normal text-gray-500 dark:text-gray-400"
                 >
-                of
-                <span class="font-semibold text-gray-900 dark:text-white"
-                    >{totalItems}</span
-                >
-            </span>
-            <ButtonGroup>
-                <Button
-                    on:click={loadPreviousPage}
-                    disabled={currentPosition === 0}
-                    ><ChevronLeftOutline /></Button
-                >
-                {#each pagesToShow as pageNumber}
-                    <Button on:click={() => goToPage(pageNumber)}
-                        >{pageNumber}</Button
+                    Showing
+                    <span class="font-semibold text-gray-900 dark:text-white">
+                        {currentPage < 2
+                            ? 1
+                            : data.data.length < 5
+                              ? data.length - data.data.length + 1
+                              : data.data.length + 1}
+                        -
+                        {data.data.length < 5
+                            ? data.length
+                            : data.data.length * currentPage}
+                    </span>
+                    of
+                    <span class="font-semibold text-gray-900 dark:text-white"
+                        >{data.length}</span
                     >
-                {/each}
-                <Button
-                    on:click={loadNextPage}
-                    disabled={totalPages === endPage}
-                    ><ChevronRightOutline /></Button
-                >
-            </ButtonGroup>
+                </span>
+                <ButtonGroup>
+                    <Button
+                        on:click={loadPreviousPage}
+                        disabled={currentPage < 2}
+                        on:click={async () => {
+                            currentPage--;
+                            await initData();
+                        }}><ChevronLeftOutline /></Button
+                    >
+                    <!-- {#each data.length as pageNumber} -->
+                    <Button disabled>{currentPage}</Button>
+                    <!-- {/each} -->
+                    <Button
+                        on:click={loadNextPage}
+                        disabled={currentPage >= data.length / 5}
+                        on:click={async () => {
+                            currentPage++;
+                            await initData();
+                        }}><ChevronRightOutline /></Button
+                    >
+                </ButtonGroup>
+            {/if}
         </div>
     </TableSearch>
 </Layout>
+
+{#if selected}
+    <Edit
+        bind:showState={modalDetailSurat}
+        bind:target={selected}
+        on:comp={rebuild}
+    />
+{/if}

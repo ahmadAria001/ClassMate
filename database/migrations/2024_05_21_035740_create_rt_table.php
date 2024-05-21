@@ -1,12 +1,11 @@
 <?php
 
-use App\Models\RT;
-use Carbon\Carbon;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      *
@@ -15,15 +14,15 @@ return new class extends Migration {
     public function up()
     {
         Schema::create('rt', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('leader_id')->index('fk_rt_user')->nullable();
+            $table->bigIncrements('id');
+            $table->unsignedBigInteger('leader_id')->nullable()->index('fk_rt_user');
             $table->bigInteger('created_at');
-            $table->unsignedBigInteger('created_by')->nullable()->index('fk_user')->nullable()->nullable();
+            $table->unsignedBigInteger('created_by')->nullable()->index('fk_user');
             $table->tinyInteger('number');
             $table->bigInteger('updated_at')->nullable();
-            $table->unsignedBigInteger('updated_by')->index('fk_user_upd')->nullable();
+            $table->unsignedBigInteger('updated_by')->nullable()->index('fk_user_upd');
             $table->bigInteger('deleted_at')->nullable();
-            $table->unsignedBigInteger('deleted_by')->index('fk_user_del')->nullable();
+            $table->unsignedBigInteger('deleted_by')->nullable()->index('fk_user_del');
         });
     }
 

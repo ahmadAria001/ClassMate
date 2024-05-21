@@ -14,14 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('docs', function (Blueprint $table) {
-            $table->foreign(
-                ['created_by'],
-                'fk_docs_user_cst'
-            )
-                ->references(['id'])
-                ->on('users')
-                ->onUpdate('restrict')
-                ->onDelete('restrict');
+            $table->foreign(['created_by'], 'fk_docs_user_cst')->references(['id'])->on('users')->onUpdate('restrict')->onDelete('restrict');
         });
     }
 
@@ -33,7 +26,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('docs', function (Blueprint $table) {
-            $table->dropForeign('fk_docs_user');
+            $table->dropForeign('fk_docs_user_cst');
         });
     }
 };

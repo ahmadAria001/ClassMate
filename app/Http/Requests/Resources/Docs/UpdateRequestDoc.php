@@ -24,7 +24,7 @@ class UpdateRequestDoc extends FormRequest
         return [
             'id' => 'required|integer|min:1',
             'requestStatus' => 'required|string',
-            'request_by'=>'required|integer',
+            'request_by'=>'nullable|integer',
             //
             'description' => 'string',
         ];

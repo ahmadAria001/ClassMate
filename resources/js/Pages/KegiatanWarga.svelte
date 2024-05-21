@@ -18,6 +18,20 @@
         ChevronLeftOutline,
         ChevronRightOutline,
     } from "flowbite-svelte-icons";
+
+    import axiosInstance from "axios";
+    import Create from "@C/Kegiatan/Modals/Create.svelte";
+
+    const axios = axiosInstance.create({ withCredentials: true });
+    let builder = {};
+
+    const rebuild = async () => {
+        await initData();
+        builder = {};
+    };
+
+    let data: any | null = null;
+
     let items = [
         {
             id: 1,
@@ -45,6 +59,20 @@
     let totalItems: number = items.length;
     let startPage: number;
     let endPage: number;
+    let currentPage = 1;
+
+    const getRequestDocs = async (page = 1) => {
+        const response = await axios.get(
+            `/api/docs/activity/p/${encodeURIComponent(page)}`,
+        );
+
+        return response.data;
+    };
+
+    const initData = async () => {
+        data = await getRequestDocs(currentPage);
+        console.log(data);
+    };
 
     const updateDataAndPagination = () => {
         const currentPageItems = items.slice(
@@ -90,9 +118,11 @@
     $: startRange = currentPosition + 1;
     $: endRange = Math.min(currentPosition + itemsPerPage, totalItems);
 
-    onMount(() => {
+    onMount(async () => {
         // Call renderPagination when the component initially mounts
         renderPagination(items.length);
+
+        await initData();
     });
 
     $: currentPageItems = items.slice(
@@ -103,6 +133,34 @@
         (item) =>
             item.name.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1,
     );
+
+    const dateFormatter = (epoc: number) => {
+        const date = new Date(epoc);
+
+        const monthNames = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+        ];
+
+        const day = date.getDate();
+
+        const monthIndex = date.getMonth();
+        const monthName = monthNames[monthIndex];
+
+        const year = date.getFullYear();
+
+        return `${day} ${monthName} ${year}`;
+    };
 </script>
 
 <Layout>
@@ -124,64 +182,61 @@
                 }}>+ Tambah Kegiatan</Button
             >
         </div>
-        <Modal title="Tambah Kegiatan" bind:open={addActivity} autoclose>
-            <form method="POST">
-                <div class="grid md:grid-cols-2 md:gap-6">
-                    <div class="mb-4">
-                        <Label for="activityName" class="mb-2"
-                            >Nama Kegiatan</Label
-                        >
-                        <Input id="activityName" placeholder="Nama Kegiatan" />
-                    </div>
-                    <div class="mb-4">
-                        <Label for="location" class="mb-2">Lokasi</Label>
-                        <Input id="location" placeholder="Lokasi" />
-                    </div>
-                </div>
-                <div class="grid md:grid-cols-2 md:gap-6">
-                    <div class="mb-4">
-                        <Label for="time" class="mb-2">Waktu</Label>
-                        <Input id="time" placeholder="Waktu" />
-                    </div>
-                    <div class="mb-4">
-                        <Label for="date" class="mb-2">Tanggal</Label>
-                        <Input type="date" id="date" placeholder="Tanggal" />
-                    </div>
-                </div>
-                <div class="block flex">
-                    <Button type="submit" class="ml-auto">Simpan</Button>
-                </div>
-            </form>
-        </Modal>
 
         <TableHead>
             <TableHeadCell>Nama Kegiatan</TableHeadCell>
             <TableHeadCell>Lokasi</TableHeadCell>
             <TableHeadCell class="text-center">Waktu</TableHeadCell>
-            <TableHeadCell class="text-center">Tanggal</TableHeadCell>
+            <!-- <TableHeadCell class="text-center">Tanggal</TableHeadCell> -->
             <TableHeadCell class="sr-only">Aksi</TableHeadCell>
         </TableHead>
         <TableBody>
-            {#each filteredItems as item}
-                <TableBodyRow>
-                    <TableBodyCell>{item.name}</TableBodyCell>
-                    <TableBodyCell>{item.location}</TableBodyCell>
-                    <TableBodyCell class="text-center uppercase"
-                        >{item.time}</TableBodyCell
-                    >
-                    <TableBodyCell class="text-center"
-                        >{item.date}</TableBodyCell
-                    >
-                    <TableBodyCell>
-                        <Button
-                            color="blue"
-                            on:click={() => {
-                                modalEdit = true;
-                            }}>Edit Data</Button
-                        >
-                    </TableBodyCell>
-                </TableBodyRow>
-            {/each}
+            {#key builder}
+                {#if data}
+                    {#each data.data as item, idx}
+                        <TableBodyRow>
+                            <TableBodyCell>{item.name}</TableBodyCell>
+                            <TableBodyCell>
+                                {item.location}
+                            </TableBodyCell>
+                            <TableBodyCell
+                                class="text-center uppercase flex justify-center"
+                            >
+                                <span class="text-center">
+                                    {dateFormatter(item.startDate)}
+                                    <br />
+                                    {new Date(
+                                        item.startDate,
+                                    ).toLocaleTimeString(undefined, {
+                                        hour12: false,
+                                    })}
+                                </span>
+                                <span class="ms-5 text-center">
+                                    {dateFormatter(item.endDate)}
+                                    <br />
+                                    {new Date(item.endDate).toLocaleTimeString(
+                                        undefined,
+                                        {
+                                            hour12: false,
+                                        },
+                                    )}
+                                </span>
+                            </TableBodyCell>
+                            <!-- <TableBodyCell class="text-center"> -->
+                            <!--     {new Date(item.endDate).toLocaleDateString()} -->
+                            <!-- </TableBodyCell> -->
+                            <TableBodyCell>
+                                <Button
+                                    color="blue"
+                                    on:click={() => {
+                                        modalEdit = true;
+                                    }}>Edit Data</Button
+                                >
+                            </TableBodyCell>
+                        </TableBodyRow>
+                    {/each}
+                {/if}
+            {/key}
         </TableBody>
 
         <!-- modal edit -->
@@ -251,3 +306,5 @@
         </div>
     </TableSearch>
 </Layout>
+
+<Create bind:showState={addActivity} on:comp={rebuild} />
