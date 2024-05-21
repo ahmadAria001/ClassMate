@@ -124,18 +124,14 @@ class RtController extends Controller
         $take = 5;
 
         if ($filter) {
-            $data = RT::withTrashed()
+            $data = RT::withoutTrashed()
                 ->with(['civils' => fn($query) => $query->orderBy('nkk')])
                 ->where('id', '=', $filter)
                 ->skip($page > 1 ? ($page - 1) * $take : 0)
                 ->take($take)
                 ->get();
-
-            if ($data) {
-                $data = $data->skip(0)->take(10);
-            }
         } else {
-            $data = RT::withTrashed()
+            $data = RT::withoutTrashed()
                 ->with([
                     'civils' => function ($query) {
                         $query->orderBy('nkk');

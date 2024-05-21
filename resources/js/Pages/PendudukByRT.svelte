@@ -220,11 +220,14 @@
     );
 
     const getWCV = async (id: string = "") => {
-        const response = await axios.get(`/api/rt/cvl/${id}`, {
-            headers: {
-                Accept: "application/json",
+        const response = await axios.get(
+            `/api/rt/cvl/0/${encodeURIComponent(id)}`,
+            {
+                headers: {
+                    Accept: "application/json",
+                },
             },
-        });
+        );
 
         return response.data;
     };
@@ -557,33 +560,6 @@
                                                 >
                                                     <Badge color="yellow"
                                                         >Kos</Badge
-                                                    >
-                                                </TableBodyCell>
-                                            {/if}
-                                            {#if item.status == "Aktif"}
-                                                <TableBodyCell
-                                                    class="text-center"
-                                                >
-                                                    <Badge color="green"
-                                                        >Aktif</Badge
-                                                    >
-                                                </TableBodyCell>
-                                            {/if}
-                                            {#if item.status == "Meninggal"}
-                                                <TableBodyCell
-                                                    class="text-center"
-                                                >
-                                                    <Badge color="red"
-                                                        >{item.status}</Badge
-                                                    >
-                                                </TableBodyCell>
-                                            {/if}
-                                            {#if item.status == "Pindah"}
-                                                <TableBodyCell
-                                                    class="text-center"
-                                                >
-                                                    <Badge color="yellow"
-                                                        >{item.status}</Badge
                                                     >
                                                 </TableBodyCell>
                                             {/if}
