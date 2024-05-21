@@ -62,6 +62,7 @@
         // 459,
     ];
 
+    let data: any;
     let role = $page.props.auth.user.role;
     // let role = "RT";
     // "RT";
@@ -79,6 +80,8 @@
     let totalItems: number = items.length;
     let startPage: number;
     let endPage: number;
+
+    let currentPage = 1;
 
     const title = "Lihat Data Warga";
 
@@ -143,8 +146,9 @@
     ) => {
         try {
             if (role == "RT") id = $page.props.auth.user.rt_id;
+            // await getDataByRT(id,landing)
 
-            let url = `/api/rt/${id}`;
+            let url = `/api/rt/${currentPage}/${id}`;
 
             if (!custom) {
                 const response = await axios.get(url, {
@@ -177,7 +181,7 @@
                         });
                     }
 
-                    return landingData;
+                    return { data: landingData, length: landingData.length };
                 }
 
                 return response.data;
@@ -192,9 +196,18 @@
         }
     };
 
+    const initPage = async () => {
+        if (role == "RT") {
+            data = await getData("", true);
+        } else {
+            data = await getData();
+        }
+    };
+
     onMount(async () => {
         // Call renderPagination when the component initially mounts
         renderPagination(items.length);
+        await initPage();
     });
 
     $: currentPageItems = items.slice(
@@ -207,7 +220,6 @@
     );
 
     const getWCV = async (id: string = "") => {
-        const token = getCookie("token");
         const response = await axios.get(`/api/rt/cvl/${id}`, {
             headers: {
                 Accept: "application/json",
@@ -227,7 +239,9 @@
         return response.data;
     };
 
-    export const rebuild = () => {
+    export const rebuild = async () => {
+        await initPage();
+
         builder = {};
     };
 
@@ -244,7 +258,7 @@
     </title>
 </svelte:head>
 
-<Layout active={title}>
+<Layout>
     <TableSearch
         placeholder="Cari Warga"
         hoverable={true}
@@ -264,7 +278,7 @@
             >
         </div>
 
-        <Create bind:showState={addCivilian} />
+        <Create bind:showState={addCivilian} on:comp={rebuild} />
 
         <TableHead>
             {#if role === "RT"}
@@ -275,7 +289,9 @@
                 <TableHeadCell class="text-center" width="20%"
                     >Status Kependudukan</TableHeadCell
                 >
-                <!-- <TableHeadCell class="text-center">Status Penduduk</TableHeadCell> -->
+                <TableHeadCell class="text-center"
+                    >Status Penduduk</TableHeadCell
+                >
                 <TableHeadCell class="sr-only"></TableHeadCell>
             {:else}
                 <TableHeadCell>RT</TableHeadCell>
@@ -285,15 +301,17 @@
         </TableHead>
         <TableBody>
             {#key builder}
-                {#if role === "RT"}
-                    {#await getData("", true) then data}
-                        {#each data as item, idx}
+                {#if data}
+                    {#if role === "RT"}
+                        {#each data.data as item, idx}
                             <TableBodyRow>
                                 <TableBodyCell class="max-w-xs truncate"
                                     >{item.fullName}</TableBodyCell
                                 >
                                 <TableBodyCell>{item.address}</TableBodyCell>
-                                <TableBodyCell class="text-center">{item.job}</TableBodyCell>
+                                <TableBodyCell class="text-center"
+                                    >{item.job}</TableBodyCell
+                                >
                                 {#if item.residentstatus == "PermanentResident"}
                                     <TableBodyCell class="text-center">
                                         <Badge color="green">Tetap</Badge>
@@ -307,24 +325,6 @@
                                         <Badge color="yellow">Kos</Badge>
                                     </TableBodyCell>
                                 {/if}
-                                <!-- {#if item.status == "Aktif"}
-                                    <TableBodyCell class="text-center">
-                                        <Badge color="green"
-                                            >{item.status}</Badge
-                                        >
-                                    </TableBodyCell>
-                                {/if} -->
-                                <!-- {#if item.status == "Meninggal"}
-                                    <TableBodyCell class="text-center">
-                                        <Badge color="red">{item.status}</Badge>
-                                    </TableBodyCell>
-                                {:else if item.status == "Pindah"}
-                                    <TableBodyCell class="text-center">
-                                        <Badge color="yellow"
-                                            >{item.status}</Badge
-                                        >
-                                    </TableBodyCell>
-                                {/if} -->
 
                                 <TableBodyCell class="text-end">
                                     <Button
@@ -338,7 +338,6 @@
                                             modalFamily = true;
                                         }}>Detail</Button
                                     >
-                                    <!-- tampilan edit keluarga? -->
                                     <Button
                                         color="yellow"
                                         on:click={() => {
@@ -356,10 +355,8 @@
                                 </TableBodyCell>
                             </TableBodyRow>
                         {/each}
-                    {/await}
-                {:else}
-                    {#await getData() then item}
-                        {#each item.data as { id, leader_id, created_at, created_by, number, updated_at, updated_by, deleted_at, deleted_by }, idx}
+                    {:else}
+                        {#each data.data as { id, leader_id, created_at, created_by, number, updated_at, updated_by, deleted_at, deleted_by }, idx}
                             <TableBodyRow>
                                 <TableBodyCell>RT. {number}</TableBodyCell>
                                 <TableBodyCell
@@ -385,12 +382,11 @@
                                                 modalFamily = true;
                                             }}>Detail</Button
                                         >
-                                        <!-- tampilan edit keluarga? -->
                                         <Button color="yellow">Edit</Button>
                                         <Button
                                             color="red"
                                             on:click={() => {
-                                                selected = item.id;
+                                                selected = id;
                                                 modalDelete = true;
                                             }}>Hapus</Button
                                         >
@@ -403,25 +399,11 @@
                                                 modalFamily = true;
                                             }}>Detail</Button
                                         >
-                                        <!-- <Button -->
-                                        <!--     color="yellow" -->
-                                        <!--     on:click={() => { -->
-                                        <!--         selected = item.id; -->
-                                        <!--         modalEdit = true; -->
-                                        <!--     }}>Edit</Button -->
-                                        <!-- > -->
-                                        <!-- <Button -->
-                                        <!--     color="red" -->
-                                        <!--     on:click={() => { -->
-                                        <!--         selDel = item.id; -->
-                                        <!--         modalDelete = true; -->
-                                        <!--     }}>Hapus</Button -->
-                                        <!-- > -->
                                     {/if}
                                 </TableBodyCell>
                             </TableBodyRow>
                         {/each}
-                    {/await}
+                    {/if}
                 {/if}
             {/key}
         </TableBody>
@@ -489,38 +471,6 @@
                                                     >
                                                 </TableBodyCell>
                                             {/if}
-                                            <!-- {#if item.status == "Aktif"}
-                                                <TableBodyCell
-                                                    class="text-center"
-                                                >
-                                                    <Badge color="green"
-                                                        >{item.status}</Badge
-                                                    >
-                                                </TableBodyCell>
-                                            {/if}
-                                            {#if item.status == "Meninggal"}
-                                                <TableBodyCell
-                                                    class="text-center"
-                                                >
-                                                    <Badge color="red"
-                                                        >{item.status}</Badge
-                                                    >
-                                                </TableBodyCell>
-                                            {:else if item.status == "Pindah"}
-                                                <TableBodyCell
-                                                    class="text-center"
-                                                >
-                                                    <Badge color="yellow"
-                                                        >{item.status}</Badge
-                                                    >
-                                                </TableBodyCell>
-                                            {/if} -->
-<!-- 
-                                            <TableBodyCell class="text-center">
-                                                <Badge color="yellow"
-                                                    >{item.status}</Badge
-                                                >
-                                            </TableBodyCell> -->
 
                                             <TableBodyCell>
                                                 <Button
@@ -701,33 +651,47 @@
             class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0 p-4"
             aria-label="Table navigation"
         >
-            <span class="text-sm font-normal text-gray-500 dark:text-gray-400">
-                Showing
-                <span class="font-semibold text-gray-900 dark:text-white"
-                    >{startRange}-{endRange}</span
+            {#if data && role != "RT"}
+                <span
+                    class="text-sm font-normal text-gray-500 dark:text-gray-400"
                 >
-                of
-                <span class="font-semibold text-gray-900 dark:text-white"
-                    >{totalItems}</span
-                >
-            </span>
-            <ButtonGroup>
-                <Button
-                    on:click={loadPreviousPage}
-                    disabled={currentPosition === 0}
-                    ><ChevronLeftOutline /></Button
-                >
-                {#each pagesToShow as pageNumber}
-                    <Button on:click={() => goToPage(pageNumber)}
-                        >{pageNumber}</Button
+                    Showing
+                    <span class="font-semibold text-gray-900 dark:text-white">
+                        {currentPage < 2
+                            ? 1
+                            : data.data.length < 5
+                              ? data.length - data.data.length + 1
+                              : data.data.length + 1}
+                        -
+                        {data.data.length < 5
+                            ? data.length
+                            : data.data.length * currentPage}
+                    </span>
+                    of
+                    <span class="font-semibold text-gray-900 dark:text-white"
+                        >{data.length}</span
                     >
-                {/each}
-                <Button
-                    on:click={loadNextPage}
-                    disabled={totalPages === endPage}
-                    ><ChevronRightOutline /></Button
-                >
-            </ButtonGroup>
+                </span>
+                <ButtonGroup>
+                    <Button
+                        disabled={currentPage < 2}
+                        on:click={async () => {
+                            currentPage--;
+                            await initPage();
+                        }}><ChevronLeftOutline /></Button
+                    >
+                    <!-- {#each data.length as pageNumber} -->
+                    <Button disabled>{currentPage}</Button>
+                    <!-- {/each} -->
+                    <Button
+                        disabled={currentPage >= data.length / 5}
+                        on:click={async () => {
+                            currentPage++;
+                            await initPage();
+                        }}><ChevronRightOutline /></Button
+                    >
+                </ButtonGroup>
+            {/if}
         </div>
     </TableSearch>
 </Layout>

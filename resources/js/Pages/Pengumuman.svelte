@@ -52,10 +52,13 @@
     let startPage: number;
     let endPage: number;
 
+    let currentPage = 1;
     let selected = "";
+    let data: any;
 
     let builder = {};
-    const rebuild = () => {
+    const rebuild = async () => {
+        await initData();
         builder = {};
     };
 
@@ -100,22 +103,43 @@
         updateDataAndPagination();
     };
 
-    const getNewsData = async (id: string = "") => {
-        const response = await axios.get("/api/news", {
-            headers: {
-                Accept: "application/json",
+    const getNewsLanding = async () => {
+        const response = await axios.get(
+            `/api/news/p/${encodeURIComponent(currentPage)}`,
+            {
+                headers: {
+                    Accept: "application/json",
+                },
             },
-        });
+        );
 
         return response.data;
+    };
+
+    const getNewsData = async (id: string = "") => {
+        const response = await axios.get(
+            `/api/news/${encodeURIComponent(id)}`,
+            {
+                headers: {
+                    Accept: "application/json",
+                },
+            },
+        );
+
+        return response.data;
+    };
+
+    const initData = async () => {
+        data = await getNewsLanding();
     };
 
     $: startRange = currentPosition + 1;
     $: endRange = Math.min(currentPosition + itemsPerPage, totalItems);
 
-    onMount(() => {
+    onMount(async () => {
         // Call renderPagination when the component initially mounts
         renderPagination(items.length);
+        await initData();
     });
 
     $: currentPageItems = items.slice(
@@ -154,7 +178,7 @@
         </TableHead>
         <TableBody>
             {#key builder}
-                {#await getNewsData() then data}
+                {#if data}
                     {#each data.data as item}
                         <TableBodyRow>
                             <TableBodyCell>{item.title}</TableBodyCell>
@@ -191,7 +215,7 @@
                             </TableBodyCell>
                         </TableBodyRow>
                     {/each}
-                {/await}
+                {/if}
             {/key}
         </TableBody>
 
@@ -221,33 +245,47 @@
             class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0 p-4"
             aria-label="Table navigation"
         >
-            <span class="text-sm font-normal text-gray-500 dark:text-gray-400">
-                Showing
-                <span class="font-semibold text-gray-900 dark:text-white"
-                    >{startRange}-{endRange}</span
+            {#if data}
+                <span
+                    class="text-sm font-normal text-gray-500 dark:text-gray-400"
                 >
-                of
-                <span class="font-semibold text-gray-900 dark:text-white"
-                    >{totalItems}</span
-                >
-            </span>
-            <ButtonGroup>
-                <Button
-                    on:click={loadPreviousPage}
-                    disabled={currentPosition === 0}
-                    ><ChevronLeftOutline /></Button
-                >
-                {#each pagesToShow as pageNumber}
-                    <Button on:click={() => goToPage(pageNumber)}
-                        >{pageNumber}</Button
+                    Showing
+                    <span class="font-semibold text-gray-900 dark:text-white">
+                        {currentPage < 2
+                            ? 1
+                            : data.data.length < 5
+                              ? data.length - data.data.length + 1
+                              : data.data.length + 1}
+                        -
+                        {data.data.length < 5
+                            ? data.length
+                            : data.data.length * currentPage}
+                    </span>
+                    of
+                    <span class="font-semibold text-gray-900 dark:text-white"
+                        >{data.length}</span
                     >
-                {/each}
-                <Button
-                    on:click={loadNextPage}
-                    disabled={totalPages === endPage}
-                    ><ChevronRightOutline /></Button
-                >
-            </ButtonGroup>
+                </span>
+                <ButtonGroup>
+                    <Button
+                        disabled={currentPage < 2}
+                        on:click={async () => {
+                            currentPage--;
+                            await initData();
+                        }}><ChevronLeftOutline /></Button
+                    >
+                    <!-- {#each data.length as pageNumber} -->
+                    <Button disabled>{currentPage}</Button>
+                    <!-- {/each} -->
+                    <Button
+                        disabled={currentPage >= data.length / 5}
+                        on:click={async () => {
+                            currentPage++;
+                            await initData();
+                        }}><ChevronRightOutline /></Button
+                    >
+                </ButtonGroup>
+            {/if}
         </div>
     </TableSearch>
 </Layout>

@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Middleware\Resources\Environment;
 
+use App\Http\Controllers\NewsController;
 use Closure;
 use Illuminate\Http\Request;
 use Laravel\Sanctum\PersonalAccessToken;
@@ -27,7 +28,7 @@ class Update
         $pat = PersonalAccessToken::findToken($token);
         if (!$pat) abort(401, 'Unauthorized');;
 
-        if ($pat->cant([\App\Http\Controllers\EnvironmentInfoController::class, 'edit']) && !($pat->can('*'))) {
+        if ($pat->cant('NewsController:edit') && !($pat->can('*'))) {
             return $next(null);
         }
 

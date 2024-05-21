@@ -40,7 +40,7 @@
     };
 
     const getRT = async (id: string = "") => {
-        const response = await axios.get(`/api/rt/${encodeURIComponent(id)}`);
+        const response = await axios.get(`/api/rt/0/${encodeURIComponent(id)}`);
 
         return response.data;
     };
@@ -140,7 +140,9 @@
                         confirm = true;
                     }}>Selanjutnya</Button
                 >
-                <Button color="alternative">Batal</Button>
+                <Button color="alternative" on:click={() => (showState = false)}
+                    >Batal</Button
+                >
             </div>
             <div class={twMerge("text-center", confirm ? "" : "hidden")}>
                 <ExclamationCircleOutline

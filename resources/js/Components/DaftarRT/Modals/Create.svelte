@@ -33,7 +33,7 @@
     let qualifiedCandidates: any[] | undefined = [];
 
     const getRT = async () => {
-        const response = await axios.get(`/api/rt`);
+        const response = await axios.get(`/api/rt/0`);
 
         return response.data;
     };

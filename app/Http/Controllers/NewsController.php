@@ -7,10 +7,12 @@ use App\Http\Requests\Resources\Environment\Delete;
 use App\Http\Requests\Resources\Environment\Update;
 use App\Models\News;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Intervention\Image\Laravel\Facades\Image;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Laravel\Sanctum\PersonalAccessToken;
+use ReflectionClass;
 
 class NewsController extends Controller
 {
@@ -19,9 +21,38 @@ class NewsController extends Controller
         return Inertia::render('Auth/RT');
     }
 
-    public function get($filter = null)
+    public function manageNewsView(Request $request)
+    {
+        $token = null;
+        if (str_contains($request->url(), 'api')) {
+            $token = $request->bearerToken();
+            if (!$token) {
+                $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+                if (!$token) {
+                    return redirect('login');
+                }
+            }
+        } else {
+            $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+
+            if (!$token) {
+                return redirect('login');
+            }
+        }
+
+        $pat = PersonalAccessToken::findToken($token);
+
+        if ($pat->cant((new ReflectionClass($this))->getShortName() . ':create') && $pat->cant((new ReflectionClass($this))->getShortName() . ':edit') && $pat->cant((new ReflectionClass($this))->getShortName() . ':destroy')) {
+            return abort(404);
+        }
+
+        return Inertia::render('Pengumuman');
+    }
+
+    public function get($page = 1, $filter = null)
     {
         $data = null;
+        $take = 5;
 
         if ($filter) {
             $data = News::where('id', $filter)->get()->first();
@@ -34,8 +65,25 @@ class NewsController extends Controller
 
     public function getlts()
     {
-        $data = News::orderByDesc('created_at')->get();
-        return Response()->json($data, 200);
+        $data = News::orderByDesc('created_at')->take(3)->get();
+        $length = $data->count();
+
+        return response()->json(['data' => $data, 'length' => $length]);
+    }
+
+    public function getPaged($page = 1)
+    {
+        $take = 5;
+
+        $data = News::withoutTrashed()
+            ->orderByDesc('created_at')
+            ->skip($page > 1 ? ($page - 1) * $take : 0)
+            ->take($take)
+            ->get();
+
+        $length = News::withoutTrashed()->count();
+
+        return response()->json(['data' => $data, 'length' => $length]);
     }
 
     public function create(Create $req)

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\Login;
 use App\Http\Controllers\FamilyController;
 use App\Http\Controllers\FinancialAssistanceController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -28,6 +29,12 @@ Route::get('/lp-profile', function () {
 });
 
 Route::get('/beranda', function () {
+    $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+
+    if (!$token) {
+        return redirect('login');
+    }
+
     return Inertia::render('HomePage');
 })->name('homepage');
 
@@ -35,53 +42,9 @@ Route::get('/404', function () {
     return Inertia::render('Page404');
 })->name('404');
 
-// profile
-Route::get('/profile', function () {
-    return Inertia::render('Profile');
-})->name('Profile');
-
-// warga
-Route::get('/status-pengaduan', function () {
-    return Inertia::render('StatusPengaduan');
-})->name('StatusPengaduan');
-Route::get('/status-pengajuan', function () {
-    return Inertia::render('StatusPengajuan');
-})->name('Statuspengajuan');
-Route::get('/status-bansos', function () {
-    return Inertia::render('StatusBansos');
-})->name('StatusBansos');
-
 // RT dan RW
-Route::get('/warga-rt', function () {
-    return Inertia::render('PendudukByRT');
-})->name('PendudukByRT');
-Route::get('/arsip-penduduk', function () {
-    return Inertia::render('ArsipPenduduk');
-})->name('ArsipPenduduk');
-Route::get('/daftar-pengaduan', function () {
-    return Inertia::render('DaftarPengaduan');
-})->name('DaftarPengaduan');
-Route::get('/daftar-pengajuan-surat', function () {
-    return Inertia::render('DaftarPermintaanSurat');
-})->name('DaftarPermintaanSurat');
-Route::get('/keuangan', function () {
-    return Inertia::render('KeuanganRT');
-})->name('KeuanganRT');
-Route::get('/daftar-bansos', function () {
-    return Inertia::render('DaftarBansos');
-})->name('DaftarBansos');
-Route::get('/pengumuman', function () {
-    return Inertia::render('Pengumuman');
-})->name('Pengumuman');
-Route::get('/kegiatan-warga', function () {
-    return Inertia::render('KegiatanWarga');
-})->name('KegiatanWarga');
 
-Route::get('/daftar-rt', function () {
-    return Inertia::render('DaftarRT');
-})->name('DaftarRT');
-
-Route::prefix('/auth')->group(fn () => [Route::post('/signin', Login::class)]);
+Route::prefix('/auth')->group(fn() => [Route::post('/signin', Login::class)]);
 
 function loadRoutesWEB($dir)
 {

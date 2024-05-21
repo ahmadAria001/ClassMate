@@ -37,7 +37,7 @@
         <h5
             class="font-bold text-black dark:text-white text-xl truncate max-w-xs md:max-w-md"
         >
-            {user.username}
+            {user.fullName} ({user.username})
         </h5>
         <p
             class="font-light text-black dark:text-white outline-white dark:outline-black"

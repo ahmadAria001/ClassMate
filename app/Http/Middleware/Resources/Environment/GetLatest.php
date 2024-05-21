@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware\Resources\Environment;
 
+use App\Http\Controllers\NewsController;
 use Closure;
 use Illuminate\Http\Request;
 use Laravel\Sanctum\PersonalAccessToken;
@@ -28,7 +29,7 @@ class GetLatest
         $pat = PersonalAccessToken::findToken($token);
         if (!$pat) abort(401, 'Unauthorized');;
 
-        if ($pat->cant([\App\Http\Controllers\EnvironmentInfoController::class, 'getLatest']) && !($pat->can('*'))) {
+        if ($pat->cant('NewsController:get') && !($pat->can('*'))) {
          abort(401, 'Unauthorized');
         }
 

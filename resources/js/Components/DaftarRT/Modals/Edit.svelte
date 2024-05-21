@@ -7,18 +7,17 @@
         Label,
         Button,
         Select,
-        Toggle,
         Toast,
     } from "flowbite-svelte";
     import { CheckCircleSolid, CloseCircleSolid } from "flowbite-svelte-icons";
 
     import { createForm } from "felte";
-    import { validateSchema, validator } from "@felte/validator-zod";
+    import { validator } from "@felte/validator-zod";
     import { type UpdateSchema, updateSchema } from "@R/Utils/Schema/RT/Update";
 
-    import { twMerge } from "tailwind-merge";
     import { createEventDispatcher, onMount } from "svelte";
     import { page } from "@inertiajs/svelte";
+    import { writable } from "svelte/store";
 
     const dispatch = createEventDispatcher();
     const axios = axiosInstance.create({ withCredentials: true });
@@ -35,7 +34,7 @@
     let selected: any = "";
 
     const getRT = async (id: string = "") => {
-        const response = await axios.get(`/api/rt/${encodeURIComponent(id)}`);
+        const response = await axios.get(`/api/rt/0/${encodeURIComponent(id)}`);
 
         return response.data;
     };
@@ -129,7 +128,14 @@
     });
 </script>
 
-<Modal title="Edit RT" bind:open={showState}>
+<Modal
+    title="Edit RT"
+    bind:open={showState}
+    on:close={() => {
+        selected = null;
+        console.log(selected);
+    }}
+>
     {#await getRT(target) then data}
         <!-- {#await buildOptions() then ops} -->
         <form method="POST" use:form>

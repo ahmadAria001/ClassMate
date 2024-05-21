@@ -67,7 +67,7 @@ class Login extends Controller
                         'DocumentationController:__invoke','DocumentationController:get','DocumentationController:create','DocumentationController:edit','DocumentationController:destroy',
                         'DocRequestController:__invoke','DocRequestController:get','DocRequestController:create','DocRequestController:edit','DocRequestController:destroy',
                         'FinancialAssistanceController:__invoke','FinancialAssistanceController:get','FinancialAssistanceController:create','FinancialAssistanceController:edit','FinancialAssistanceController:destroy',
-                        'CivilianController:__invoke,CivilianController:get,CivilianController:create,CivilianController:edit,CivilianController:destroy',
+                        'CivilianController:__invoke','CivilianController:get','CivilianController:create','CivilianController:edit','CivilianController:destroy',
                         'RtController:__invoke','RtController:get','RtController:create','RtController:edit','RtController:destroy',
                         'ProfileImageController:get','ProfileImageController:create','ProfileImageController:edit','ProfileImageController:destroy',
                         'PasswordController:reset',

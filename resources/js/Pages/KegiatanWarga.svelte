@@ -13,14 +13,17 @@
         Label,
         Input,
         ButtonGroup,
+        Popover,
     } from "flowbite-svelte";
     import {
         ChevronLeftOutline,
         ChevronRightOutline,
+        QuestionCircleSolid,
     } from "flowbite-svelte-icons";
 
     import axiosInstance from "axios";
     import Create from "@C/Kegiatan/Modals/Create.svelte";
+    import Edit from "@C/Kegiatan/Modals/Edit.svelte";
 
     const axios = axiosInstance.create({ withCredentials: true });
     let builder = {};
@@ -61,6 +64,8 @@
     let endPage: number;
     let currentPage = 1;
 
+    let selected: string | null = null;
+
     const getRequestDocs = async (page = 1) => {
         const response = await axios.get(
             `/api/docs/activity/p/${encodeURIComponent(page)}`,
@@ -71,7 +76,6 @@
 
     const initData = async () => {
         data = await getRequestDocs(currentPage);
-        console.log(data);
     };
 
     const updateDataAndPagination = () => {
@@ -195,7 +199,18 @@
                 {#if data}
                     {#each data.data as item, idx}
                         <TableBodyRow>
-                            <TableBodyCell>{item.name}</TableBodyCell>
+                            <TableBodyCell>
+                                <div
+                                    class="flex justify-between align-middle gap-2"
+                                >
+                                    <span class="w-full truncate">
+                                        {item.name}
+                                    </span>
+                                    <QuestionCircleSolid
+                                        id={`title-${item.id}`}
+                                    />
+                                </div>
+                            </TableBodyCell>
                             <TableBodyCell>
                                 {item.location}
                             </TableBodyCell>
@@ -203,108 +218,100 @@
                                 class="text-center uppercase flex justify-center"
                             >
                                 <span class="text-center">
-                                    {dateFormatter(item.startDate)}
+                                    {dateFormatter(item.startDate * 1000)}
                                     <br />
                                     {new Date(
-                                        item.startDate,
+                                        item.startDate * 1000,
                                     ).toLocaleTimeString(undefined, {
                                         hour12: false,
                                     })}
                                 </span>
                                 <span class="ms-5 text-center">
-                                    {dateFormatter(item.endDate)}
+                                    {dateFormatter(item.endDate * 1000)}
                                     <br />
-                                    {new Date(item.endDate).toLocaleTimeString(
-                                        undefined,
-                                        {
-                                            hour12: false,
-                                        },
-                                    )}
+                                    {new Date(
+                                        item.endDate * 1000,
+                                    ).toLocaleTimeString(undefined, {
+                                        hour12: false,
+                                    })}
                                 </span>
                             </TableBodyCell>
-                            <!-- <TableBodyCell class="text-center"> -->
-                            <!--     {new Date(item.endDate).toLocaleDateString()} -->
-                            <!-- </TableBodyCell> -->
                             <TableBodyCell>
                                 <Button
                                     color="blue"
                                     on:click={() => {
+                                        selected = item.id;
                                         modalEdit = true;
                                     }}>Edit Data</Button
                                 >
                             </TableBodyCell>
                         </TableBodyRow>
+
+                        <Popover
+                            class="w-64 text-sm text-white"
+                            title="Deskripsi"
+                            triggeredBy={`#title-${item.id}`}
+                        >
+                            {item.docs_id.description}
+                        </Popover>
                     {/each}
                 {/if}
             {/key}
         </TableBody>
-
-        <!-- modal edit -->
-
-        <Modal title="Edit Kegiatan" bind:open={modalEdit} autoclose>
-            <form method="POST">
-                <div class="grid md:grid-cols-2 md:gap-6">
-                    <div class="mb-4">
-                        <Label for="activityName" class="mb-2"
-                            >Nama Kegiatan</Label
-                        >
-                        <Input id="activityName" placeholder="Nama Kegiatan" />
-                    </div>
-                    <div class="mb-4">
-                        <Label for="location" class="mb-2">Lokasi</Label>
-                        <Input id="location" placeholder="Lokasi" />
-                    </div>
-                </div>
-                <div class="grid md:grid-cols-2 md:gap-6">
-                    <div class="mb-4">
-                        <Label for="time" class="mb-2">Waktu</Label>
-                        <Input id="time" placeholder="Waktu" />
-                    </div>
-                    <div class="mb-4">
-                        <Label for="date" class="mb-2">Tanggal</Label>
-                        <Input type="date" id="date" placeholder="Tanggal" />
-                    </div>
-                </div>
-                <div class="block flex">
-                    <Button type="submit" class="ml-auto">Simpan</Button>
-                </div>
-            </form>
-        </Modal>
-
         <div
             slot="footer"
             class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0 p-4"
             aria-label="Table navigation"
         >
-            <span class="text-sm font-normal text-gray-500 dark:text-gray-400">
-                Showing
-                <span class="font-semibold text-gray-900 dark:text-white"
-                    >{startRange}-{endRange}</span
+            {#if data}
+                <span
+                    class="text-sm font-normal text-gray-500 dark:text-gray-400"
                 >
-                of
-                <span class="font-semibold text-gray-900 dark:text-white"
-                    >{totalItems}</span
-                >
-            </span>
-            <ButtonGroup>
-                <Button
-                    on:click={loadPreviousPage}
-                    disabled={currentPosition === 0}
-                    ><ChevronLeftOutline /></Button
-                >
-                {#each pagesToShow as pageNumber}
-                    <Button on:click={() => goToPage(pageNumber)}
-                        >{pageNumber}</Button
+                    Showing
+                    <span class="font-semibold text-gray-900 dark:text-white">
+                        {currentPage < 2
+                            ? 1
+                            : data.data.length < 5
+                              ? data.length - data.data.length + 1
+                              : data.data.length + 1}
+                        -
+                        {data.data.length < 5
+                            ? data.length
+                            : data.data.length * currentPage}
+                    </span>
+                    of
+                    <span class="font-semibold text-gray-900 dark:text-white"
+                        >{data.length}</span
                     >
-                {/each}
-                <Button
-                    on:click={loadNextPage}
-                    disabled={totalPages === endPage}
-                    ><ChevronRightOutline /></Button
-                >
-            </ButtonGroup>
+                </span>
+                <ButtonGroup>
+                    <Button
+                        disabled={currentPage < 2}
+                        on:click={async () => {
+                            currentPage--;
+                            await initData();
+                        }}><ChevronLeftOutline /></Button
+                    >
+                    <!-- {#each data.length as pageNumber} -->
+                    <Button disabled>{currentPage}</Button>
+                    <!-- {/each} -->
+                    <Button
+                        disabled={currentPage >= data.length / 5}
+                        on:click={async () => {
+                            currentPage++;
+                            await initData();
+                        }}><ChevronRightOutline /></Button
+                    >
+                </ButtonGroup>
+            {/if}
         </div>
     </TableSearch>
 </Layout>
 
-<Create bind:showState={addActivity} on:comp={rebuild} />
+{#if addActivity}
+    <Create bind:showState={addActivity} on:comp={rebuild} />
+{/if}
+
+{#if selected && modalEdit}
+    <Edit bind:showState={modalEdit} bind:target={selected} on:comp={rebuild} />
+{/if}

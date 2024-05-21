@@ -12,12 +12,64 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Laravel\Sanctum\PersonalAccessToken;
+use ReflectionClass;
 
 class DocRequestController extends Controller
 {
-    public function __invoke()
+    public function __invoke(Request $request)
     {
-        return Inertia::render('');
+        $token = null;
+        if (str_contains($request->url(), 'api')) {
+            $token = $request->bearerToken();
+            if (!$token) {
+                $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+                if (!$token) {
+                    return redirect('login');
+                }
+            }
+        } else {
+            $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+
+            if (!$token) {
+                return redirect('login');
+            }
+        }
+
+        $pat = PersonalAccessToken::findToken($token);
+
+        if ($pat->cant((new ReflectionClass($this))->getShortName() . ':__invoke')) {
+            return abort(404);
+        }
+
+        return Inertia::render('StatusPengajuan');
+    }
+
+    public function manageReqView(Request $request)
+    {
+        $token = null;
+        if (str_contains($request->url(), 'api')) {
+            $token = $request->bearerToken();
+            if (!$token) {
+                $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+                if (!$token) {
+                    return redirect('login');
+                }
+            }
+        } else {
+            $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+
+            if (!$token) {
+                return redirect('login');
+            }
+        }
+
+        $pat = PersonalAccessToken::findToken($token);
+
+        if ($pat->cant((new ReflectionClass($this))->getShortName() . ':create') && $pat->cant((new ReflectionClass($this))->getShortName() . ':edit') && $pat->cant((new ReflectionClass($this))->getShortName() . ':destroy')) {
+            return abort(404);
+        }
+
+        return Inertia::render('DaftarPermintaanSurat');
     }
 
     public function get($filter = null)

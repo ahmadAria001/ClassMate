@@ -27,9 +27,11 @@ class Delete
         }
 
         $pat = PersonalAccessToken::findToken($token);
-        if (!$pat) abort(401, 'Unauthorized');
+        if (!$pat) {
+            abort(401, 'Unauthorized');
+        }
 
-        if ($pat->cant('FinancialAssistanceController:destroy') && !($pat->can('*')) && $pat->cant('RtController:create') ) {
+        if (!$pat->can('*') && $pat->cant('RtController:create')) {
             abort(401, 'Unauthorized');
         }
 

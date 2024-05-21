@@ -56,6 +56,8 @@ Route::prefix('/docs')->group(function () {
 
     Route::prefix('/activity')->group(function () {
         Route::get('/', [ActivityController::class, 'get'])->middleware(GetActivity::class);
+        Route::get('/lts', [ActivityController::class, 'getlts'])->middleware(GetActivity::class);
+
         Route::get('/{filter}', [ActivityController::class, 'get'])->middleware(GetActivity::class);
         Route::get('/p/{page}', [ActivityController::class, 'getPaged'])->middleware(GetActivity::class);
 

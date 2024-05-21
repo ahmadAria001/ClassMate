@@ -22,9 +22,11 @@
         createSchema,
     } from "./../../../Utils/Schema/Civils/Create";
     import { twMerge } from "tailwind-merge";
+    import { createEventDispatcher } from "svelte";
 
     export let showState = false;
 
+    const dispatch = createEventDispatcher();
     const axios = axiosInstance.create({ withCredentials: true });
     let err: { status: null | boolean; message: null | string } = {
         status: null,
@@ -60,6 +62,8 @@
 
             err = response.data;
             showState = false;
+            dispatch("comp");
+
             setTimeout(() => {
                 err = { status: null, message: null };
             }, 5000);

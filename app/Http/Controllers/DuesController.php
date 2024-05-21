@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Laravel\Sanctum\PersonalAccessToken;
+use ReflectionClass;
 
 class DuesController extends Controller
 {
@@ -30,6 +31,34 @@ class DuesController extends Controller
         }
 
         return Response()->json(['data' => $data], 200);
+    }
+
+    public function manageDuesView(Request $request)
+    {
+        $token = null;
+        if (str_contains($request->url(), 'api')) {
+            $token = $request->bearerToken();
+            if (!$token) {
+                $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+                if (!$token) {
+                    return redirect('login');
+                }
+            }
+        } else {
+            $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+
+            if (!$token) {
+                return redirect('login');
+            }
+        }
+
+        $pat = PersonalAccessToken::findToken($token);
+
+        if ($pat->cant((new ReflectionClass($this))->getShortName() . ':create') && $pat->cant((new ReflectionClass($this))->getShortName() . ':edit') && $pat->cant((new ReflectionClass($this))->getShortName() . ':destroy')) {
+            return abort(404);
+        }
+
+        return Inertia::render('KeuanganRT');
     }
 
     public function create(CreateDues $req)
@@ -69,7 +98,7 @@ class DuesController extends Controller
                     if (!$token) {
                         $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
                         if (!$token) {
-                            return Response()->json(['message'=>'Unauthorized'],401);
+                            return Response()->json(['message' => 'Unauthorized'], 401);
                         }
                     }
 
@@ -126,7 +155,7 @@ class DuesController extends Controller
                     if (!$token) {
                         $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
                         if (!$token) {
-                            return Response()->json(['message'=>'Unauthorized'],401);
+                            return Response()->json(['message' => 'Unauthorized'], 401);
                         }
                     }
 
@@ -181,7 +210,7 @@ class DuesController extends Controller
                     if (!$token) {
                         $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
                         if (!$token) {
-                            return Response()->json(['message'=>'Unauthorized'],401);
+                            return Response()->json(['message' => 'Unauthorized'], 401);
                         }
                     }
 

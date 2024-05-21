@@ -82,7 +82,10 @@
     let startPage: number;
     let endPage: number;
 
+    let data: any;
+    let currentPage = 1;
     let selected: string | null = null;
+    let builder = {};
 
     const updateDataAndPagination = () => {
         const currentPageItems = items.slice(
@@ -126,21 +129,35 @@
     };
 
     const getRT = async () => {
-        const response = await axios.get("/api/rt", {
-            headers: {
-                Accept: "application/json",
+        const response = await axios.get(
+            `/api/rt/${encodeURIComponent(currentPage)}`,
+            {
+                headers: {
+                    Accept: "application/json",
+                },
             },
-        });
+        );
 
         return response.data;
+    };
+
+    const initData = async () => {
+        data = await getRT();
+        selected = null;
+    };
+
+    const rebuild = async () => {
+        await initData();
+        builder = {};
     };
 
     $: startRange = currentPosition + 1;
     $: endRange = Math.min(currentPosition + itemsPerPage, totalItems);
 
-    onMount(() => {
+    onMount(async () => {
         // Call renderPagination when the component initially mounts
         renderPagination(items.length);
+        await initData();
     });
 
     $: currentPageItems = items.slice(
@@ -159,7 +176,7 @@
     {title}
 </svelte:head>
 
-<Layout active={title}>
+<Layout>
     <TableSearch
         placeholder="Cari Warga"
         hoverable={true}
@@ -178,8 +195,6 @@
                 }}>+ Tambah RT</Button
             >
         </div>
-        <Create bind:showState={addRT} />
-
         <TableHead>
             <TableHeadCell>Nama Lengkap</TableHeadCell>
             <TableHeadCell width="20%">Ketua RT</TableHeadCell>
@@ -187,85 +202,109 @@
             <TableHeadCell class="sr-only">Aksi</TableHeadCell>
         </TableHead>
         <TableBody>
-            {#await getRT() then data}
-                {#each data.data as item}
-                    <TableBodyRow>
-                        <TableBodyCell class="flex items-center">
-                            <Avatar
-                                src={item.leader_id?.pict
-                                    ? `/assets/uploads/${item.leader_id?.pict}`
-                                    : ""}
-                                class="mr-3"
-                            />
-                            {item.leader_id
-                                ? item.leader_id?.civilian_id?.fullName
-                                : "Tidak Ada"}
-                        </TableBodyCell>
-                        <TableBodyCell>RT. {item.number}</TableBodyCell>
-                        <TableBodyCell>
-                            {item.leader_id
-                                ? item.leader_id?.civilian_id?.address
-                                : "Tidak Ada"}
-                        </TableBodyCell>
-                        <TableBodyCell>
-                            <Button href="/warga-rt">Lihat Penduduk</Button>
-                            <Button
-                                color="yellow"
-                                on:click={() => {
-                                    modalEdit = true;
-                                    selected = item.id;
-                                }}>Edit</Button
-                            >
-                            <Button
-                                color="red"
-                                on:click={() => {
-                                    modalDelete = true;
-                                    selected = item.id;
-                                }}>Hapus</Button
-                            >
-                        </TableBodyCell>
-                    </TableBodyRow>
-                {/each}
-            {/await}
+            {#key builder}
+                {#if data}
+                    {#each data.data as item}
+                        <TableBodyRow>
+                            <TableBodyCell class="flex items-center">
+                                <Avatar
+                                    src={item.leader_id?.pict
+                                        ? `/assets/uploads/${item.leader_id?.pict}`
+                                        : ""}
+                                    class="mr-3"
+                                />
+                                {item.leader_id
+                                    ? item.leader_id?.civilian_id?.fullName
+                                    : "Tidak Ada"}
+                            </TableBodyCell>
+                            <TableBodyCell>RT. {item.number}</TableBodyCell>
+                            <TableBodyCell>
+                                {item.leader_id
+                                    ? item.leader_id?.civilian_id?.address
+                                    : "Tidak Ada"}
+                            </TableBodyCell>
+                            <TableBodyCell>
+                                <!-- <Button href="/warga-rt">Lihat Penduduk</Button> -->
+                                <Button
+                                    color="yellow"
+                                    on:click={() => {
+                                        modalEdit = true;
+                                        selected = item.id;
+                                    }}>Edit</Button
+                                >
+                                <Button
+                                    color="red"
+                                    on:click={() => {
+                                        modalDelete = true;
+                                        selected = item.id;
+                                    }}>Hapus</Button
+                                >
+                            </TableBodyCell>
+                        </TableBodyRow>
+                    {/each}
+                {/if}
+            {/key}
         </TableBody>
-
-        {#if selected}
-            <Edit bind:showState={modalEdit} bind:target={selected} />
-            <Delete bind:showState={modalDelete} bind:target={selected} />
-        {/if}
 
         <div
             slot="footer"
             class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0 p-4"
             aria-label="Table navigation"
         >
-            <span class="text-sm font-normal text-gray-500 dark:text-gray-400">
-                Showing
-                <span class="font-semibold text-gray-900 dark:text-white"
-                    >{startRange}-{endRange}</span
+            {#if data}
+                <span
+                    class="text-sm font-normal text-gray-500 dark:text-gray-400"
                 >
-                of
-                <span class="font-semibold text-gray-900 dark:text-white"
-                    >{totalItems}</span
-                >
-            </span>
-            <ButtonGroup>
-                <Button
-                    on:click={loadPreviousPage}
-                    disabled={currentPosition === 0}
-                    ><ChevronLeftOutline /></Button
-                >
-                {#each pagesToShow as pageNumber}
-                    <Button on:click={() => goToPage(pageNumber)}
-                        >{pageNumber}</Button
+                    Showing
+                    <span class="font-semibold text-gray-900 dark:text-white">
+                        {currentPage < 2
+                            ? 1
+                            : data.data.length < 5
+                              ? data.length - data.data.length + 1
+                              : data.data.length + 1}
+                        -
+                        {data.data.length < 5
+                            ? data.length
+                            : data.data.length * currentPage}
+                    </span>
+                    of
+                    <span class="font-semibold text-gray-900 dark:text-white"
+                        >{data.length}</span
                     >
-                {/each}
-                <Button
-                    on:click={loadNextPage}
-                    disabled={totalPages === endPage}
-                    ><ChevronRightOutline /></Button
-                >
-            </ButtonGroup>
+                </span>
+                <ButtonGroup>
+                    <Button
+                        disabled={currentPage < 2}
+                        on:click={async () => {
+                            currentPage--;
+                            await initData();
+                        }}><ChevronLeftOutline /></Button
+                    >
+                    <!-- {#each data.length as pageNumber} -->
+                    <Button disabled>{currentPage}</Button>
+                    <!-- {/each} -->
+                    <Button
+                        disabled={currentPage >= data.length / 5}
+                        on:click={async () => {
+                            currentPage++;
+                            await initData();
+                        }}><ChevronRightOutline /></Button
+                    >
+                </ButtonGroup>
+            {/if}
         </div>
     </TableSearch>
 </Layout>
+
+<Create bind:showState={addRT} on:comp={rebuild} />
+
+{#if selected && modalEdit}
+    <Edit bind:showState={modalEdit} bind:target={selected} on:comp={rebuild} />
+{/if}
+{#if selected && modalDelete}
+    <Delete
+        bind:showState={modalDelete}
+        bind:target={selected}
+        on:comp={rebuild}
+    />
+{/if}

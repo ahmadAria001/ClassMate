@@ -8,12 +8,36 @@ use App\Http\Requests\Resources\User\Update;
 use App\Models\Civilian;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Inertia\Inertia;
 use Laravel\Sanctum\PersonalAccessToken;
 
 class UserController extends Controller
 {
+    public function __invoke(Request $request)
+    {
+        $token = null;
+        if (str_contains($request->url(), 'api')) {
+            $token = $request->bearerToken();
+            if (!$token) {
+                $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+                if (!$token) {
+                    return redirect('login');
+                }
+            }
+        } else {
+            $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+
+            if (!$token) {
+                return redirect('login');
+            }
+        }
+
+        return Inertia::render('Profile');
+    }
+
     public function get($filter = null)
     {
         $data = null;

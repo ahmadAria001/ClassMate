@@ -12,12 +12,41 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Laravel\Sanctum\PersonalAccessToken;
+use ReflectionClass;
 
 class ActivityController extends Controller
 {
     public function __invoke()
     {
         return Inertia::render();
+    }
+
+    public function manageActView(Request $request)
+    {
+        $token = null;
+        if (str_contains($request->url(), 'api')) {
+            $token = $request->bearerToken();
+            if (!$token) {
+                $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+                if (!$token) {
+                    return redirect('login');
+                }
+            }
+        } else {
+            $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+
+            if (!$token) {
+                return redirect('login');
+            }
+        }
+
+        $pat = PersonalAccessToken::findToken($token);
+
+        if ($pat->cant((new ReflectionClass($this))->getShortName() . ':create') && $pat->cant((new ReflectionClass($this))->getShortName() . ':edit') && $pat->cant((new ReflectionClass($this))->getShortName() . ':destroy')) {
+            return abort(404);
+        }
+
+        return Inertia::render('KegiatanWarga');
     }
 
     public function get($filter = null)
@@ -33,12 +62,21 @@ class ActivityController extends Controller
         return Response()->json(['data' => $data], 200);
     }
 
+    public function getlts()
+    {
+        $data = Activity::with('docs_id')->orderByDesc('startDate')->take(3)->get();
+        $length = $data->count();
+
+        return response()->json(['data' => $data, 'length' => $length]);
+    }
+
     public function getPaged($page = 1)
     {
         $take = 5;
 
         $data = Activity::withoutTrashed()
             ->with('docs_id', 'created_by.civilian_id.rt_id', 'updated_by')
+            ->orderByDesc('startDate')
             ->skip($page > 1 ? ($page - 1) * $take : 0)
             ->take($take)
             ->get();
@@ -115,7 +153,6 @@ class ActivityController extends Controller
             $docs = Docs::withTrashed()
                 ->where('id', $data->docs_id)
                 ->first();
-            error_log($data);
             if ($data) {
                 //Handle Log Update
                 if (Auth::guard('web')->check()) {
@@ -123,12 +160,12 @@ class ActivityController extends Controller
                         'name' => $payload->has('name') ? $payload->get('name') : $data->endDate,
                         'startDate' => $payload->has('startDate') ? strtotime($payload->get('startDate')) : $data->startDate,
                         'endDate' => $payload->has('endDate') ? strtotime($payload->get('endDate')) : $data->endDate,
-                        'location' => $payload->has('location') ? strtotime($payload->get('location')) : $data->location,
+                        'location' => $payload->has('location') ? $payload->get('location') : $data->location,
                         'updated_by' => Auth::id(),
                     ]);
 
                     $docs->update([
-                        'description' => $payload->get('description') ? $payload->get('description') : $docs->description,
+                        'description' => $payload->has('description') ? $payload->get('description') : $docs->description,
                         'updated_by' => Auth::id(),
                     ]);
                 } else {
@@ -147,12 +184,12 @@ class ActivityController extends Controller
                         'name' => $payload->has('name') ? $payload->get('name') : $data->endDate,
                         'startDate' => $payload->has('startDate') ? strtotime($payload->get('startDate')) : $data->startDate,
                         'endDate' => $payload->has('endDate') ? strtotime($payload->get('endDate')) : $data->endDate,
-                        'location' => $payload->has('location') ? strtotime($payload->get('location')) : $data->location,
+                        'location' => $payload->has('location') ? $payload->get('location') : $data->location,
                         'updated_by' => $model->get('id')[0]->id,
                     ]);
 
                     $docs->update([
-                        'description' => $payload->get('description') ? $payload->get('description') : $docs->description,
+                        'description' => $payload->has('description') ? $payload->get('description') : $docs->description,
                         'updated_by' => $model->get('id')[0]->id,
                     ]);
                 }

@@ -17,12 +17,41 @@ use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 use Laravel\Sanctum\PersonalAccessToken;
+use ReflectionClass;
 
 class CivilianController extends Controller
 {
     public function __invoke(): Response
     {
         return Inertia::render('Auth/Civilian');
+    }
+
+    public function viewArchived(Request $request)
+    {
+        $token = null;
+        if (str_contains($request->url(), 'api')) {
+            $token = $request->bearerToken();
+            if (!$token) {
+                $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+                if (!$token) {
+                    return redirect('login');
+                }
+            }
+        } else {
+            $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+
+            if (!$token) {
+                return redirect('login');
+            }
+        }
+
+        $pat = PersonalAccessToken::findToken($token);
+
+        if ($pat->cant((new ReflectionClass($this))->getShortName() . ':get')) {
+            return abort(404);
+        }
+
+        return Inertia::render('ArsipPenduduk');
     }
 
     public function get($filter = null): JsonResponse

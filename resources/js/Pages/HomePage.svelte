@@ -2,6 +2,7 @@
     import Layout from "./Layout.svelte";
     import {
         Card,
+        Popover,
         Table,
         TableBody,
         TableBodyCell,
@@ -10,43 +11,63 @@
         TableHeadCell,
     } from "flowbite-svelte";
 
-    let announcement = [
-        {
-            title: "Perekrutan Anggota KPPS",
-            desc: "Pengumuman bagi seluruh masyarakat, dengan adanya Pemilihan Umum yang akan segera dilaksanakan, bagi yang berminat untuk menjadi anggota KPPS untuk mengambil form pendaftaran di rumah Ketua RW 03.",
-        },
-        {
-            title: "Pemilihan Calon ketua RT",
-            desc: "Pengumuman bagi seluruh masyarakat, dengan adanya Pemilihan Umum yang akan segera dilaksanakan, dimohon warga untuk berkumpul di rumah ketua RT masing-masing",
-        },
-        {
-            title: "Pengumuman 3",
-            desc: "Pengumuman bagi seluruh masyarakat, diharap tetap tabah",
-        },
-        {
-            title: "Pengumuman 4",
-            desc: "Pengumuman bagi seluruh masyarakat, kalian terbaik",
-        },
-    ];
+    import axiosInstance from "axios";
+    import { onMount } from "svelte";
+    import { QuestionCircleSolid } from "flowbite-svelte-icons";
 
-    let citizenActivity = [
-        {
-            id: 1,
-            nama: "Kerja Bakti",
-            lokasi: "JI. Rambutan - JI Mangga",
-            waktu: "08.00 - 10.00",
-            tanggal: "23 April 2024",
-        },
-        {
-            id: 2,
-            nama: "Rapat Karang Taruna",
-            lokasi: "Rumah Adit, JI. Manggis No. 8",
-            waktu: "19.00 - 20.00",
-            tanggal: "25 April 2024",
-        },
-    ];
-    let caColumn =
-        citizenActivity.length > 0 ? Object.keys(citizenActivity[0]) : [];
+    const axios = axiosInstance.create({ withCredentials: true });
+
+    let announcement: any;
+    let citizenActivity: any;
+
+    const getNews = async () => {
+        const response = await axios.get(`/api/news/lts`, {
+            headers: {
+                Accept: "application/json",
+            },
+        });
+
+        return response.data;
+    };
+
+    const getCitizenEvents = async () => {
+        const response = await axios.get(`/api/docs/activity/lts`);
+
+        return response.data;
+    };
+
+    const dateFormatter = (epoc: number) => {
+        const date = new Date(epoc);
+
+        const monthNames = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+        ];
+
+        const day = date.getDate();
+
+        const monthIndex = date.getMonth();
+        const monthName = monthNames[monthIndex];
+
+        const year = date.getFullYear();
+
+        return `${day} ${monthName} ${year}`;
+    };
+
+    onMount(async () => {
+        announcement = await getNews();
+        citizenActivity = await getCitizenEvents();
+    });
 </script>
 
 <Layout>
@@ -56,11 +77,15 @@
         >
             Pengumuman
         </h5>
-        {#each announcement.slice(0, 3) as { title, desc } (title)}
-            <h5 class="font-bold mt-2 text-black dark:text-white">{title}</h5>
-            <p class="mb-2">{desc}</p>
-            <hr />
-        {/each}
+        {#if announcement}
+            {#each announcement.data as item, idx}
+                <h5 class="font-bold mt-2 text-black dark:text-white">
+                    {item.title}
+                </h5>
+                <p class="mb-2">{item.desc}</p>
+                <hr />
+            {/each}
+        {/if}
     </Card>
     <Card class="mt-3 max-w-full">
         <h5
@@ -70,23 +95,63 @@
         </h5>
         <Table>
             <TableHead>
-                <!-- {#each caColumn as columns}
-                    <TableHeadCell>{columns}</TableHeadCell>
-                {/each} -->
                 <TableHeadCell>Nama</TableHeadCell>
                 <TableHeadCell>Lokasi</TableHeadCell>
                 <TableHeadCell>Waktu</TableHeadCell>
-                <TableHeadCell>Tanggal</TableHeadCell>
             </TableHead>
-            {#each citizenActivity as { id, nama, lokasi, waktu, tanggal } (id)}
+            {#if citizenActivity}
                 <TableBody>
-                    <!-- <TableBodyCell>{id}</TableBodyCell> -->
-                    <TableBodyCell>{nama}</TableBodyCell>
-                    <TableBodyCell>{lokasi}</TableBodyCell>
-                    <TableBodyCell>{waktu}</TableBodyCell>
-                    <TableBodyCell>{tanggal}</TableBodyCell>
+                    {#each citizenActivity.data as item, idx}
+                        <TableBodyRow>
+                            <TableBodyCell>
+                                <div
+                                    class="flex justify-between align-middle gap-2"
+                                >
+                                    <span class="w-full truncate">
+                                        {item.name}
+                                    </span>
+                                    <QuestionCircleSolid
+                                        id={`title-${item.id}`}
+                                    />
+                                </div>
+                            </TableBodyCell>
+                            <TableBodyCell>
+                                {item.location}
+                            </TableBodyCell>
+                            <TableBodyCell
+                                class="text-center uppercase flex justify-center"
+                            >
+                                <span class="text-center">
+                                    {dateFormatter(item.startDate * 1000)}
+                                    <br />
+                                    {new Date(
+                                        item.startDate * 1000,
+                                    ).toLocaleTimeString(undefined, {
+                                        hour12: false,
+                                    })}
+                                </span>
+                                <span class="ms-5 text-center">
+                                    {dateFormatter(item.endDate * 1000)}
+                                    <br />
+                                    {new Date(
+                                        item.endDate * 1000,
+                                    ).toLocaleTimeString(undefined, {
+                                        hour12: false,
+                                    })}
+                                </span>
+                            </TableBodyCell>
+                        </TableBodyRow>
+
+                        <Popover
+                            class="w-64 text-sm text-white"
+                            title="Deskripsi"
+                            triggeredBy={`#title-${item.id}`}
+                        >
+                            {item.docs_id.description}
+                        </Popover>
+                    {/each}
                 </TableBody>
-            {/each}
+            {/if}
         </Table>
     </Card>
 </Layout>

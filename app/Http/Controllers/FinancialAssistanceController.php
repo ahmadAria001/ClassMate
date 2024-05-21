@@ -11,15 +11,66 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 use Laravel\Sanctum\PersonalAccessToken;
+use ReflectionClass;
 
 class FinancialAssistanceController extends Controller
 {
-    public function __invoke()
+    public function __invoke(Request $request)
     {
-        $data = FinancialAssistance::all();
+        $token = null;
+        if (str_contains($request->url(), 'api')) {
+            $token = $request->bearerToken();
+            if (!$token) {
+                $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+                if (!$token) {
+                    return redirect('login');
+                }
+            }
+        } else {
+            $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
 
-        return view('test.bansosList', ['data' => $data]);
+            if (!$token) {
+                return redirect('login');
+            }
+        }
+
+        $pat = PersonalAccessToken::findToken($token);
+
+        if ($pat->cant((new ReflectionClass($this))->getShortName() . ':__invoke')) {
+            return abort(404);
+        }
+
+        return Inertia::render('StatusBansos');
+    }
+
+    public function manageFAView(Request $request)
+    {
+        $token = null;
+        if (str_contains($request->url(), 'api')) {
+            $token = $request->bearerToken();
+            if (!$token) {
+                $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+                if (!$token) {
+                    return redirect('login');
+                }
+            }
+        } else {
+            $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+
+            if (!$token) {
+                return redirect('login');
+            }
+        }
+
+        $pat = PersonalAccessToken::findToken($token);
+
+        if ($pat->cant((new ReflectionClass($this))->getShortName() . ':create') && $pat->cant((new ReflectionClass($this))->getShortName() . ':edit') && $pat->cant((new ReflectionClass($this))->getShortName() . ':destroy')) {
+            return abort(404);
+        }
+
+        return Inertia::render('DaftarBansos');
     }
 
     // #GET
@@ -27,14 +78,11 @@ class FinancialAssistanceController extends Controller
     {
         $data = null;
 
-        // if ($filter)
-        //     $data = FinancialAssistance::with('civilian.family.rt_id')->find($filter);
-        // else
-        //     $data = FinancialAssistance::with('civilian.family.rt_id')->get();
-        if ($filter)
+        if ($filter) {
             $data = RT::with(['family.civil.fa'])->find($filter);
-        else
+        } else {
             $data = RT::with('family.civil.fa')->get();
+        }
 
         return Response()->json(['data' => $data], 200);
     }
@@ -60,29 +108,33 @@ class FinancialAssistanceController extends Controller
                     if (!$token) {
                         $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
                         if (!$token) {
-                            return Response()->json(['message'=>'Unauthorized'],401);
+                            return Response()->json(['message' => 'Unauthorized'], 401);
                         }
                     }
 
                     $pat = PersonalAccessToken::findToken($token);
                     $model = $pat->tokenable();
 
-                    $data->created_by = ($model->get('id'))[0]->id;
-                } else
+                    $data->created_by = $model->get('id')[0]->id;
+                } else {
                     $data->created_by = Auth::id();
+                }
 
                 $data->save();
 
                 return Response()->json([
                     'status' => true,
-                    'message' => 'Data Created'
+                    'message' => 'Data Created',
                 ]);
             }
 
-            return Response()->json([
-                'status' => false,
-                'message' => 'Data already exist'
-            ], 400);
+            return Response()->json(
+                [
+                    'status' => false,
+                    'message' => 'Data already exist',
+                ],
+                400,
+            );
         } catch (\Throwable $th) {
             error_log($th);
         }
@@ -94,7 +146,9 @@ class FinancialAssistanceController extends Controller
         $payload = $req->safe()->collect();
 
         try {
-            $data = FinancialAssistance::withTrashed()->find(['id' => $payload->get('id')])->first();
+            $data = FinancialAssistance::withTrashed()
+                ->find(['id' => $payload->get('id')])
+                ->first();
 
             if ($data) {
                 if (Auth::guard('web')->check()) {
@@ -103,14 +157,14 @@ class FinancialAssistanceController extends Controller
                         'tanggungan' => $payload->get('tanggungan'),
                         'alasan' => $payload->get('alasan'),
                         'status' => $payload->get('status'),
-                        'updated_by' => Auth::id()
+                        'updated_by' => Auth::id(),
                     ]);
                 } else {
                     $token = $req->bearerToken();
                     if (!$token) {
                         $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
                         if (!$token) {
-                            return Response()->json(['message'=>'Unauthorized'],401);
+                            return Response()->json(['message' => 'Unauthorized'], 401);
                         }
                     }
 
@@ -122,20 +176,23 @@ class FinancialAssistanceController extends Controller
                         'tanggungan' => $payload->get('tanggungan'),
                         'alasan' => $payload->get('alasan'),
                         'status' => $payload->get('status'),
-                        'updated_by' => ($model->get('id'))[0]->id
+                        'updated_by' => $model->get('id')[0]->id,
                     ]);
                 }
 
                 return Response()->json([
                     'status' => true,
-                    'message' => 'Data Updated'
+                    'message' => 'Data Updated',
                 ]);
             }
 
-            return Response()->json([
-                'status' => false,
-                'message' => 'Data Not found'
-            ], 400);
+            return Response()->json(
+                [
+                    'status' => false,
+                    'message' => 'Data Not found',
+                ],
+                400,
+            );
         } catch (\Throwable $th) {
             error_log($th);
         }
@@ -147,26 +204,28 @@ class FinancialAssistanceController extends Controller
         $payload = $req->safe()->collect();
 
         try {
-            $data = FinancialAssistance::withTrashed()->find(['id' => $payload->get('id')])->first();
+            $data = FinancialAssistance::withTrashed()
+                ->find(['id' => $payload->get('id')])
+                ->first();
 
             if ($data) {
                 if (Auth::guard('web')->check()) {
                     $data->update([
-                        'deleted_by' => Auth::id()
+                        'deleted_by' => Auth::id(),
                     ]);
                 } else {
                     $token = $req->bearerToken();
                     if (!$token) {
                         $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
                         if (!$token) {
-                            return Response()->json(['message'=>'Unauthorized'],401);
+                            return Response()->json(['message' => 'Unauthorized'], 401);
                         }
                     }
 
                     $pat = PersonalAccessToken::findToken($token);
                     $model = $pat->tokenable();
                     $data->update([
-                        'deleted_by' => ($model->get('id'))[0]->id
+                        'deleted_by' => $model->get('id')[0]->id,
                     ]);
                 }
 
@@ -176,14 +235,17 @@ class FinancialAssistanceController extends Controller
 
                 return Response()->json([
                     'status' => true,
-                    'message' => 'Data Deleted'
+                    'message' => 'Data Deleted',
                 ]);
             }
 
-            return Response()->json([
-                'status' => false,
-                'message' => 'Data Not found'
-            ], 400);
+            return Response()->json(
+                [
+                    'status' => false,
+                    'message' => 'Data Not found',
+                ],
+                400,
+            );
         } catch (\Throwable $th) {
             error_log($th);
         }
@@ -198,12 +260,11 @@ class FinancialAssistanceController extends Controller
 
     public function store(Request $request)
     {
-
         $data = FinancialAssistance::firstOrCreate([
             'request_by' => $request->request_by,
             'tanggungan' => $request->tanggungan,
             'alasan' => $request->alasan,
-            'status' => $request->statusRadio
+            'status' => $request->statusRadio,
         ]);
 
         return redirect('/bansos');

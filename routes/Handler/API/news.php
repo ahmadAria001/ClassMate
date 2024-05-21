@@ -13,6 +13,8 @@ Route::prefix('/news')->group(fn () => [
     Route::get('/lts', [NewsController::class, 'getlts'])->middleware(GetLatest::class),
     Route::get('/', [NewsController::class, 'get'])->middleware(Get::class),
     Route::get('/{filter}', [NewsController::class, 'get'])->middleware(Get::class),
+    Route::get('/p/{page}', [NewsController::class, 'getPaged'])->middleware(Get::class),
+
 
     Route::post('/', [NewsController::class, 'create'])->middleware(Create::class),
     Route::put('/', [NewsController::class, 'edit'])->middleware(Update::class),

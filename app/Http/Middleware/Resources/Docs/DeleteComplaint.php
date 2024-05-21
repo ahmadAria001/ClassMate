@@ -28,7 +28,7 @@ class DeleteComplaint
         $pat = PersonalAccessToken::findToken($token);
         if (!$pat) abort(401, 'Unauthorized');;
 
-        if ($pat->cant([\App\Http\Controllers\ComplaintController::class, 'destroy']) && !($pat->can('*'))) {
+        if ($pat->cant('ComplaintController:destroy') && !($pat->can('*'))) {
             return $next(null);
         }
 
