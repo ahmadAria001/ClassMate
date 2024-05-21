@@ -134,7 +134,7 @@
         hoverable={true}
         bind:inputValue={searchTerm}
         divClass="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg overflow-hidden"
-        ss="flex items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4"
+        innerDivClass="flex items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4"
         classInput="text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2  pl-10"
     >
         <div

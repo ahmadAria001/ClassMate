@@ -155,7 +155,7 @@
         </div>
         <TableHead>
             <TableHeadCell>Nama</TableHeadCell>
-            <TableHeadCell>Alamat</TableHeadCell>
+            <!-- <TableHeadCell>Alamat</TableHeadCell> -->
             <TableHeadCell>No. HP</TableHeadCell>
             <TableHeadCell>Permasalahan</TableHeadCell>
             <TableHeadCell class="text-center">Status</TableHeadCell>
@@ -169,10 +169,10 @@
                                 >{item.created_by.civilian_id
                                     .fullName}</TableBodyCell
                             >
-                            <TableBodyCell
+                            <!-- <TableBodyCell
                                 >{item.created_by.civilian_id
                                     .address}</TableBodyCell
-                            >
+                            > -->
                             <TableBodyCell
                                 >{item.created_by.civilian_id
                                     .phone}</TableBodyCell

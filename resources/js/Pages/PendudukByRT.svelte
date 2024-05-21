@@ -275,7 +275,7 @@
                 <TableHeadCell class="text-center" width="20%"
                     >Status Kependudukan</TableHeadCell
                 >
-                <TableHeadCell class="text-center">Status Penduduk</TableHeadCell>
+                <!-- <TableHeadCell class="text-center">Status Penduduk</TableHeadCell> -->
                 <TableHeadCell class="sr-only"></TableHeadCell>
             {:else}
                 <TableHeadCell>RT</TableHeadCell>
@@ -314,7 +314,7 @@
                                         >
                                     </TableBodyCell>
                                 {/if} -->
-                                {#if item.status == "Meninggal"}
+                                <!-- {#if item.status == "Meninggal"}
                                     <TableBodyCell class="text-center">
                                         <Badge color="red">{item.status}</Badge>
                                     </TableBodyCell>
@@ -324,7 +324,7 @@
                                             >{item.status}</Badge
                                         >
                                     </TableBodyCell>
-                                {/if}
+                                {/if} -->
 
                                 <TableBodyCell class="text-end">
                                     <Button
@@ -442,9 +442,6 @@
                         <TableHeadCell class="text-center"
                             >Status Kependudukan</TableHeadCell
                         >
-                        <TableHeadCell class="text-center"
-                            >Kondisi</TableHeadCell
-                        >
 
                         {#if role == "RT" || role == "Admin"}
                             <TableHeadCell class="sr-only">Aksi</TableHeadCell>
@@ -492,7 +489,7 @@
                                                     >
                                                 </TableBodyCell>
                                             {/if}
-                                            {#if item.status == "Aktif"}
+                                            <!-- {#if item.status == "Aktif"}
                                                 <TableBodyCell
                                                     class="text-center"
                                                 >
@@ -517,13 +514,13 @@
                                                         >{item.status}</Badge
                                                     >
                                                 </TableBodyCell>
-                                            {/if}
-
+                                            {/if} -->
+<!-- 
                                             <TableBodyCell class="text-center">
                                                 <Badge color="yellow"
                                                     >{item.status}</Badge
                                                 >
-                                            </TableBodyCell>
+                                            </TableBodyCell> -->
 
                                             <TableBodyCell>
                                                 <Button

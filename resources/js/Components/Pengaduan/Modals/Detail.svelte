@@ -182,7 +182,7 @@
                 </div>
 
                 <Popover
-                    class="w-64 text-sm text-white"
+                    class="w-64 text-sm text-black dark:text-white"
                     title="Alamat"
                     triggeredBy={`#pass-hint`}
                 >

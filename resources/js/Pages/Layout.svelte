@@ -576,7 +576,7 @@
     </Sidebar>
 </Drawer>
 
-<div class="dark:bg-gray-900 h-screen flex px-4 mx-auto w-full mb-14">
+<div class="bg-white dark:bg-gray-900 h-screen flex px-4 mx-auto w-full mb-14">
     <main class=" lg:ml-64 mt-4 w-full mx-auto" style="margin-top: 5rem">
         <slot />
     </main>

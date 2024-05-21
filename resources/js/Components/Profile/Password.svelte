@@ -133,7 +133,7 @@
             <div>
                 <div class="block flex mt-3">
                     <Popover
-                        class="w-64 text-sm text-white"
+                        class="w-64 text-sm text-white z-50"
                         title="Persyaratan Password"
                         triggeredBy={`#pass-hint`}
                     >
