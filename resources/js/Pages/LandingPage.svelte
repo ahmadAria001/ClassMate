@@ -10,9 +10,9 @@
         TableHeadCell,
     } from "flowbite-svelte";
     import { ArrowRightOutline, CheckOutline } from "flowbite-svelte-icons";
-    import Cards from "@C/LandingPage/cards/CardsAnnouncement.svelte";
-    import Navbar from "@C/LandingPage/nav/Navbar.svelte";
-    import Footer from "@C/LandingPage/Footer/Footer.svelte";
+    import Cards from "@C/LandingPage/CardsAnnouncement.svelte";
+    import Navbar from "@C/LandingPage/Navbar.svelte";
+    import Footer from "@C/LandingPage/Footer.svelte";
     let pengumumans = [
         {
             img: "https://media.kompas.tv/library/image/content_article/article_img/20231204072833.jpg",
