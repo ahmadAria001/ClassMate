@@ -1,5 +1,5 @@
 <script lang="ts">
-    export let imageUrl: string | undefined = undefined;
+    export let imageUrl: string | null | undefined = undefined;
     export let title: string | null | undefined = undefined;
     export let description: string | null | undefined = undefined;
     export let hrefUrl: string | null | undefined = undefined;
@@ -20,7 +20,7 @@
                 class="rounded-t-xl md:rounded-l-xl md:rounded-tr-none object-cover h-full w-full"
             />
         </div>
-        <div class="card-content p-4">
+        <div class="card-content p-4 w-full">
             <div
                 class="bg-white p-3 h-full rounded-lg flex flex-col justify-center"
             >

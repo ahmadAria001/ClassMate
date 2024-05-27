@@ -9,10 +9,11 @@ use App\Http\Middleware\Resources\RT\Update;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('/rt')->group(fn () => [
-    Route::get('/cvl/{page}',[RtController::class, 'withCivils'])->middleware(GetWCV::class),
-    Route::get('/cvl/{page}/{filter}',[RtController::class, 'withCivils'])->middleware(GetWCV::class),
+    Route::get('/cvl/{page}', [RtController::class, 'withCivils'])->middleware(GetWCV::class),
+    Route::get('/cvl/{page}/{filter}', [RtController::class, 'withCivils'])->middleware(GetWCV::class),
 
 
+    Route::get('/', [RtController::class, 'get'])->middleware(Get::class),
     Route::get('/{page}', [RtController::class, 'get'])->middleware(Get::class),
     Route::get('/{page}/{filter}', [RtController::class, 'get'])->middleware(Get::class),
 
