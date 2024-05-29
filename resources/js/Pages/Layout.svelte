@@ -79,6 +79,7 @@
                 children: {
                     Iuran: "/iuran",
                     // Pengeluaran: "/pengeluaran",
+                    "Catatan Pembayaran": "/log-pembayaran",
                 },
             },
             {
@@ -128,6 +129,7 @@
                 children: {
                     Iuran: "/iuran",
                     // Pengeluaran: "/pengeluaran",
+                    "Catatan Pembayaran": "/log-pembayaran",
                 },
             },
             {
@@ -177,6 +179,7 @@
                 children: {
                     Iuran: "/iuran",
                     // Pengeluaran: "/pengeluaran",
+                    "Catatan Pembayaran": "/log-pembayaran",
                 },
             },
             {

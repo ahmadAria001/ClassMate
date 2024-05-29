@@ -271,8 +271,8 @@ class DuesController extends Controller
         }
     }
 
-    public function expend()
+    public function log()
     {
-        return Inertia::render('Pengeluaran');
+        return Inertia::render('LogPembayaran');
     }
 }

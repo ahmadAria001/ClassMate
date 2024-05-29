@@ -139,7 +139,7 @@
 
 <Layout>
     <Badge>Masih dummy static</Badge>
-    <div
+    <!-- <div
         class="info-card grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
     >
         <CardInfo
@@ -170,37 +170,44 @@
             iconBgClass="bg-gray-900 dark:bg-gray-700"
             textColor="text-red-500"
         />
-    </div>
+    </div> -->
 
     <div
         class="bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md flex flex-col w-full"
     >
         <div class="w-full text-end flex justify-between p-4">
-            <p class="text-2xl font-bold text-black">List Pengeluaran</p>
-            <Button>+ Tambah Pengeluaran</Button>
+            <p class="text-2xl font-bold text-black">Catatan Pengeluaran</p>
         </div>
         <Table tableClass="mb-0">
             <TableHead>
                 <TableHeadCell>Nama Lengkap</TableHeadCell>
-                <TableHeadCell>Alamat</TableHeadCell>
-                <TableHeadCell class="text-center"
+                <TableHeadCell>Nama Petugas</TableHeadCell>
+                <!-- <TableHeadCell class="text-center"
                     >Status Kependudukan</TableHeadCell
-                >
-                <TableHeadCell>
+                > -->
+                <TableHeadCell class="text-center">Tanggal Bayar</TableHeadCell>
+                <TableHeadCell class="text-center">Bulan Bayar</TableHeadCell>
+                <TableHeadCell class="text-center">Status</TableHeadCell>
+                <!-- <TableHeadCell>
                     <span class="sr-only">Edit</span>
-                </TableHeadCell>
+                </TableHeadCell> -->
             </TableHead>
             <TableBody tableBodyClass="divide-y">
                 <!-- dummy -->
                 <TableBodyRow>
                     <TableBodyCell>Joko Anwar</TableBodyCell>
-                    <TableBodyCell>Jl. Pahlawan No. 456</TableBodyCell>
-                    <TableBodyCell class="text-center">
+                    <TableBodyCell>Nuri Darmayanti</TableBodyCell>
+                    <!-- <TableBodyCell class="text-center">
                         <Badge color="green">Tetap</Badge>
+                    </TableBodyCell> -->
+                    <TableBodyCell class="text-center">30-5-2024</TableBodyCell>
+                    <TableBodyCell class="text-center">Juni</TableBodyCell>
+                    <TableBodyCell class="text-center">
+                        <Badge color="green">Lunas</Badge>
                     </TableBodyCell>
-                    <TableBodyCell>
+                    <!-- <TableBodyCell>
                         <Button href="/iuran/detail">Detail</Button>
-                    </TableBodyCell>
+                    </TableBodyCell> -->
                 </TableBodyRow>
                 <!-- end dummy -->
             </TableBody>
