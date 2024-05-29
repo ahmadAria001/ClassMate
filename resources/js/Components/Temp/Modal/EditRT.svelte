@@ -8,7 +8,6 @@
 
     import BaseModal from "./BaseModal.svelte";
     import { UpdateRT } from "../../../schema";
-    import { setCookie, getCookie } from "@R/Utils/Cokies";
 
     export let showState = false;
     export let dataPointed: any = null;

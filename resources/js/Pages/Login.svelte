@@ -5,7 +5,7 @@
     import axios from "axios";
     import { page, router } from "@inertiajs/svelte";
     import { Login } from "@R/schema";
-    import { setCookie, getCookie } from "./../Utils/Cokies";
+
     import { Label, Input, Checkbox, A, Button } from "flowbite-svelte";
     export let site = {
         name: "KawanDesa",
@@ -106,7 +106,9 @@
                     >
                 {/if}
                 <div class="flex items-start mb-3">
-                    <Checkbox color="blue" class="dark:text-black">Ingat saya</Checkbox>
+                    <Checkbox color="blue" class="dark:text-black"
+                        >Ingat saya</Checkbox
+                    >
                     <a
                         href="/"
                         class="ml-auto text-sm font-bold text-blue-700 hover:underline dark:text-blue-500"

@@ -8,7 +8,6 @@
 
     import BaseModal from "./BaseModal.svelte";
     import { CreateDues } from "../../../schema";
-    import { setCookie, getCookie } from "@R/Utils/Cokies";
 
     export let showState = false;
     let err = {
