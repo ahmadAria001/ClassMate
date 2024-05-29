@@ -82,9 +82,9 @@
                 icon: ClipboardSolid,
                 isOpenItems: false,
                 children: {
-                    "Surat Ket. Warga": "/daftar-pengajuan-surat",
-                    "Laporan keuangan": "/keuangan",
-                    "Bantuan sosial": "/daftar-bansos",
+                    "Surat Keterangan": "/daftar-pengajuan-surat",
+                    "Laporan Keuangan": "/keuangan",
+                    "Bantuan Sosial": "/daftar-bansos",
                 },
             },
             {
@@ -201,7 +201,7 @@
                 icon: FileSolid,
                 isOpenItems: false,
                 children: {
-                    "Status pengaduan": "/status-pengaduan",
+                    "Status Pengaduan": "/status-pengaduan",
                 },
             },
             {

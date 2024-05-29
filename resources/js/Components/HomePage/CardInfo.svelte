@@ -4,7 +4,7 @@
     export let icon;
     export let iconBgClass: string = "bg-green-500";
     export let cardClass: string =
-        "flex items-center p-4 rounded-lg shadow-md ";
+        "flex items-center p-4 rounded-lg shadow-md dark:bg-gray-800";
 </script>
 
 <div class={cardClass}>
@@ -12,7 +12,7 @@
         <svelte:component this={icon} class="w-6 h-6" />
     </div>
     <div class="ml-4">
-        <h4 class="text-gray-600">{title}</h4>
-        <h2 class="text-2xl font-semibold">{value}</h2>
+        <h4 class="text-black dark:text-white">{title}</h4>
+        <h2 class="text-2xl text-black font-semibold dark:text-white">{value}</h2>
     </div>
 </div>

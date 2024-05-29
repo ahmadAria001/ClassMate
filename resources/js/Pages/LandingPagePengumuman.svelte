@@ -97,10 +97,10 @@
                     imageUrl={announcement.attachment ||
                         "https://redthread.uoregon.edu/files/original/affd16fd5264cab9197da4cd1a996f820e601ee4.png"}
                     hrefUrl="/"
-                    classCard="mb-3 d-block"
-                    title={announcement.title}
-                    description={announcement.desc}
-                    date={announcement.created_at}
+                    classCard="mb-3 d-block bg-gray-100"
+                    title={pengumuman.title}
+                    description={pengumuman.desc}
+                    date={pengumuman.date}
                 />
             {/each}
         </div>
