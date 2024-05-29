@@ -1,8 +1,50 @@
-<script>
+<script lang="ts">
     import { Heading, Select } from "flowbite-svelte";
     import Cards from "@C/LandingPage/CardsAnnouncement.svelte";
     import Navbar from "@C/LandingPage/Navbar.svelte";
     import Footer from "@C/LandingPage/Footer.svelte";
+    import axiosInstance from "axios";
+    import { onMount } from "svelte";
+
+    const axios = axiosInstance.create();
+    interface News {
+        title: string;
+        desc: string;
+        attachment: string | null;
+        created_at: string;
+    }
+
+    type NewsArray = News[];
+
+    let announcements: NewsArray = [];
+
+    const getNews = async (): Promise<NewsArray> => {
+        const response = await axios.get("/api/news/", {
+            headers: {
+                Accept: "application/json",
+            },
+        });
+
+        console.log("API Response:", response.data);
+
+        if (Array.isArray(response.data.data)) {
+            return response.data.data.map((item) => ({
+                ...item,
+                created_at: item.created_at.slice(0, 10), // ngecut date
+            }));
+        } else {
+            throw new Error("Unexpected response format");
+        }
+    };
+
+    onMount(async () => {
+        try {
+            announcements = await getNews();
+            // console.log(announcements);
+        } catch (error) {
+            console.error("Error fetching news:", error);
+        }
+    });
 
     let pengumumans = [
         {
@@ -50,11 +92,12 @@
         </div>
 
         <div class="group-card w-full pb-24">
-            {#each pengumumans.slice(0, 2) as pengumuman}
+            {#each announcements as announcement}
                 <Cards
-                    imageUrl={pengumuman.img}
+                    imageUrl={announcement.attachment ||
+                        "https://redthread.uoregon.edu/files/original/affd16fd5264cab9197da4cd1a996f820e601ee4.png"}
                     hrefUrl="/"
-                    classCard="mb-3 d-block"
+                    classCard="mb-3 d-block bg-gray-100"
                     title={pengumuman.title}
                     description={pengumuman.desc}
                     date={pengumuman.date}

@@ -11,7 +11,7 @@
 
 <a href={hrefUrl} class="rounded">
     <div
-        class="card flex flex-col md:flex-row bg-blue-100 rounded-xl {classCard}"
+        class="card flex flex-col md:flex-row bg-gray-900 rounded-xl {classCard}"
     >
         <div class="card-image md:min-w-72 md:max-w-72 md:min-h-80">
             <img

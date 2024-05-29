@@ -95,9 +95,9 @@
                 icon: ClipboardSolid,
                 isOpenItems: false,
                 children: {
-                    "Surat Ket. Warga": "/daftar-pengajuan-surat",
-                    "Laporan keuangan": "/keuangan",
-                    "Bantuan sosial": "/daftar-bansos",
+                    "Surat Keterangan": "/daftar-pengajuan-surat",
+                    "Laporan Keuangan": "/keuangan",
+                    "Bantuan Sosial": "/daftar-bansos",
                 },
             },
             {
@@ -234,7 +234,7 @@
                 icon: FileSolid,
                 isOpenItems: false,
                 children: {
-                    "Status pengaduan": "/status-pengaduan",
+                    "Status Pengaduan": "/status-pengaduan",
                 },
             },
             {
@@ -448,7 +448,7 @@
             <Avatar
                 id="avatar-menu"
                 src={$page.props.auth.user.pict
-                    ? `/assets/uploads/${$page.props.auth.user.pict}`
+                    ? `${$page.props.auth.user.pict}`
                     : ""}
                 class="cursor-pointer"
             />

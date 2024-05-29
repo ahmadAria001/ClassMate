@@ -1,7 +1,59 @@
-<script>
+<script lang="ts">
     import { Heading } from "flowbite-svelte";
     import Navbar from "@C/LandingPage/Navbar.svelte";
     import Footer from "@C/LandingPage/Footer.svelte";
+    import axiosInstance from "axios";
+    import { onMount } from "svelte";
+    const axios = axiosInstance.create();
+
+    interface Civil {
+        id: number;
+        nik: string;
+        fullName: string;
+        birthplace: string;
+        birthdate: number;
+        residentstatus: string;
+        nkk: string;
+        isFamilyHead: number;
+        rt_id: number;
+        address: string;
+        status: string;
+        phone: string;
+        religion: string;
+        job: string;
+        created_at: string;
+        created_by: number;
+        updated_at: string | null;
+        updated_by: number | null;
+        deleted_at: string | null;
+        deleted_by: number | null;
+    }
+
+    interface RT {
+        id: number;
+        leader_id: number | null;
+        created_at: string;
+        created_by: number;
+        number: number;
+        updated_at: string | null;
+        updated_by: number | null;
+        deleted_at: string | null;
+        deleted_by: number | null;
+        civils: Civil[];
+    }
+
+    let dataRT: RT[] = [];
+
+    const getRTData = async (): Promise<void> => {
+        try {
+            const response = await axios.get<{ data: RT[] }>("/api/rt");
+            dataRT = response.data.data;
+        } catch (error) {
+            console.error("Error fetching RT data:", error);
+        }
+    };
+
+    onMount(getRTData);
 
     let admins = [
         {
@@ -129,20 +181,25 @@
         <div
             class="list-rt grid grid-cols-2 md:grid-cols-3 gap-4 lg:gap-8 md:px-32 pb-24"
         >
-            {#each admins.slice(1) as admin}
+            {#each dataRT as rt}
                 <div class="rounded-lg shadow-lg">
                     <img
-                        src={admin.photoProfile}
+                        src={rt.civils[0]?.leader_id
+                            ? rt.civils[0].leader_id
+                            : "https://redthread.uoregon.edu/files/original/affd16fd5264cab9197da4cd1a996f820e601ee4.png"}
                         alt=""
                         class="w-full object-cover rounded-lg h-auto object-top"
                     />
                     <div class="p-4">
-                        <Heading tag="h5" class="mb-2">{admin.name}</Heading>
+                        <Heading tag="h5" class="mb-2"
+                            >{rt.civils[0]?.fullName}</Heading
+                        >
                         <p class="text-gray-500">
-                            Ketua {admin.position} / {admin.head}
+                            Ketua RT {rt.number} / {rt.civils[0]?.leader_id ||
+                                3}
                         </p>
-                        <p class="text-gray-500">{admin.number}</p>
-                        <p class="text-gray-500">{admin.address}</p>
+                        <p class="text-gray-500">{rt.civils[0].phone}</p>
+                        <p class="text-gray-500">{rt.civils[0].address}</p>
                     </div>
                 </div>
             {/each}

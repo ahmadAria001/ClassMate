@@ -5,7 +5,7 @@
     export let iconBgClass: string = "bg-green-500";
     export let textColor: string = "";
     export let cardClass: string =
-        "flex items-center p-4 rounded-lg shadow-md ";
+        "flex items-center p-4 rounded-lg shadow-md dark:bg-gray-800";
 </script>
 
 <div class={cardClass}>
@@ -14,6 +14,6 @@
     </div>
     <div class="ml-4">
         <h4 class="text-black font-bold">{title}</h4>
-        <h2 class={`text-2xl font-semibold ${textColor}`}>{value}</h2>
+        <h2 class={`text-2xl font-semibold ${textColor}`}>{value}</h2>\
     </div>
 </div>

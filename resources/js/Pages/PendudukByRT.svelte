@@ -35,8 +35,6 @@
     import axiosInstance from "axios";
     const axios = axiosInstance.create({ withCredentials: true });
 
-    import { setCookie, getCookie } from "@R/Utils/Cokies";
-
     let items = [
         {
             id: 1,
