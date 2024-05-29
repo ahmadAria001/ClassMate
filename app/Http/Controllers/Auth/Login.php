@@ -40,64 +40,64 @@ class Login extends Controller
                 if ($user->role === 'Admin') {
                     $token_abilities = [
                         '*'
-                ];
+                    ];
                 }
                 if ($user->role === 'RT') {
                     $token_abilities = [
-                        'ComplaintController:__invoke','ComplaintController:get','ComplaintController:create','ComplaintController:edit','ComplaintController:destroy',
-                        'ActivityController:__invoke','ActivityController:get','ActivityController:create','ActivityController:edit','ActivityController:destroy',
-                        'DocumentationController:__invoke','DocumentationController:get','DocumentationController:create','DocumentationController:edit','DocumentationController:destroy',
-                        'DocRequestController:__invoke','DocRequestController:get','DocRequestController:create','DocRequestController:edit','DocRequestController:destroy',
-                        'FinancialAssistanceController:__invoke','FinancialAssistanceController:get','FinancialAssistanceController:create','FinancialAssistanceController:edit','FinancialAssistanceController:destroy',
-                        'CivilianController:__invoke','CivilianController:get','CivilianController:create','CivilianController:edit','CivilianController:destroy',
-                        'RtController:__invoke','RtController:get','RtController:create','RtController:edit','RtController:destroy',
-                        'ProfileImageController:get','ProfileImageController:create','ProfileImageController:edit','ProfileImageController:destroy',
+                        'ComplaintController:__invoke', 'ComplaintController:get', 'ComplaintController:create', 'ComplaintController:edit', 'ComplaintController:destroy',
+                        'ActivityController:__invoke', 'ActivityController:get', 'ActivityController:create', 'ActivityController:edit', 'ActivityController:destroy',
+                        'DocumentationController:__invoke', 'DocumentationController:get', 'DocumentationController:create', 'DocumentationController:edit', 'DocumentationController:destroy',
+                        'DocRequestController:__invoke', 'DocRequestController:get', 'DocRequestController:create', 'DocRequestController:edit', 'DocRequestController:destroy',
+                        'FinancialAssistanceController:__invoke', 'FinancialAssistanceController:get', 'FinancialAssistanceController:create', 'FinancialAssistanceController:edit', 'FinancialAssistanceController:destroy',
+                        'CivilianController:__invoke', 'CivilianController:get', 'CivilianController:create', 'CivilianController:edit', 'CivilianController:destroy',
+                        'RtController:__invoke', 'RtController:get', 'RtController:create', 'RtController:edit', 'RtController:destroy',
+                        'ProfileImageController:get', 'ProfileImageController:create', 'ProfileImageController:edit', 'ProfileImageController:destroy',
                         'PasswordController:reset',
-                        'UserController:__invoke','UserController:get','UserController:create','UserController:edit','UserController:destroy',
-                        'NewsController:__invoke','NewsController:get','NewsController:create','NewsController:edit','NewsController:destroy',
-                        'DuesController:__invoke','DuesController:get','DuesController:create','DuesController:edit','DuesController:destroy',
-                        'DuesPaymentLogController:__invoke','DuesPaymentLogController:get','DuesPaymentLogController:create','DuesPaymentLogController:edit','DuesPaymentLogController:destroy',
-                        'CertificateController:__invoke','CertificateController:get','CertificateController:create','CertificateController:edit,CertificateController:destroy',
+                        'UserController:__invoke', 'UserController:get', 'UserController:create', 'UserController:edit', 'UserController:destroy',
+                        'NewsController:__invoke', 'NewsController:get', 'NewsController:create', 'NewsController:edit', 'NewsController:destroy',
+                        'DuesController:__invoke', 'DuesController:get', 'DuesController:create', 'DuesController:edit', 'DuesController:destroy',
+                        'DuesPaymentLogController:__invoke', 'DuesPaymentLogController:get', 'DuesPaymentLogController:create', 'DuesPaymentLogController:edit', 'DuesPaymentLogController:destroy',
+                        'CertificateController:__invoke', 'CertificateController:get', 'CertificateController:create', 'CertificateController:edit,CertificateController:destroy',
                     ];
                 }
                 if ($user->role === 'RW') {
                     $token_abilities = [
-                        'ComplaintController:__invoke','ComplaintController:get','ComplaintController:create','ComplaintController:edit','ComplaintController:destroy',
-                        'ActivityController:__invoke','ActivityController:get','ActivityController:create','ActivityController:edit','ActivityController:destroy',
-                        'DocumentationController:__invoke','DocumentationController:get','DocumentationController:create','DocumentationController:edit','DocumentationController:destroy',
-                        'DocRequestController:__invoke','DocRequestController:get','DocRequestController:create','DocRequestController:edit','DocRequestController:destroy',
-                        'FinancialAssistanceController:__invoke','FinancialAssistanceController:get','FinancialAssistanceController:create','FinancialAssistanceController:edit','FinancialAssistanceController:destroy',
-                        'CivilianController:__invoke','CivilianController:get','CivilianController:create','CivilianController:edit','CivilianController:destroy',
-                        'RtController:__invoke','RtController:get','RtController:create','RtController:edit','RtController:destroy',
-                        'ProfileImageController:get','ProfileImageController:create','ProfileImageController:edit','ProfileImageController:destroy',
+                        'ComplaintController:__invoke', 'ComplaintController:get', 'ComplaintController:create', 'ComplaintController:edit', 'ComplaintController:destroy',
+                        'ActivityController:__invoke', 'ActivityController:get', 'ActivityController:create', 'ActivityController:edit', 'ActivityController:destroy',
+                        'DocumentationController:__invoke', 'DocumentationController:get', 'DocumentationController:create', 'DocumentationController:edit', 'DocumentationController:destroy',
+                        'DocRequestController:__invoke', 'DocRequestController:get', 'DocRequestController:create', 'DocRequestController:edit', 'DocRequestController:destroy',
+                        'FinancialAssistanceController:__invoke', 'FinancialAssistanceController:get', 'FinancialAssistanceController:create', 'FinancialAssistanceController:edit', 'FinancialAssistanceController:destroy',
+                        'CivilianController:__invoke', 'CivilianController:get', 'CivilianController:create', 'CivilianController:edit', 'CivilianController:destroy',
+                        'RtController:__invoke', 'RtController:get', 'RtController:create', 'RtController:edit', 'RtController:destroy',
+                        'ProfileImageController:get', 'ProfileImageController:create', 'ProfileImageController:edit', 'ProfileImageController:destroy',
                         'PasswordController:reset',
-                        'UserController:__invoke','UserController:get','UserController:create','UserController:edit','UserController:destroy',
-                        'NewsController:__invoke','NewsController:get','NewsController:create','NewsController:edit','NewsController:destroy',
-                        'DuesController:__invoke','DuesController:get','DuesController:create','DuesController:edit','DuesController:destroy',
-                        'DuesPaymentLogController:__invoke','DuesPaymentLogController:get','DuesPaymentLogController:create','DuesPaymentLogController:edit','DuesPaymentLogController:destroy',
-                        'CertificateController:__invoke','CertificateController:get','CertificateController:create','CertificateController:edit,CertificateController:destroy',
+                        'UserController:__invoke', 'UserController:get', 'UserController:create', 'UserController:edit', 'UserController:destroy',
+                        'NewsController:__invoke', 'NewsController:get', 'NewsController:create', 'NewsController:edit', 'NewsController:destroy',
+                        'DuesController:__invoke', 'DuesController:get', 'DuesController:create', 'DuesController:edit', 'DuesController:destroy',
+                        'DuesPaymentLogController:__invoke', 'DuesPaymentLogController:get', 'DuesPaymentLogController:create', 'DuesPaymentLogController:edit', 'DuesPaymentLogController:destroy',
+                        'CertificateController:__invoke', 'CertificateController:get', 'CertificateController:create', 'CertificateController:edit,CertificateController:destroy',
                     ];
                 }
                 if ($user->role === 'Warga') {
                     $token_abilities = [
-                        'ComplaintController:__invoke','ComplaintController:get','ComplaintController:create',
-                        'DocRequestController:__invoke','DocRequestController:get','DocRequestController:create',
-                        'FinancialAssistanceController:__invoke','FinancialAssistanceController:get','FinancialAssistanceController:create','FinancialAssistanceController:edit',
-                        'CivilianController:__invoke','CivilianController:get','CivilianController:create','CivilianController:edit',
-                        'RtController:__invoke','RtController:get',
-                        'ProfileImageController:get','ProfileImageController:create','ProfileImageController:edit','ProfileImageController:destroy',
+                        'ComplaintController:__invoke', 'ComplaintController:get', 'ComplaintController:create',
+                        'DocRequestController:__invoke', 'DocRequestController:get', 'DocRequestController:create',
+                        'FinancialAssistanceController:__invoke', 'FinancialAssistanceController:get', 'FinancialAssistanceController:create', 'FinancialAssistanceController:edit',
+                        'CivilianController:__invoke', 'CivilianController:get', 'CivilianController:create', 'CivilianController:edit',
+                        'RtController:__invoke', 'RtController:get',
+                        'ProfileImageController:get', 'ProfileImageController:create', 'ProfileImageController:edit', 'ProfileImageController:destroy',
                         'PasswordController:reset',
-                        'UserController:__invoke','UserController:get','UserController:create','UserController:edit','UserController:destroy',
-                        'NewsController:__invoke','NewsController:get',
-                        'DuesController:__invoke','DuesController:get',
-                        'DuesPaymentLogController:__invoke','DuesPaymentLogController:get',
-                        'CertificateController:__invoke','CertificateController:get',
-                        'RtController:__invoke','RtController:get',
+                        'UserController:__invoke', 'UserController:get', 'UserController:create', 'UserController:edit', 'UserController:destroy',
+                        'NewsController:__invoke', 'NewsController:get',
+                        'DuesController:__invoke', 'DuesController:get',
+                        'DuesPaymentLogController:__invoke', 'DuesPaymentLogController:get',
+                        'CertificateController:__invoke', 'CertificateController:get',
+                        'RtController:__invoke', 'RtController:get',
                     ];
                 }
 
                 $generatedToken = $user->createToken('access_token', $token_abilities, now()->addWeek());
-                $cookie = Cookie('token', $generatedToken->plainTextToken, Carbon::now()->addWeek()->getTimestamp(), '/', null, null, true);
+                $cookie = Cookie('token', $generatedToken->plainTextToken, Carbon::now()->addWeek()->getTimestamp(), '/', null, null, false);
 
                 error_log($generatedToken->plainTextToken);
 

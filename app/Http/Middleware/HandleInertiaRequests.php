@@ -6,6 +6,7 @@ use App\Models\Civilian;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Middleware;
 use Laravel\Sanctum\PersonalAccessToken;
@@ -92,7 +93,8 @@ class HandleInertiaRequests extends Middleware
                         'fullName' => $user->fullName,
                         'nik' => $user->nik,
                         'rt_id' => $rt,
-                        'pict' => $model->get('pict')->first()->pict,
+                        'pict' => asset('storage' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . $model->get('pict')->first()->pict),
+                        // . DIRECTORY_SEPARATOR . 'public'
                         'civ_id' => $user->id,
                     ];
                 } else {

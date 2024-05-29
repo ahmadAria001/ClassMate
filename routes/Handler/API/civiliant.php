@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('civilian')->group(function () {
-    Route::prefix('/archive')->group(fn() => [
+    Route::prefix('/archive')->group(fn () => [
         Route::get('/', [CivilianController::class, 'getArchived'])->middleware(CiviliantGet::class),
         Route::get('/{filter}', [CivilianController::class, 'getArchived'])->middleware(CiviliantGet::class),
         Route::get('/{filter}/{byRT}', [CivilianController::class, 'getArchived'])->middleware(CiviliantGet::class),
@@ -18,6 +18,7 @@ Route::prefix('civilian')->group(function () {
 
     Route::get('/', [CivilianController::class, 'get'])->middleware(CiviliantGet::class);
     Route::get('/{filter}', [CivilianController::class, 'get'])->middleware(CiviliantGet::class);
+    Route::get('/head/{rt_id}', [CivilianController::class, 'getFamilyHead'])->middleware(CiviliantGet::class);
 
     Route::get('/{column}/{operator}/{value}', [CivilianController::class, 'getCustom'])->middleware(CiviliantGet::class);
 

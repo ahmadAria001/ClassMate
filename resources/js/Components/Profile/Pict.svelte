@@ -17,6 +17,8 @@
         builder = {};
         dispatch("comp");
     };
+
+    console.log($page.props);
 </script>
 
 <Card
@@ -28,7 +30,7 @@
         <img
             src={!data.data[0].pict
                 ? "https://t3.ftcdn.net/jpg/05/16/27/58/360_F_516275801_f3Fsp17x6HQK0xQgDQEELoTuERO4SsWV.jpg"
-                : `/assets/uploads/${data.data[0].pict}`}
+                : `${$page.props.auth.user.pict}`}
             alt="Foto profil"
             class="w-24 h-24 rounded-lg mr-3 object-center border-white border-2"
         />

@@ -415,7 +415,7 @@
             <Avatar
                 id="avatar-menu"
                 src={$page.props.auth.user.pict
-                    ? `/assets/uploads/${$page.props.auth.user.pict}`
+                    ? `${$page.props.auth.user.pict}`
                     : ""}
                 class="cursor-pointer"
             />
