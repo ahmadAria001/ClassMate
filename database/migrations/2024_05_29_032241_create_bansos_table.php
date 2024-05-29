@@ -8,18 +8,16 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('duesPaymentLog', function (Blueprint $table) {
+        Schema::create('bansos', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('paid_by')->index('fk_payer_payment');
-            $table->unsignedBigInteger('dues_id')->index('fk_dues_payment');
-            $table->decimal('amount_paid', 13);
-            $table->decimal('exchange', 13)->default(0);
-            $table->decimal('debt', 13)->default(0);
+            $table->unsignedBigInteger('request_by')->index('fk_bansos_civilian');
+            $table->text('tanggungan')->nullable();
+            $table->text('alasan')->nullable();
+            $table->enum('status', ['Open', 'Approved', 'Rejected'])->default('Open');
+            $table->text('attachment')->nullable();
             $table->bigInteger('created_at');
             $table->unsignedBigInteger('created_by')->nullable()->index('fk_docs_user');
             $table->bigInteger('updated_at')->nullable();
@@ -31,11 +29,9 @@ return new class extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
-        Schema::dropIfExists('duesPaymentLog');
+        Schema::dropIfExists('bansos');
     }
 };

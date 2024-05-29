@@ -261,7 +261,7 @@
         </div>
         <div class="mb-4">
             <Label for="famhead" class="mb-2">Kepala Keluarga</Label>
-            {#if resstatval != "PermanentResident" || !resstatval}
+            {#if resstatval == "Kos" || !resstatval}
                 <Toggle
                     id="famhead"
                     onclick="return false"

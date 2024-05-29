@@ -8,16 +8,16 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('news', function (Blueprint $table) {
+        Schema::create('users', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->text('title');
-            $table->text('desc');
-            $table->text('attachment')->nullable();
+            $table->string('username', 50)->nullable();
+            $table->string('password');
+            $table->enum('role', ['RT', 'RW', 'Warga', 'Admin'])->nullable();
+            $table->unsignedBigInteger('civilian_id')->nullable()->index('fk_users_civilian');
+            $table->text('pict')->nullable();
             $table->bigInteger('created_at');
             $table->unsignedBigInteger('created_by')->nullable()->index('fk_user');
             $table->bigInteger('updated_at')->nullable();
@@ -29,11 +29,9 @@ return new class extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
-        Schema::dropIfExists('news');
+        Schema::dropIfExists('users');
     }
 };

@@ -8,18 +8,17 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('complaint', function (Blueprint $table) {
+        Schema::create('documentation', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('docs_id')->index('fk_complaint_docs');
-            $table->enum('complaintStatus', ['Resolved', 'Unresolved', 'Open'])->default('Open');
-            $table->text('attachment')->nullable();
+            $table->unsignedBigInteger('docs_id')->index('fk_documentantion_docs');
+            $table->enum('contentType', ['Complaint', 'Dues', 'Event', 'Administration'])->nullable();
+            $table->text('contentAttachment')->nullable();
+            $table->text('contentDesc')->nullable();
             $table->bigInteger('created_at');
-            $table->unsignedBigInteger('created_by')->nullable();
+            $table->unsignedBigInteger('created_by')->nullable()->index('fk_docs_user');
             $table->bigInteger('updated_at')->nullable();
             $table->unsignedBigInteger('updated_by')->nullable()->index('fk_docs_user_upd');
             $table->bigInteger('deleted_at')->nullable();
@@ -29,11 +28,9 @@ return new class extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
-        Schema::dropIfExists('complaint');
+        Schema::dropIfExists('documentation');
     }
 };

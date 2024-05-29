@@ -10,6 +10,7 @@ use App\Models\DocRequest;
 use App\Models\Docs;
 use App\Models\Documentation;
 use App\Models\Dues;
+use App\Models\DuesMember;
 use App\Models\DuesPaymentLog;
 use App\Models\FinancialAssistance;
 use App\Models\News;
@@ -114,6 +115,16 @@ class TableSeeder extends Seeder
             ]);
         }
 
+        for ($i = 1; $i <= 3; $i++) {
+            DuesMember::create([
+                'id' => $i,
+                'dues' => $i,
+                'member' => $i,
+                'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
+                'created_by' => $i,
+            ]);
+        }
+
         $paidBy = 1;
         $dues = 1;
 
@@ -127,11 +138,8 @@ class TableSeeder extends Seeder
             }
 
             DuesPaymentLog::create([
-                'dues_id' => $dues++,
-                'paid_by' => $paidBy++,
+                'dues_member' => $dues++,
                 'amount_paid' => $faker->numberBetween(0, 5000),
-                'exchange' => 0,
-                'debt' => 0,
                 'created_at' => Carbon::createFromDate($faker->dateTimeBetween('-5 years', 'now'))->getTimestamp(),
                 'created_by' => 6,
             ]);

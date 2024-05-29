@@ -8,15 +8,14 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('certificate', function (Blueprint $table) {
+        Schema::create('duesPaymentLog', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('request_by')->index('fk_certificate_created');
-            $table->text('desc');
+            $table->unsignedBigInteger('dues_member')->index('fk_dues_member');
+            $table->decimal('amount_paid', 13);
+            $table->decimal('paid_for', 13)->nullable();
             $table->bigInteger('created_at');
             $table->unsignedBigInteger('created_by')->nullable()->index('fk_docs_user');
             $table->bigInteger('updated_at')->nullable();
@@ -28,11 +27,9 @@ return new class extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
-        Schema::dropIfExists('certificate');
+        Schema::dropIfExists('duesPaymentLog');
     }
 };

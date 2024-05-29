@@ -12,11 +12,8 @@ class DuesPaymentLog extends Model
     use HasFactory, SoftDeletes;
     protected $table = 'duesPaymentLog';
     protected $fillable = [
-        'paid_by',
-        'dues_id',
+        'dues_member',
         'amount_paid',
-        'exchange',
-        'debt',
         'created_at',
         'created_by',
         'updated_at',
@@ -27,25 +24,21 @@ class DuesPaymentLog extends Model
 
     protected $dateFormat = 'U';
 
-    protected function paid_by(): BelongsTo
+    public function dues_member(): BelongsTo
     {
-        return $this->belongsTo(Civilian::class, 'paid_by', 'id');
+        return $this->belongsTo(DuesMember::class, 'dues_member', 'id');
     }
-    protected function paid_id(): BelongsTo
-    {
-        return $this->belongsTo(Dues::class, 'paid_id', 'id');
-    }
-    protected function created_by(): BelongsTo
+    public function created_by(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by', 'id');
     }
 
-    protected function updated_by(): BelongsTo
+    public function updated_by(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by', 'id');
     }
 
-    protected function deleted_by(): BelongsTo
+    public function deleted_by(): BelongsTo
     {
         return $this->belongsTo(User::class, 'deleted_by', 'id');
     }

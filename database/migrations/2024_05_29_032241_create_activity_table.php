@@ -8,21 +8,18 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('dues', function (Blueprint $table) {
+        Schema::create('activity', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->enum('typeDues', ['Security', 'TrashManagement', 'Event'])->nullable();
-            $table->text('description')->nullable();
-            $table->decimal('amt_dues', 13)->nullable();
-            $table->decimal('amt_fund', 13)->nullable();
-            $table->boolean('status')->nullable();
-            $table->unsignedBigInteger('rt_id')->index('fk_dues_rt');
+            $table->unsignedBigInteger('docs_id')->index('fk_activity_docs');
+            $table->text('name')->nullable();
+            $table->bigInteger('startDate')->nullable();
+            $table->bigInteger('endDate')->nullable();
+            $table->text('location')->nullable();
             $table->bigInteger('created_at');
-            $table->unsignedBigInteger('created_by')->nullable()->index('fk_docs_user');
+            $table->unsignedBigInteger('created_by')->nullable()->index('fk_user');
             $table->bigInteger('updated_at')->nullable();
             $table->unsignedBigInteger('updated_by')->nullable()->index('fk_docs_user_upd');
             $table->bigInteger('deleted_at')->nullable();
@@ -32,11 +29,9 @@ return new class extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
-        Schema::dropIfExists('dues');
+        Schema::dropIfExists('activity');
     }
 };

@@ -7,6 +7,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Laravel\Facades\Image;
 use Laravel\Sanctum\PersonalAccessToken;
 
@@ -51,12 +52,22 @@ class ProfileImageController extends Controller
 
         $model = User::withoutTrashed()->where('id', $user)->first();
 
-        // File::makeDirectory(public_path('assets/uploads/'), 0755, true, true);
         $name = Carbon::now() . '_' . $image->getClientOriginalName();
-        $path = public_path('assets/uploads') . '/' . $name;
-        // [$width, $height] = getimagesize($image->getFileInfo());
 
-        Image::read($image)->resize(480, 480)->toJpeg()->save($path);
+        if (!Storage::directoryExists('assets' . DIRECTORY_SEPARATOR . 'uploads')) {
+            // File::makeDirectory(, 0755, true, true);
+            Storage::makeDirectory('assets' . DIRECTORY_SEPARATOR . 'uploads');
+        }
+
+        $path =
+            // public_path('storage') . DIRECTORY_SEPARATOR .
+            'assets' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR;
+        Storage::putFileAs($path, $image, $name);
+        // [$width, $height] = getimagesize($image->getFileInfo());
+        error_log($path);
+        // error_log(asset('storage/.gitignore'));
+
+        Image::read($image)->resize(480, 480)->toJpeg()->save($path . $name);
 
         $model->pict = $name;
         $model->save();

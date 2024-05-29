@@ -8,10 +8,8 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
         Schema::table('doc_request', function (Blueprint $table) {
             $table->foreign(['request_by'], 'fk_request_by')->references(['id'])->on('civilian')->onUpdate('restrict')->onDelete('restrict');
@@ -20,10 +18,8 @@ return new class extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
         Schema::table('doc_request', function (Blueprint $table) {
             $table->dropForeign('fk_request_by');

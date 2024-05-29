@@ -8,17 +8,13 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('documentation', function (Blueprint $table) {
+        Schema::create('certificate', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('docs_id')->index('fk_documentantion_docs');
-            $table->enum('contentType', ['Complaint', 'Dues', 'Event', 'Administration'])->nullable();
-            $table->text('contentAttachment')->nullable();
-            $table->text('contentDesc')->nullable();
+            $table->unsignedBigInteger('request_by')->index('fk_certificate_created');
+            $table->text('desc');
             $table->bigInteger('created_at');
             $table->unsignedBigInteger('created_by')->nullable()->index('fk_docs_user');
             $table->bigInteger('updated_at')->nullable();
@@ -30,11 +26,9 @@ return new class extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
-        Schema::dropIfExists('documentation');
+        Schema::dropIfExists('certificate');
     }
 };
