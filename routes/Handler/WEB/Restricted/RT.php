@@ -19,12 +19,12 @@ Route::get('/daftar-pengaduan', [ComplaintController::class, 'manageComplaintVie
 
 Route::get('/daftar-pengajuan-surat', [DocRequestController::class, 'manageReqView'])->name('DaftarPermintaanSurat');
 
-Route::get('/keuangan', [DuesController::class,'manageDuesView'])->name('KeuanganRT');
+Route::get('/keuangan', [DuesController::class, 'manageDuesView'])->name('KeuanganRT');
 
-Route::get('/daftar-bansos', [FinancialAssistanceController::class,'manageFAView'])->name('DaftarBansos');
+Route::get('/daftar-bansos', [FinancialAssistanceController::class, 'manageFAView'])->name('DaftarBansos');
 
-Route::get('/pengumuman', [NewsController::class,'manageNewsView'])->name('Pengumuman');
+Route::get('/pengumuman', [NewsController::class, 'manageNewsView'])->name('Pengumuman');
 
-Route::get('/kegiatan-warga', [ActivityController::class,'manageActView'])->name('KegiatanWarga');
+Route::get('/kegiatan-warga', [ActivityController::class, 'manageActView'])->name('KegiatanWarga');
 
-Route::get('/daftar-rt', [RtController::class,'manageRTView'])->name('DaftarRT');
+Route::get('/daftar-rt', [RtController::class, 'manageRTView'])->name('DaftarRT');

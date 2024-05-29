@@ -15,9 +15,37 @@ use ReflectionClass;
 
 class DuesController extends Controller
 {
-    public function __invoke()
+    public function __invoke(Request $request)
     {
-        return Inertia::render('Auth/Dues');
+        $token = null;
+        if (str_contains($request->url(), 'api')) {
+            $token = $request->bearerToken();
+            if (!$token) {
+                $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+                if (!$token) {
+                    return redirect('login');
+                }
+            }
+        } else {
+            $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+
+            if (!$token) {
+                return redirect('login');
+            }
+        }
+
+        $pat = PersonalAccessToken::findToken($token);
+
+        if ($pat->cant((new ReflectionClass($this))->getShortName() . ':create') && $pat->cant((new ReflectionClass($this))->getShortName() . ':edit') && $pat->cant((new ReflectionClass($this))->getShortName() . ':destroy')) {
+            return abort(404);
+        }
+        // return Inertia::render('Auth/Dues');
+        return Inertia::render('IuranWarga');
+    }
+
+    public function show()
+    {
+        return Inertia::render('IuranDetail');
     }
 
     public function get($filter = null)
@@ -241,5 +269,10 @@ class DuesController extends Controller
         } catch (\Throwable $th) {
             error_log($th);
         }
+    }
+
+    public function expend()
+    {
+        return Inertia::render('Pengeluaran');
     }
 }
