@@ -369,19 +369,19 @@
                 title="Jumlah Warga"
                 value={data?.civilianCount}
                 icon={UsersGroupOutline}
-                iconBgClass="bg-green-500"
+                iconBgClass="bg-gray-900 dark:bg-gray-700"
             />
             <CardInfo
                 title="Jumlah Iuran Terkumpul"
                 value={data?.totalDues}
                 icon={UsersGroupOutline}
-                iconBgClass="bg-green-500"
+                iconBgClass="bg-gray-900 dark:bg-gray-700"
             />
             <CardInfo
                 title="Jumlah Laporan Masuk"
                 value={data?.complaintCount}
                 icon={FileImportOutline}
-                iconBgClass="bg-green-500"
+                iconBgClass="bg-gray-900 dark:bg-gray-700"
             />
         </div>
 
@@ -400,7 +400,7 @@
                     <div class="flex justify-end items-center"></div>
                 </div>
 
-                <Chart {options} class="py-6" />
+                <Chart {options} class="py-6 dark:text-white" />
 
                 <!-- <div
                     class="grid grid-cols-1 items-center border-gray-200 border-t dark:border-gray-700 justify-between"

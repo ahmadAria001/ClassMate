@@ -215,7 +215,7 @@
                     <Cards
                         imageUrl={pengumuman.img}
                         hrefUrl="/"
-                        classCard="mb-3 d-block"
+                        classCard="mb-3 d-block bg-gray-100"
                         title={pengumuman.title}
                         description={pengumuman.desc}
                         date={pengumuman.date}
@@ -317,7 +317,7 @@
         >
             {#each poins as poin}
                 <div>
-                    <div class="p-2 bg-blue-100 inline-block rounded-xl">
+                    <div class="p-2 bg-gray-100 inline-block rounded-xl">
                         <CheckOutline
                             strokeWidth="3"
                             size="lg"

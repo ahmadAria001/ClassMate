@@ -54,7 +54,7 @@
                 <Cards
                     imageUrl={pengumuman.img}
                     hrefUrl="/"
-                    classCard="mb-3 d-block"
+                    classCard="mb-3 d-block bg-gray-100"
                     title={pengumuman.title}
                     description={pengumuman.desc}
                     date={pengumuman.date}

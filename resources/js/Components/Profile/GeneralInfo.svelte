@@ -92,7 +92,7 @@
             />
         </div>
         <div class="mb-4">
-            <Label for="no_hp" class="mb-2">No Hp</Label>
+            <Label for="no_hp" class="mb-2">No HP</Label>
             <Input
                 id="no_hp"
                 placeholder="No Hp"
@@ -105,7 +105,7 @@
 
     <div class="grid md:grid-cols-2 md:gap-6">
         <div class="">
-            <Label for="birthdate" class="mb-2 w-full text-center"
+            <Label for="birthdate" class="mb-2 w-full text-left"
                 >Tempat, Tanggal Lahir</Label
             >
 
