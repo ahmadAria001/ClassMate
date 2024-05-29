@@ -17,6 +17,7 @@ Route::prefix('/rt')->group(fn () => [
     Route::get('/{page}', [RtController::class, 'get'])->middleware(Get::class),
     Route::get('/{page}/{filter}', [RtController::class, 'get'])->middleware(Get::class),
 
+    Route::get('/', [RtController::class, 'get'])->middleware(Get::class),
     Route::post('/', [RtController::class, 'create'])->middleware(Create::class),
     Route::put('/', [RtController::class, 'edit'])->middleware(Update::class),
     Route::delete('/', [RtController::class, 'destroy'])->middleware(Delete::class),

@@ -32,6 +32,9 @@
         ClipboardSolid,
         VolumeUpSolid,
         BellSolid,
+        ChartMixedDollarSolid,
+        ChartMixedDollarOutline,
+        FileDocOutline,
     } from "flowbite-svelte-icons";
     import { twMerge } from "tailwind-merge";
     import { writable } from "svelte/store";
@@ -67,6 +70,16 @@
                 children: {
                     "Lihat Data Warga": "/warga-rt",
                     "Arsip Warga": "/arsip-penduduk",
+                },
+            },
+            {
+                name: "Keuangan",
+                icon: ChartMixedDollarOutline,
+                isOpenItems: false,
+                children: {
+                    Iuran: "/iuran",
+                    // Pengeluaran: "/pengeluaran",
+                    "Catatan Pembayaran": "/log-pembayaran",
                 },
             },
             {
@@ -110,6 +123,16 @@
                 },
             },
             {
+                name: "Keuangan",
+                icon: ChartMixedDollarOutline,
+                isOpenItems: false,
+                children: {
+                    Iuran: "/iuran",
+                    // Pengeluaran: "/pengeluaran",
+                    "Catatan Pembayaran": "/log-pembayaran",
+                },
+            },
+            {
                 name: "Pengaduan",
                 icon: FileSolid,
                 isOpenItems: false,
@@ -150,6 +173,16 @@
                 },
             },
             {
+                name: "Keuangan",
+                icon: ChartMixedDollarOutline,
+                isOpenItems: false,
+                children: {
+                    Iuran: "/iuran",
+                    // Pengeluaran: "/pengeluaran",
+                    "Catatan Pembayaran": "/log-pembayaran",
+                },
+            },
+            {
                 name: "Pengaduan",
                 icon: FileSolid,
                 isOpenItems: false,
@@ -169,7 +202,7 @@
             },
             {
                 name: "Surat",
-                icon: ClipboardSolid,
+                icon: FileDocOutline,
                 isOpenItems: false,
                 children: {
                     "Status Surat": "/status-pengajuan",
@@ -317,7 +350,7 @@
     <Navbar
         let:hidden
         let:toggle
-        class="border-b-2 h-16 fixed m-0 dark:bg-gray-800"
+        class="border-b-2 h-16 fixed m-0 dark:bg-gray-800 z-50"
     >
         <NavHamburger
             onClick={toggleDrawer}
@@ -475,7 +508,7 @@
     bind:hidden={drawerHidden}
     bind:activateClickOutside
     width="w-64"
-    class="overflow-scroll pb-32 overflow-x-hidden mt-16 p-0 border-r-2 z-40"
+    class="overflow-scroll pb-32 overflow-x-hidden mt-16 p-0 border-r-2 z-40 overflow-hidden"
     id="sidebar"
 >
     <div class="flex items-center">
@@ -576,8 +609,10 @@
     </Sidebar>
 </Drawer>
 
-<div class="bg-white dark:bg-gray-900 h-screen flex px-4 mx-auto w-full mb-14">
-    <main class=" lg:ml-64 mt-4 w-full mx-auto" style="margin-top: 5rem">
+<div
+    class="bg-white dark:bg-gray-900 flex px-4 mx-auto w-full min-h-screen pb-14"
+>
+    <main class="h-full lg:ml-64 mt-4 w-full mx-auto" style="margin-top: 5rem">
         <slot />
     </main>
 </div>
