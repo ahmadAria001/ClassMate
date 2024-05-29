@@ -18,18 +18,14 @@ export default defineConfig({
             tsconfig: "./tsconfig.json",
         }),
     ],
-    resolve: (name) => {
-        const pages = import.meta.glob("./Pages/**/*.svelte", { eager: true });
-        return pages[`./Pages/${name}.svelte`];
+    resolve: {
+        alias: {
+            "@P": path.resolve(__dirname, "resources/js/Pages"),
+            "@R": path.resolve(__dirname, "resources/js/"),
+            "@C": path.resolve(__dirname, "resources/js/Components"),
+            "@U": path.resolve(__dirname, "resources/js/Utils)"),
+        },
     },
-    //  {
-    //     alias: {
-    //         "@P": path.resolve(__dirname, "resources/js/Pages"),
-    //         "@R": path.resolve(__dirname, "resources/js/"),
-    //         "@C": path.resolve(__dirname, "resources/js/Components"),
-    //         "@U": path.resolve(__dirname, "resources/js/Utils)"),
-    //     },
-    // },
     //  (name) => {
     //     const pages = import.meta.glob("./Pages/**/*.svelte", { eager: true });
     //     return pages[`./Pages/${name}.svelte`];
