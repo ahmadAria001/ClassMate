@@ -13,6 +13,105 @@
     import Cards from "@C/LandingPage/CardsAnnouncement.svelte";
     import Navbar from "@C/LandingPage/Navbar.svelte";
     import Footer from "@C/LandingPage/Footer.svelte";
+    import axiosInstance from "axios";
+    import { onMount } from "svelte";
+
+    const axios = axiosInstance.create();
+
+    interface News {
+        title: string;
+        desc: string;
+        attachment: string | null;
+        created_at: string;
+    }
+
+    type NewsArray = News[];
+
+    interface Civil {
+        id: number;
+        nik: string;
+        fullName: string;
+        birthplace: string;
+        birthdate: number;
+        residentstatus: string;
+        nkk: string;
+        isFamilyHead: number;
+        rt_id: number;
+        address: string;
+        status: string;
+        phone: string;
+        religion: string;
+        job: string;
+        created_at: string;
+        created_by: number;
+        updated_at: string | null;
+        updated_by: number | null;
+        deleted_at: string | null;
+        deleted_by: number | null;
+    }
+
+    interface RT {
+        id: number;
+        leader_id: number | null;
+        created_at: string;
+        created_by: number;
+        number: number;
+        updated_at: string | null;
+        updated_by: number | null;
+        deleted_at: string | null;
+        deleted_by: number | null;
+        civils: Civil[];
+    }
+
+    let dataRT: RT[] = [];
+    let announcements: NewsArray = [];
+
+    const getNews = async (): Promise<NewsArray> => {
+        const response = await axios.get("/api/news/lts", {
+            headers: {
+                Accept: "application/json",
+            },
+        });
+
+        // console.log("API News Response:", response.data);
+
+        if (Array.isArray(response.data.data)) {
+            return response.data.data.map((item) => ({
+                ...item,
+                created_at: item.created_at.slice(0, 10), // Truncate date
+            }));
+        } else {
+            throw new Error("Unexpected response format");
+        }
+    };
+
+    const getRTData = async (): Promise<RT[]> => {
+        const response = await axios.get("/api/rt", {
+            headers: {
+                Accept: "application/json",
+            },
+        });
+
+        // console.log("API RT Data Response:", response.data);
+
+        if (Array.isArray(response.data.data)) {
+            return response.data.data;
+        } else {
+            throw new Error("Unexpected response format");
+        }
+    };
+
+    onMount(async () => {
+        try {
+            announcements = await getNews();
+            dataRT = await getRTData();
+            // console.log(dataRT);
+            // console.log(announcements);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    });
+
     let pengumumans = [
         {
             img: "https://media.kompas.tv/library/image/content_article/article_img/20231204072833.jpg",
@@ -206,12 +305,14 @@
         <div class="announcement mb-24">
             <div class="text-center mb-8">
                 <Heading tag="h3" class="mb-2">Pengumuman</Heading>
-                <A href="" class="inline-block flex justify-center items-center"
+                <A
+                    href="lp-pengumuman"
+                    class="inline-block flex justify-center items-center"
                     >Lihat Selengkapnya &ensp; <ArrowRightOutline /></A
                 >
             </div>
             <div class="group-card w-full">
-                {#each pengumumans.slice(0, 2) as pengumuman}
+                <!-- {#each pengumumans.slice(0, 2) as pengumuman}
                     <Cards
                         imageUrl={pengumuman.img}
                         hrefUrl="/"
@@ -219,6 +320,17 @@
                         title={pengumuman.title}
                         description={pengumuman.desc}
                         date={pengumuman.date}
+                    />
+                {/each} -->
+                {#each announcements as announcement}
+                    <Cards
+                        imageUrl={announcement.attachment ||
+                            "https://redthread.uoregon.edu/files/original/affd16fd5264cab9197da4cd1a996f820e601ee4.png"}
+                        hrefUrl="/"
+                        classCard="mb-3 d-block"
+                        title={announcement.title}
+                        description={announcement.desc}
+                        date={announcement.created_at}
                     />
                 {/each}
             </div>
@@ -259,7 +371,9 @@
     <div class="list-admins mb-24">
         <div class="text-center mb-8">
             <Heading tag="h3" class="mb-2">Daftar Pengurus RW 03</Heading>
-            <A href="" class="inline-block flex justify-center items-center"
+            <A
+                href="lp-profile"
+                class="inline-block flex justify-center items-center"
                 >Lihat Selengkapnya &ensp; <ArrowRightOutline /></A
             >
         </div>
@@ -286,7 +400,7 @@
         <div
             class="list-rt grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-8"
         >
-            {#each admins.slice(1) as admin}
+            <!-- {#each admins.slice(1) as admin}
                 <div class="rounded-lg shadow-lg p-2 md:p-4">
                     <img
                         src={admin.photoProfile}
@@ -297,6 +411,26 @@
                     <p class="text-gray-500 mb-2">
                         Ketua {admin.position} / {admin.head}
                     </p>
+                </div>
+            {/each} -->
+            <!-- data from database -->
+            {#each dataRT as rt}
+                <div class="rounded-lg shadow-lg p-2 md:p-4">
+                    <img
+                        src={rt.civils[0]?.leader_id
+                            ? rt.civils[0].leader_id
+                            : "https://redthread.uoregon.edu/files/original/affd16fd5264cab9197da4cd1a996f820e601ee4.png"}
+                        alt="Profile Image"
+                        class="w-full object-cover rounded-lg mb-3 max-h-64 object-top"
+                    />
+                    <div class="mt-2">
+                        <Heading tag="h5" class="mb-2"
+                            >RT {rt.civils[0].fullName}</Heading
+                        >
+                        <p class="text-gray-500">
+                            Ketua RT {rt.number} / RW {rt.leader_id || 3}
+                        </p>
+                    </div>
                 </div>
             {/each}
         </div>
