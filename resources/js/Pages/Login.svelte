@@ -21,17 +21,15 @@
     };
 
     const signIn = async (values: z.infer<typeof Login>) => {
-        const response = await axios.post("/api/auth/signin", {
+        const response = await router.post("/api/auth/signin", {
             username: values.username,
             password: values.password,
             _token: $page.props.csrf_token,
         });
 
-        const { status, token, exp } = response.data;
-        // if (status) setCookie("token", response.data.token, exp);
+        const data = response.data;
 
-        // before '/civilian'
-        router.visit("/beranda");
+        console.log(data);
     };
 
     const errHandler = () => {};

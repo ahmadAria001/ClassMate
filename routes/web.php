@@ -6,6 +6,7 @@ use App\Http\Controllers\FinancialAssistanceController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Laravel\Sanctum\PersonalAccessToken;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,6 +36,10 @@ Route::get('/beranda', function () {
         return redirect('login');
     }
 
+    if (!PersonalAccessToken::findToken($token)) {
+        return redirect('login');
+    }
+
     return Inertia::render('HomePage');
 })->name('homepage');
 
@@ -44,7 +49,7 @@ Route::get('/404', function () {
 
 // RT dan RW
 
-Route::prefix('/auth')->group(fn() => [Route::post('/signin', Login::class)]);
+Route::prefix('/auth')->group(fn () => [Route::post('/signin', Login::class)]);
 
 function loadRoutesWEB($dir)
 {

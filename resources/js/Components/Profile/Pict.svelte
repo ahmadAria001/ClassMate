@@ -15,6 +15,8 @@
 
     export const rebuild = () => {
         builder = {};
+
+        location.reload();
         dispatch("comp");
     };
 

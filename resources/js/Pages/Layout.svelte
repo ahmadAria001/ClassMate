@@ -334,14 +334,7 @@
     ];
 
     const logout = async () => {
-        const { data, status } = await axios.get("/api/auth/signout");
-
-        if (status != 200) {
-            router.visit("/login");
-            return;
-        }
-
-        router.visit("/login");
+        await router.get("/api/auth/signout");
     };
 </script>
 
@@ -447,9 +440,11 @@
             >
             <Avatar
                 id="avatar-menu"
-                src={$page.props.auth.user.pict
-                    ? `${$page.props.auth.user.pict}`
-                    : "https://png.pngtree.com/png-clipart/20200224/original/pngtree-cartoon-color-simple-male-avatar-png-image_5230557.jpg"}
+                src={new String($page.props.auth.user.pict).includes(
+                    "/uploads/",
+                )
+                    ? $page.props.auth.user.pict
+                    : ""}
                 class="cursor-pointer"
             />
             <!-- <NavHamburger class1="w-full md:flex md:w-auto md:order-1" /> -->

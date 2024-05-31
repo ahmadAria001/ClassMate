@@ -23,6 +23,7 @@
     let rt_id: string = $page.props.auth.user.rt_id;
     let value: string;
     let disabledSelectRT: boolean = false;
+    let selected: string;
 
     if (role === "RT") {
         disabledSelectRT = true;
@@ -70,23 +71,23 @@
     interface RTFormatted {
         id: number;
         name: string;
+        number: number;
     }
 
     let dataRT: RTFormatted[] = [];
-    let data: string;
-    // const token = getCookie("token");
-    // if (!token) {
-    //     console.error("No token found");
-    //     throw new Error("No token found");
-    // }
+    let data: any;
+    let duesRt: any;
 
-    const getData = async () => {
+    const getData = async (filter: string) => {
         try {
-            const response = await axios.get("api/civilian/", {
-                headers: {
-                    Accept: "application/json",
+            const response = await axios.get(
+                `/api/civilian/head/${encodeURIComponent(filter)}`,
+                {
+                    headers: {
+                        Accept: "application/json",
+                    },
                 },
-            });
+            );
 
             return response.data;
         } catch (error) {
@@ -95,22 +96,44 @@
     };
 
     const initData = async () => {
-        data = await getData();
+        value = $page.props.auth.user.rt_id;
+        dataRT = await getRTData();
+        data = await getData(value);
+
+        if (value) duesRt = await getDuesTypes(value);
+    };
+
+    const getDuesTypes = async (filter: string) => {
+        try {
+            const response = await axios.get(
+                `/api/dues/types/${encodeURIComponent(filter)}`,
+                {
+                    headers: {
+                        Accept: "application/json",
+                    },
+                },
+            );
+
+            return response.data;
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     const getRTData = async (): Promise<RTFormatted[]> => {
-        const response = await axios.get("/api/rt", {
+        const response = await axios.get("/api/rt/dd", {
             headers: {
                 Accept: "*/*",
             },
         });
 
-        console.log("API RT Data Response:", response.data);
+        // console.log("API RT Data Response:", response.data);
 
         if (Array.isArray(response.data.data)) {
             return response.data.data.map((rt: RT) => ({
-                id: rt.number,
+                id: rt.id,
                 name: `RT ${rt.number}`,
+                number: rt.number,
             }));
         } else {
             throw new Error("Unexpected response format");
@@ -119,57 +142,134 @@
 
     onMount(async () => {
         try {
-            dataRT = await getRTData();
             await initData();
             // console.log(dataRT);
-            console.log(data);
+            // console.log(data);
         } catch (error) {
             console.error("Error fetching data:", error);
         }
     });
 
-    function handleSelectChange() {}
+    const handleSelectChange = async () => {
+        if (!value) return;
+
+        const response = await getData(value);
+        duesRt = await getDuesTypes(value);
+        data = response;
+    };
 </script>
 
 <Layout>
-    <div
-        class="bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md flex flex-col p-4 sm:p-6 w-full mb-8"
-    >
-        <h5
-            class="text-xl font-bold leading-none text-gray-900 dark:text-white mb-4"
+    <div class="grid grid-cols-2 max-md:grid-cols-1 gap-2 max-md:gap-0">
+        <div
+            class="bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md flex flex-col p-4 sm:p-6 w-full mb-2"
         >
-            Filter Data Pembayaran Penduduk
-        </h5>
-        <form action="" method="post">
-            <div
-                class="flex flex-col md:flex-row justify-around items-start md:items-center min-w-full"
+            <h5
+                class="text-xl font-bold leading-none text-gray-900 dark:text-white mb-4"
             >
-                <div
-                    class="flex flex-1 justify-center items-center lg:px-4 mb-2 md:mb-0"
-                >
+                Filter Data Pembayaran Penduduk
+            </h5>
+            <div
+                class="block md:flex-row mx-auto justify-around items-start md:items-center min-w-full"
+            >
+                <div class="lg:px-4 mb-2 md:mb-0">
                     <Label for="select-rt" class="mr-2">RT</Label>
                     <Select
-                        class="max-w-xs"
+                        class="w-full"
                         id="select-rt"
-                        {disabledSelectRT}
-                        items={dataRT}
                         placeholder="Pilih RT"
                         bind:value
+                        {disabledSelectRT}
                         on:change={handleSelectChange}
-                    />
+                    >
+                        {#each dataRT as { id, name, number }, idx}
+                            {#if id == $page.props.auth.user.rt_id}
+                                <option value={id} selected>{name}</option>
+                            {:else}
+                                <option value={id}>{name}</option>
+                            {/if}
+                        {/each}
+                    </Select>
                 </div>
-                <div class="flex flex-1 justify-center items-center lg:px-4">
+                <div class="mt-2 lg:px-4">
                     <Label for="nama_warga" class="mr-2">Cari warga</Label>
                     <Input
-                        class="mr-4 max-w-xs"
+                        class="mr-4 w-full"
                         type="text"
                         id="nama_warga"
                         placeholder="Cari Nama Warga"
                     />
-                    <Button>Cari</Button>
+                    <Button class="mt-2">Cari</Button>
                 </div>
             </div>
-        </form>
+        </div>
+        <div
+            class="bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md w-full max-md:mb-5 mb-2"
+        >
+            <h5
+                class="text-xl ml-4 mt-3 font-bold leading-none text-gray-900 dark:text-white mb-4"
+            >
+                List Iuran
+            </h5>
+            <div class="block w-full">
+                <div class="lg:px-4 mb-2 md:mb-0">
+                    {#if duesRt || duesRt?.data?.lenght > 0}
+                        {console.log(duesRt.data.length)}
+                        <Table tableClass="mb-0">
+                            <TableHead>
+                                <TableHeadCell>Nama</TableHeadCell>
+                                <TableHeadCell>Jumlah Iuran</TableHeadCell>
+                                <TableHeadCell>
+                                    <span class="sr-only">Status</span>
+                                </TableHeadCell>
+                                <TableHeadCell>
+                                    <span class="sr-only">Action</span>
+                                </TableHeadCell>
+                            </TableHead>
+                            <TableBody tableBodyClass="divide-y">
+                                {#each duesRt.data as item, idx}
+                                    <TableBodyRow>
+                                        <TableBodyCell
+                                            >{item.typeDues}</TableBodyCell
+                                        >
+                                        <TableBodyCell
+                                            >Rp. {item.amt_dues}</TableBodyCell
+                                        >
+                                        <TableBodyCell>
+                                            {#if item.status}
+                                                <Badge color="green"
+                                                    >Aktif</Badge
+                                                >
+                                            {:else}
+                                                <Badge color="red"
+                                                    >Tidak Aktif</Badge
+                                                >
+                                            {/if}
+                                        </TableBodyCell>
+                                        <TableBodyCell tdClass="divide-y">
+                                            <Button
+                                                type="button"
+                                                color="green"
+                                                on:click={() => {
+                                                    selected = item.id;
+                                                }}
+                                            >
+                                                Detail
+                                            </Button>
+                                        </TableBodyCell>
+                                    </TableBodyRow>
+                                {/each}
+                            </TableBody>
+                        </Table>
+                    {:else}
+                        <p>RT tidak memiliki iuran aktif</p>
+                    {/if}
+                </div>
+                <div class="mt-2 lg:px-4 w-full flex justify-end pr-5 pb-5">
+                    <Button class="">Cari</Button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <Table tableClass="mb-0">
@@ -184,40 +284,27 @@
             </TableHeadCell>
         </TableHead>
         <TableBody tableBodyClass="divide-y">
-            <!-- dummy -->
-            <TableBodyRow>
-                <TableBodyCell>Joko Anwar</TableBodyCell>
-                <TableBodyCell>Jl. Pahlawan No. 456</TableBodyCell>
-                <TableBodyCell class="text-center">
-                    <Badge color="green">Tetap</Badge>
-                </TableBodyCell>
-                <TableBodyCell>
-                    <Button href="/iuran/detail">Detail</Button>
-                </TableBodyCell>
-            </TableBodyRow>
-            <!-- end dummy -->
-            <!-- {#each data as dt}
-                <TableBodyRow>
-                    <TableBodyCell>{dt.fullName}</TableBodyCell>
-                    <TableBodyCell>{dt.address}</TableBodyCell>
-                    {#if dt.residentstatus == "PermanentResident"}
+            {#if data}
+                {#each data.data as item, idx}
+                    <TableBodyRow>
+                        <TableBodyCell>{item?.fullName}</TableBodyCell>
+                        <TableBodyCell>{item.address}</TableBodyCell>
                         <TableBodyCell class="text-center">
                             <Badge color="green">Tetap</Badge>
                         </TableBodyCell>
-                    {:else if dt.residentstatus == "ContractResident"}
-                        <TableBodyCell class="text-center">
-                            <Badge color="indigo">Kontrak</Badge>
+                        <TableBodyCell>
+                            <Button
+                                href={`/iuran/detail?rt=${encodeURIComponent(item.rt_id.id)}&civ=${encodeURIComponent(item.id)}`}
+                                >Detail</Button
+                            >
                         </TableBodyCell>
-                    {:else if dt.residentstatus == "Kos"}
-                        <TableBodyCell class="text-center">
-                            <Badge color="yellow">Kos</Badge>
-                        </TableBodyCell>
-                    {/if}
-                    <TableBodyCell>
-                        <Button href="">Detail</Button>
-                    </TableBodyCell>
-                </TableBodyRow>
-            {/each} -->
+                    </TableBodyRow>
+                {/each}
+            {/if}
         </TableBody>
     </Table>
 </Layout>
+
+<!-- {#if selected}
+
+{/if} -->

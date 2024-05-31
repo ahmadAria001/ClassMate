@@ -31,6 +31,12 @@ class Logout extends Controller
 
             $pat = PersonalAccessToken::findToken($token);
             $pat->delete();
+
+            error_log($req->getBaseUrl());
+
+            if (str_contains($req->header('referer'), $req->getBaseUrl())) {
+                return redirect('login');
+            }
         } else {
             if (!Auth::hasUser()) {
                 return Response()->json(

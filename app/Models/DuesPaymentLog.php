@@ -14,6 +14,7 @@ class DuesPaymentLog extends Model
     protected $fillable = [
         'dues_member',
         'amount_paid',
+        'paid_for',
         'created_at',
         'created_by',
         'updated_at',

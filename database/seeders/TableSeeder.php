@@ -102,23 +102,31 @@ class TableSeeder extends Seeder
 
         $duesType = ['Security', 'TrashManagement', 'Event'];
 
-        for ($i = 1; $i <= 3; $i++) {
+        $duesTypeIndex = 0;
+        $currentRT = 1;
+        for ($i = 1; $i <= 12; $i++) {
+            if ($duesTypeIndex > 2) $duesTypeIndex = 0;
+            if ($currentRT > 6) $currentRT = 1;
+
             Dues::create([
-                'typeDues' => $duesType[$i - 1],
+                'typeDues' => $duesType[$duesTypeIndex++],
                 'description' => $faker->sentence(),
                 'amt_dues' => $faker->numberBetween(0, 5000),
                 'amt_fund' => $faker->numberBetween(0, 5000000),
                 'status' => $faker->boolean(),
-                'rt_id' => $i,
+                'created_by' => $currentRT,
+                'rt_id' => $currentRT++,
                 'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
-                'created_by' => $i,
             ]);
         }
 
-        for ($i = 1; $i <= 3; $i++) {
+        $duesTypeIndex = 1;
+        for ($i = 1; $i <= 6; $i++) {
+            if ($duesTypeIndex > 3) $duesTypeIndex = 0;
+
             DuesMember::create([
                 'id' => $i,
-                'dues' => $i,
+                'dues' => ($duesTypeIndex++) + 1,
                 'member' => $i,
                 'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
                 'created_by' => $i,
@@ -133,14 +141,17 @@ class TableSeeder extends Seeder
                 $paidBy = 1;
             }
 
-            if ($dues >= 3) {
+            if ($dues > 3) {
                 $dues = 1;
             }
+
+            $selectedDate = Carbon::createFromDate($faker->dateTimeBetween('-5 years', 'now'))->getTimestamp();
 
             DuesPaymentLog::create([
                 'dues_member' => $dues++,
                 'amount_paid' => $faker->numberBetween(0, 5000),
-                'created_at' => Carbon::createFromDate($faker->dateTimeBetween('-5 years', 'now'))->getTimestamp(),
+                'paid_for' => $selectedDate,
+                'created_at' => $selectedDate,
                 'created_by' => 6,
             ]);
         }
