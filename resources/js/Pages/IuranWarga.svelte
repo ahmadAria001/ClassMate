@@ -16,7 +16,6 @@
     } from "flowbite-svelte";
     import { Select, Label } from "flowbite-svelte";
     import { page } from "@inertiajs/svelte";
-    import { getCookie } from "@R/Utils/Cokies";
 
     const axios = axiosInstance.create();
 

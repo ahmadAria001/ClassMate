@@ -350,7 +350,7 @@
     <Navbar
         let:hidden
         let:toggle
-        class="border-b-2 h-16 fixed m-0 dark:bg-gray-800 z-50"
+        class="border-b-2 h-16 fixed m-0 dark:bg-gray-800 z-30"
     >
         <NavHamburger
             onClick={toggleDrawer}
@@ -449,13 +449,13 @@
                 id="avatar-menu"
                 src={$page.props.auth.user.pict
                     ? `${$page.props.auth.user.pict}`
-                    : ""}
+                    : "https://png.pngtree.com/png-clipart/20200224/original/pngtree-cartoon-color-simple-male-avatar-png-image_5230557.jpg"}
                 class="cursor-pointer"
             />
             <!-- <NavHamburger class1="w-full md:flex md:w-auto md:order-1" /> -->
         </div>
         <Dropdown triggeredBy="#notification" class="p-0 max-w-md">
-            <Listgroup class="border-none">
+            <!-- <Listgroup class="border-none">
                 <h3
                     class="text-center p-3 text-sm font-medium text-black bg-gray-50 dark:bg-gray-700 dark:text-white font-bold rounded-t-lg"
                 >
@@ -482,7 +482,7 @@
                 >
                     <p>Lihat Semua</p>
                 </a>
-            </Listgroup>
+            </Listgroup> -->
         </Dropdown>
         <Dropdown triggeredBy="#avatar-menu" class="w-52 z-[100]">
             <DropdownHeader>
@@ -508,7 +508,7 @@
     bind:hidden={drawerHidden}
     bind:activateClickOutside
     width="w-64"
-    class="overflow-scroll pb-32 overflow-x-hidden mt-16 p-0 border-r-2 z-40 overflow-hidden"
+    class="overflow-scroll pb-32 overflow-x-hidden mt-16 p-0 border-r-2 z-40"
     id="sidebar"
 >
     <div class="flex items-center">
@@ -517,51 +517,7 @@
             class="mb- text-black dark:text-white lg:hidden"
         />
     </div>
-    <!-- <Sidebar asideClass="w-54">
-        <SidebarWrapper class="rounded-none pt-0 bg-white">
-            <SidebarGroup ulClass={groupClass} class="mb-3">
-                {#each filtermenu as { name, icon, children, href, isOpenItems } (name)}
-                    {#if children}
-                        <SidebarDropdownWrapper
-                            label={name}
-                            class="pr-3 bg-gray-100 dark:bg-gray-700"
-                            isOpen={isOpenItems}
-                        >
-                            <svelte:component this={icon} slot="icon" />
-                            {#each Object.entries(children) as [title, href]}
-                                <SidebarItem
-                                    label={title}
-                                    {href}
-                                    spanClass="ml-9"
-                                    class={twMerge(
-                                        itemClass,
-                                        $url == href
-                                            ? "bg-gray-100 dark:bg-gray-900"
-                                            : "",
-                                    )}
-                                />
-                            {/each}
-                        </SidebarDropdownWrapper>
-                    {:else}
-                        <SidebarItem
-                            label={name}
-                            {href}
-                            spanClass="ml-3"
-                            class={twMerge(
-                                itemClass,
-                                $url == href
-                                    ? "bg-gray-100 dark:bg-gray-900"
-                                    : "",
-                            )}
-                        >
-                            <svelte:component this={icon} slot="icon" />
-                        </SidebarItem>
-                    {/if}
-                {/each}
-            </SidebarGroup>
-        </SidebarWrapper>
-    </Sidebar> -->
-    <Sidebar asideClass="w-54">
+    <Sidebar asideClass="w-54 sidebar ">
         <SidebarWrapper class="rounded-none pt-0 bg-white">
             <SidebarGroup ulClass={groupClass} class="mb-3">
                 {#each filtermenu as { name, icon, children, href } (name)}

@@ -19,9 +19,6 @@
         Checkbox,
         Modal,
     } from "flowbite-svelte";
-    import { Select, Label } from "flowbite-svelte";
-    import { page } from "@inertiajs/svelte";
-    import { getCookie } from "@R/Utils/Cokies";
     import { writable } from "svelte/store";
 
     let dues = ["Keamanan", "Sampah"];
