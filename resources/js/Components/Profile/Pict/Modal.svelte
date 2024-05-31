@@ -1,11 +1,8 @@
 <script lang="ts">
     import {
         Button,
-        Card,
         Dropzone,
         ImagePlaceholder,
-        Input,
-        Label,
         Modal,
         Toast,
     } from "flowbite-svelte";

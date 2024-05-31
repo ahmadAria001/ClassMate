@@ -118,6 +118,15 @@ class RtController extends Controller
         return Response()->json(['data' => $data, 'length' => $length], 200);
     }
 
+    public function getDropDown()
+    {
+        $data = RT::withoutTrashed()
+            ->get(['id', 'number']);
+        $length = RT::withoutTrashed()->count();
+
+        return Response()->json(['data' => $data, 'length' => $length], 200);
+    }
+
     public function withCivils($page = 1, $filter = null)
     {
         $data = null;

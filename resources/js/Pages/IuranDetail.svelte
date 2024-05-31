@@ -19,16 +19,20 @@
         Checkbox,
         Modal,
     } from "flowbite-svelte";
-    import { Select, Label } from "flowbite-svelte";
-    import { page } from "@inertiajs/svelte";
-    import { getCookie } from "@R/Utils/Cokies";
+    // import { Select, Label } from "flowbite-svelte";
+    import { page, router } from "@inertiajs/svelte";
     import { writable } from "svelte/store";
 
-    let dues = ["Keamanan", "Sampah"];
+    const axios = axiosInstance.create();
+
     let clickOutsideModal = false;
     let checkedAll = false;
     let checkedItems = Array(12).fill(false);
     let isAnyChecked = writable(false);
+    let civilian: string | null;
+    let rt: string | null;
+    let duesTypes: any[] | null;
+    let currentPage = 1;
 
     function toggleAll(event: Event) {
         const target = event.target as HTMLInputElement;
@@ -45,6 +49,89 @@
             isAnyChecked.set(checkedItems.some(Boolean));
         };
     }
+
+    const getDuesTypes = async (filter: string) => {
+        try {
+            const response = await axios.get(
+                `/api/dues/types/${encodeURIComponent(filter)}`,
+                {
+                    headers: {
+                        Accept: "application/json",
+                    },
+                },
+            );
+
+            return response.data;
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const getDuesMember = async (member: string, dues: string) => {
+        try {
+            const response = await axios.get(
+                `/api/dues/member/${encodeURIComponent(member)}/${encodeURIComponent(dues)}/${currentPage}`,
+                {
+                    headers: {
+                        Accept: "application/json",
+                    },
+                },
+            );
+
+            return response.data;
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const initPage = async () => {
+        if (!rt) return;
+
+        const types = await getDuesTypes(rt);
+        duesTypes = types.data;
+    };
+
+    onMount(async () => {
+        extractParams();
+        await initPage();
+    });
+
+    const extractParams = () => {
+        const urlParams = new URLSearchParams(location.search);
+        civilian = urlParams.get("civ");
+        rt = urlParams.get("rt");
+
+        if (!rt) router.visit("/404");
+        if (!civilian) router.visit("/404");
+    };
+
+    const dateFormatter = (epoc: number) => {
+        const date = new Date(epoc);
+
+        const monthNames = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+        ];
+
+        const day = date.getDate();
+
+        const monthIndex = date.getMonth();
+        const monthName = monthNames[monthIndex];
+
+        const year = date.getFullYear();
+
+        return `${day} ${monthName} ${year}`;
+    };
 
     $: isAnyChecked.set(checkedItems.some(Boolean));
 </script>
@@ -107,40 +194,59 @@
                 >
             </div>
             <Tabs class="px-4">
-                {#each dues as d}
-                    <TabItem open title={d}>
-                        <Table hoverable={true}>
-                            <TableHead>
-                                <TableHeadCell class="!p-4">
-                                    <Checkbox
-                                        bind:checked={checkedAll}
-                                        on:change={toggleAll}
-                                    />
-                                </TableHeadCell>
-                                <TableHeadCell>Nama Bulan</TableHeadCell>
-                                <TableHeadCell>Tagihan</TableHeadCell>
-                                <TableHeadCell>Status</TableHeadCell>
-                                <!-- <TableHeadCell class="text-center"
+                {#if duesTypes}
+                    {#each duesTypes as d}
+                        <TabItem
+                            open
+                            title={d.typeDues == "Security"
+                                ? "Keamanan"
+                                : d.typeDues == "TrashManagement"
+                                  ? "Sampah"
+                                  : d.typeDues == "TrashManagement"
+                                    ? "Event"
+                                    : ""}
+                        >
+                            <Table hoverable={true}>
+                                <TableHead>
+                                    <TableHeadCell class="!p-4">
+                                        <Checkbox
+                                            bind:checked={checkedAll}
+                                            on:change={toggleAll}
+                                        />
+                                    </TableHeadCell>
+                                    <TableHeadCell>Nama Bulan</TableHeadCell>
+                                    <TableHeadCell>Tagihan</TableHeadCell>
+                                    <TableHeadCell>Status</TableHeadCell>
+                                    <!-- <TableHeadCell class="text-center"
                                     >Bayar</TableHeadCell
                                 > -->
-                            </TableHead>
-                            <TableBody tableBodyClass="divide-y">
-                                {#each Array(12) as _, index}
-                                    <TableBodyRow>
-                                        <TableBodyCell class="!p-4">
-                                            <Checkbox
-                                                bind:checked={checkedItems[
-                                                    index
-                                                ]}
-                                                on:change={toggleItem(index)}
-                                            />
-                                        </TableBodyCell>
-                                        <TableBodyCell>Juli</TableBodyCell>
-                                        <TableBodyCell
-                                            >Rp. 100.000</TableBodyCell
-                                        >
+                                </TableHead>
+                                <TableBody tableBodyClass="divide-y">
+                                    {#if civilian}
+                                        {#await getDuesMember(civilian, d.id) then data}
+                                            {#each data.data as item, idx}
+                                                <TableBodyRow>
+                                                    <TableBodyCell class="!p-4">
+                                                        <Checkbox
+                                                            bind:checked={checkedItems[
+                                                                idx
+                                                            ]}
+                                                            on:change={toggleItem(
+                                                                idx,
+                                                            )}
+                                                        />
+                                                    </TableBodyCell>
+                                                    <TableBodyCell
+                                                        >{dateFormatter(
+                                                            item.paid_for *
+                                                                1000,
+                                                        )}</TableBodyCell
+                                                    >
+                                                    <TableBodyCell
+                                                        >Rp. {item.amount_paid}</TableBodyCell
+                                                    >
 
-                                        <!-- {#if item.residentstatus == "PermanentResident"}
+                                                    <!-- {#if item.residentstatus == "PermanentResident"}
                                             <TableBodyCell class="text-center">
                                                 <Badge color="green"
                                                     >Tetap</Badge
@@ -159,23 +265,30 @@
                                             </TableBodyCell>
                                         {/if} -->
 
-                                        <TableBodyCell class="text-center">
-                                            <Badge color="green">Lunas</Badge>
-                                        </TableBodyCell>
+                                                    <TableBodyCell
+                                                        class="text-center"
+                                                    >
+                                                        <Badge color="green"
+                                                            >Lunas</Badge
+                                                        >
+                                                    </TableBodyCell>
 
-                                        <!-- <TableBodyCell class="text-center">
+                                                    <!-- <TableBodyCell class="text-center">
                                             <Button
                                                 on:click={() =>
                                                     (clickOutsideModal = true)}
                                                 >Bayar</Button
                                             >
                                         </TableBodyCell> -->
-                                    </TableBodyRow>
-                                {/each}
-                            </TableBody>
-                        </Table>
-                    </TabItem>
-                {/each}
+                                                </TableBodyRow>
+                                            {/each}
+                                        {/await}
+                                    {/if}
+                                </TableBody>
+                            </Table>
+                        </TabItem>
+                    {/each}
+                {/if}
             </Tabs>
         </div>
     </div>

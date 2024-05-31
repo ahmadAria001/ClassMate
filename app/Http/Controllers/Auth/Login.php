@@ -101,6 +101,10 @@ class Login extends Controller
 
                 error_log($generatedToken->plainTextToken);
 
+                if (str_contains($req->header('referer'), "login")) {
+                    return redirect('beranda')->cookie($cookie);
+                }
+
                 return Response()
                     ->json([
                         'status' => true,

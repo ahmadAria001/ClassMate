@@ -16,7 +16,6 @@
     } from "flowbite-svelte";
     import { Select, Label } from "flowbite-svelte";
     import { page } from "@inertiajs/svelte";
-    import { getCookie } from "@R/Utils/Cokies";
 
     const axios = axiosInstance.create();
 
@@ -71,23 +70,27 @@
     interface RTFormatted {
         id: number;
         name: string;
+        number: number;
     }
 
     let dataRT: RTFormatted[] = [];
-    let data: string;
+    let data: any;
     // const token = getCookie("token");
     // if (!token) {
     //     console.error("No token found");
     //     throw new Error("No token found");
     // }
 
-    const getData = async () => {
+    const getData = async (filter: string) => {
         try {
-            const response = await axios.get("api/civilian/", {
-                headers: {
-                    Accept: "application/json",
+            const response = await axios.get(
+                `/api/civilian/head/${encodeURIComponent(filter)}`,
+                {
+                    headers: {
+                        Accept: "application/json",
+                    },
                 },
-            });
+            );
 
             return response.data;
         } catch (error) {
@@ -96,22 +99,25 @@
     };
 
     const initData = async () => {
-        data = await getData();
+        value = $page.props.auth.user.rt_id;
+        dataRT = await getRTData();
+        data = await getData(value);
     };
 
     const getRTData = async (): Promise<RTFormatted[]> => {
-        const response = await axios.get("/api/rt", {
+        const response = await axios.get("/api/rt/dd", {
             headers: {
                 Accept: "*/*",
             },
         });
 
-        console.log("API RT Data Response:", response.data);
+        // console.log("API RT Data Response:", response.data);
 
         if (Array.isArray(response.data.data)) {
             return response.data.data.map((rt: RT) => ({
-                id: rt.number,
+                id: rt.id,
                 name: `RT ${rt.number}`,
+                number: rt.number,
             }));
         } else {
             throw new Error("Unexpected response format");
@@ -120,16 +126,20 @@
 
     onMount(async () => {
         try {
-            dataRT = await getRTData();
             await initData();
             // console.log(dataRT);
-            console.log(data);
+            // console.log(data);
         } catch (error) {
             console.error("Error fetching data:", error);
         }
     });
 
-    function handleSelectChange() {}
+    const handleSelectChange = async () => {
+        if (!value) return;
+
+        const response = await getData(value);
+        data = response;
+    };
 </script>
 
 <Layout>
@@ -152,12 +162,19 @@
                     <Select
                         class="max-w-xs"
                         id="select-rt"
-                        {disabledSelectRT}
-                        items={dataRT}
                         placeholder="Pilih RT"
                         bind:value
+                        {disabledSelectRT}
                         on:change={handleSelectChange}
-                    />
+                    >
+                        {#each dataRT as { id, name, number }, idx}
+                            {#if id == $page.props.auth.user.rt_id}
+                                <option value={id} selected>{name}</option>
+                            {:else}
+                                <option value={id}>{name}</option>
+                            {/if}
+                        {/each}
+                    </Select>
                 </div>
                 <div class="flex flex-1 justify-center items-center lg:px-4">
                     <Label for="nama_warga" class="mr-2">Cari warga</Label>
@@ -185,8 +202,25 @@
             </TableHeadCell>
         </TableHead>
         <TableBody tableBodyClass="divide-y">
+            {#if data}
+                {#each data.data as item, idx}
+                    <TableBodyRow>
+                        <TableBodyCell>{item?.fullName}</TableBodyCell>
+                        <TableBodyCell>{item.address}</TableBodyCell>
+                        <TableBodyCell class="text-center">
+                            <Badge color="green">Tetap</Badge>
+                        </TableBodyCell>
+                        <TableBodyCell>
+                            <Button
+                                href={`/iuran/detail?rt=${encodeURIComponent(item.rt_id.id)}&civ=${encodeURIComponent(item.id)}`}
+                                >Detail</Button
+                            >
+                        </TableBodyCell>
+                    </TableBodyRow>
+                {/each}
+            {/if}
             <!-- dummy -->
-            <TableBodyRow>
+            <!-- <TableBodyRow>
                 <TableBodyCell>Joko Anwar</TableBodyCell>
                 <TableBodyCell>Jl. Pahlawan No. 456</TableBodyCell>
                 <TableBodyCell class="text-center">
@@ -195,7 +229,7 @@
                 <TableBodyCell>
                     <Button href="/iuran/detail">Detail</Button>
                 </TableBodyCell>
-            </TableBodyRow>
+            </TableBodyRow> -->
             <!-- end dummy -->
             <!-- {#each data as dt}
                 <TableBodyRow>

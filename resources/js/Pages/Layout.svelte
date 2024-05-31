@@ -334,14 +334,7 @@
     ];
 
     const logout = async () => {
-        const { data, status } = await axios.get("/api/auth/signout");
-
-        if (status != 200) {
-            router.visit("/login");
-            return;
-        }
-
-        router.visit("/login");
+        await router.get("/api/auth/signout");
     };
 </script>
 
@@ -447,8 +440,10 @@
             >
             <Avatar
                 id="avatar-menu"
-                src={$page.props.auth.user.pict
-                    ? `${$page.props.auth.user.pict}`
+                src={new String($page.props.auth.user.pict).includes(
+                    "/uploads/",
+                )
+                    ? $page.props.auth.user.pict
                     : ""}
                 class="cursor-pointer"
             />

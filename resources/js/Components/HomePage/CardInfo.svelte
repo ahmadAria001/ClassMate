@@ -14,6 +14,6 @@
     </div>
     <div class="ml-4">
         <h4 class="text-black font-bold">{title}</h4>
-        <h2 class={`text-2xl font-semibold ${textColor}`}>{value}</h2>\
+        <h2 class={`text-2xl font-semibold ${textColor}`}>{value}</h2>
     </div>
 </div>

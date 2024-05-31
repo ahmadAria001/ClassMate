@@ -20,7 +20,6 @@
     } from "flowbite-svelte-icons";
     import { Select, Label } from "flowbite-svelte";
     import { page } from "@inertiajs/svelte";
-    import { getCookie } from "@R/Utils/Cokies";
     import CardInfo from "@C/HomePage/CardInfo.svelte";
 
     const axios = axiosInstance.create();
