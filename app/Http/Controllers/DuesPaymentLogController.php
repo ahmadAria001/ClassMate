@@ -42,9 +42,13 @@ class DuesPaymentLogController extends Controller
     public function getDuesTypes($rt)
     {
         $data = Dues::withoutTrashed()
-            ->where('rt_id', '=', $rt)->get(['id', 'typeDues'])->all();
+            ->where('rt_id', '=', $rt)->get(['id', 'typeDues', 'amt_dues', 'status']);
 
-        return Response()->json(['data' => $data], 200);
+        $length = $data->count();
+
+        return Response()->json([
+            'data' => $data->all(), 'length' => $length
+        ], 200);
     }
 
     public function getMember($member, $dues, $page)
@@ -61,18 +65,15 @@ class DuesPaymentLogController extends Controller
             ->whereHas('dues_member.member', function ($q) use ($member) {
                 return $q->where('id', $member);
             })
-            // ->groupByRaw('')
             ->orderByRaw('MONTH(FROM_UNIXTIME(`paid_for`)) ASC, YEAR(FROM_UNIXTIME(`paid_for`)) DESC')
             ->skip($page > 1 ? ($page - 1) * $take : 0)
             ->take($take)
             ->get();
 
-        // $length = $data->count();
+        $length = $data->count();
 
         return Response()->json([
-            'data' => $data
-            // ->toArray()
-            // , 'length' => $length
+            'data' => $data->toArray(), 'length' => $length
         ], 200);
     }
 

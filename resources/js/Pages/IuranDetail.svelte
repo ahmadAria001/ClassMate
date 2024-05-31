@@ -33,6 +33,7 @@
     let rt: string | null;
     let duesTypes: any[] | null;
     let currentPage = 1;
+    let civilianMdl: any;
 
     function toggleAll(event: Event) {
         const target = event.target as HTMLInputElement;
@@ -84,11 +85,32 @@
         }
     };
 
+    const getCivil = async (filter: string) => {
+        try {
+            const response = await axios.get(
+                `/api/civilian/${encodeURIComponent(filter)}`,
+                {
+                    headers: {
+                        Accept: "application/json",
+                    },
+                },
+            );
+
+            return response.data;
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     const initPage = async () => {
         if (!rt) return;
+        if (!civilian) return;
 
         const types = await getDuesTypes(rt);
+        const civilianData = await getCivil(civilian);
+
         duesTypes = types.data;
+        civilianMdl = civilianData.data;
     };
 
     onMount(async () => {
@@ -147,34 +169,45 @@
                 >
                     Informasi Warga
                 </p>
-                <Table
-                    striped={true}
-                    divClass="rounded-lg relative overflow-hidden"
-                >
-                    <TableBody tableBodyClass="divide-y max-w-xs">
-                        <TableBodyRow>
-                            <TableBodyCell>Nama</TableBodyCell>
-                            <TableBodyCell class="w-full truncate max-w-xs"
-                                >Joko Anwar Maulana Tedjo Cahyo Perdana</TableBodyCell
-                            >
-                        </TableBodyRow>
-                        <TableBodyRow>
-                            <TableBodyCell>KK</TableBodyCell>
-                            <TableBodyCell>12345</TableBodyCell>
-                        </TableBodyRow>
-                        <TableBodyRow>
-                            <TableBodyCell>Alamat</TableBodyCell>
-                            <TableBodyCell>JL. Pahlawan no 456</TableBodyCell>
-                        </TableBodyRow>
-                        <TableBodyRow>
-                            <TableBodyCell>Status Kependudukan</TableBodyCell>
-                            <TableBodyCell
-                                ><Badge color="green">Tetap</Badge
-                                ></TableBodyCell
-                            >
-                        </TableBodyRow>
-                    </TableBody>
-                </Table>
+                {#if civilianMdl}
+                    <Table
+                        striped={true}
+                        divClass="rounded-lg relative overflow-hidden"
+                    >
+                        <TableBody tableBodyClass="divide-y max-w-xs">
+                            <TableBodyRow>
+                                <TableBodyCell>Nama</TableBodyCell>
+                                <TableBodyCell class="w-full truncate max-w-xs"
+                                    >{civilianMdl.fullName}</TableBodyCell
+                                >
+                            </TableBodyRow>
+                            <TableBodyRow>
+                                <TableBodyCell>KK</TableBodyCell>
+                                <TableBodyCell>{civilianMdl.nkk}</TableBodyCell>
+                            </TableBodyRow>
+                            <TableBodyRow>
+                                <TableBodyCell>Alamat</TableBodyCell>
+                                <TableBodyCell
+                                    >{civilianMdl.address}</TableBodyCell
+                                >
+                            </TableBodyRow>
+                            <TableBodyRow>
+                                <TableBodyCell
+                                    >Status Kependudukan</TableBodyCell
+                                >
+                                <TableBodyCell>
+                                    {#if civilianMdl.residentstatus == "PermanentResident"}
+                                        <Badge color="green">Tetap</Badge>
+                                    {:else if civilianMdl.residentstatus == "ContractResident"}
+                                        <Badge color="indigo">Kontrak</Badge>
+                                    {:else if civilianMdl.residentstatus == "Kos"}
+                                        <Badge color="yellow">Kos</Badge>
+                                    {/if}
+                                </TableBodyCell>
+                            </TableBodyRow>
+                        </TableBody>
+                    </Table>
+                {/if}
             </div>
         </div>
         <div
