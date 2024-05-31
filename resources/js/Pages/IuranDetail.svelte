@@ -19,8 +19,6 @@
         Checkbox,
         Modal,
     } from "flowbite-svelte";
-    // import { Select, Label } from "flowbite-svelte";
-    import { page, router } from "@inertiajs/svelte";
     import { writable } from "svelte/store";
 
     const axios = axiosInstance.create();

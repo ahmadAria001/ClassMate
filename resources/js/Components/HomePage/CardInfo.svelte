@@ -13,7 +13,11 @@
         <svelte:component this={icon} class="w-6 h-6" />
     </div>
     <div class="ml-4">
-        <h4 class="text-black font-bold">{title}</h4>
-        <h2 class={`text-2xl font-semibold ${textColor}`}>{value}</h2>
+        <h4 class="text-black dark:text-white font-bold">{title}</h4>
+        <h2
+            class={`text-2xl font-semibold text-black dark:text-white ${textColor}`}
+        >
+            {value}
+        </h2>
     </div>
 </div>

@@ -22,9 +22,7 @@
         QuestionCircleSolid,
         UsersGroupOutline,
         FileImportOutline,
-        DotsHorizontalOutline,
-        ChevronDownOutline,
-        ChevronRightOutline,
+        CashOutline,
     } from "flowbite-svelte-icons";
     import CardInfo from "@C/HomePage/CardInfo.svelte";
 
@@ -374,7 +372,7 @@
             <CardInfo
                 title="Jumlah Iuran Terkumpul"
                 value={data?.totalDues}
-                icon={UsersGroupOutline}
+                icon={CashOutline}
                 iconBgClass="bg-gray-900 dark:bg-gray-700"
             />
             <CardInfo
