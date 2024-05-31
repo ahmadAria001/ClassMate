@@ -37,44 +37,52 @@ class TableSeeder extends Seeder
             ]);
         }
 
+        $createdCivilian = [];
+
         for ($i = 1; $i <= 6; $i++) {
             if ($i < 6) {
-                Civilian::create([
-                    'nik' => $i,
-                    'fullName' => $faker->sentence(3),
-                    'residentstatus' => $faker->randomElement(['ContractResident', 'PermanentResident']),
-                    'birthplace' => $faker->city(),
-                    'birthdate' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
-                    'nkk' => $i,
-                    'isFamilyHead' => true,
-                    'rt_id' => $i,
-                    'address' => $faker->address(),
-                    'status' => $faker->randomElement(['Aktif', 'Meninggal', 'Pindah']),
-                    'phone' => preg_replace('/[^0-9]/', ' ', $faker->phoneNumber()),
-                    'religion' => $faker->randomElement(['Islam', 'Katolik', 'Hindu', 'Budha', 'Konghuan']),
-                    'job' => $faker->randomElement(['Pengangguran', 'Mahasiswa', 'Petani', 'PNS', 'Sum Ting']),
-                    'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
-                    'created_by' => $i,
-                ]);
+                array_push(
+                    $createdCivilian,
+                    Civilian::firstOrCreate([
+                        'nik' => $i,
+                        'fullName' => $faker->sentence(3),
+                        'residentstatus' => $faker->randomElement(['ContractResident', 'PermanentResident']),
+                        'birthplace' => $faker->city(),
+                        'birthdate' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
+                        'nkk' => $i,
+                        'isFamilyHead' => true,
+                        'rt_id' => $i,
+                        'address' => $faker->address(),
+                        'status' => $faker->randomElement(['Aktif', 'Meninggal', 'Pindah']),
+                        'phone' => preg_replace('/[^0-9]/', ' ', $faker->phoneNumber()),
+                        'religion' => $faker->randomElement(['Islam', 'Katolik', 'Hindu', 'Budha', 'Konghuan']),
+                        'job' => $faker->randomElement(['Pengangguran', 'Mahasiswa', 'Petani', 'PNS', 'Sum Ting']),
+                        'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
+                        'created_by' => $i,
+                    ])
+                );
             } else {
-                Civilian::create([
-                    'nik' => 6,
-                    'fullName' => 'admin',
-                    'residentstatus' => 'PermanentResident',
-                    'birthplace' => 'MLG',
-                    'birthdate' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
-                    'nkk' => $i,
-                    'isFamilyHead' => true,
-                    'rt_id' => $i,
-                    'address' => $faker->address(),
-                    'status' => $faker->randomElement(['Aktif', 'Meninggal', 'Pindah']),
-                    'phone' => preg_replace('/[^0-9]/', ' ', $faker->phoneNumber()),
-                    'religion' => $faker->randomElement(['Islam', 'Katolik', 'Hindu', 'Budha', 'Konghuan']),
-                    'job' => $faker->randomElement(['Pengangguran', 'Mahasiswa', 'Petani', 'PNS', 'Sum Ting']),
+                array_push(
+                    $createdCivilian,
+                    Civilian::firstOrCreate([
+                        'nik' => 6,
+                        'fullName' => 'admin',
+                        'residentstatus' => 'PermanentResident',
+                        'birthplace' => 'MLG',
+                        'birthdate' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
+                        'nkk' => $i,
+                        'isFamilyHead' => true,
+                        'rt_id' => $i,
+                        'address' => $faker->address(),
+                        'status' => $faker->randomElement(['Aktif', 'Meninggal', 'Pindah']),
+                        'phone' => preg_replace('/[^0-9]/', ' ', $faker->phoneNumber()),
+                        'religion' => $faker->randomElement(['Islam', 'Katolik', 'Hindu', 'Budha', 'Konghuan']),
+                        'job' => $faker->randomElement(['Pengangguran', 'Mahasiswa', 'Petani', 'PNS', 'Sum Ting']),
 
-                    'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
-                    'created_by' => 1,
-                ]);
+                        'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
+                        'created_by' => 1,
+                    ])
+                );
             }
         }
 
@@ -104,52 +112,75 @@ class TableSeeder extends Seeder
 
         $duesTypeIndex = 0;
         $currentRT = 1;
-        for ($i = 1; $i <= 12; $i++) {
-            if ($duesTypeIndex > 2) $duesTypeIndex = 0;
+
+        $createdDues = array();
+
+        for ($i = 1; $i <= 6; $i++) {
+            $createdDues["$i"] = array();
             if ($currentRT > 6) $currentRT = 1;
 
-            Dues::create([
-                'typeDues' => $duesType[$duesTypeIndex++],
-                'description' => $faker->sentence(),
-                'amt_dues' => $faker->numberBetween(0, 5000),
-                'amt_fund' => $faker->numberBetween(0, 5000000),
-                'status' => $faker->boolean(),
-                'created_by' => $currentRT,
-                'rt_id' => $currentRT++,
-                'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
-            ]);
+            foreach ($duesType as $key => $value) {
+                array_push($createdDues["$i"], Dues::firstOrCreate([
+                    'typeDues' => $value,
+                    'description' => $faker->sentence(),
+                    'amt_dues' => $faker->numberBetween(0, 5000),
+                    'amt_fund' => $faker->numberBetween(0, 5000000),
+                    'status' => $faker->boolean(),
+                    'created_by' => $currentRT,
+                    'rt_id' => $currentRT,
+                    'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
+                ]));
+            }
+
+            $currentRT++;
         }
 
         $duesTypeIndex = 1;
-        for ($i = 1; $i <= 6; $i++) {
-            if ($duesTypeIndex > 3) $duesTypeIndex = 0;
+        $memberCreated = array();
+        for ($i = 0; $i < count($createdCivilian); $i++) {
 
-            DuesMember::create([
-                'id' => $i,
-                'dues' => ($duesTypeIndex++) + 1,
-                'member' => $i,
-                'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
-                'created_by' => $i,
-            ]);
+            for ($idx = 0; $idx < count($createdDues[($createdCivilian[$i])->rt_id]); $idx++) {
+                if ($duesTypeIndex > 3) $duesTypeIndex = 0;
+
+                array_push($memberCreated, DuesMember::firstOrCreate([
+                    'dues' => ($createdDues[($createdCivilian[$i])->rt_id])[$idx]->id,
+                    'member' => $createdCivilian[$i]->id,
+                    'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
+                    'created_by' => 6,
+                ]));
+            }
         }
 
         $paidBy = 1;
         $dues = 1;
 
-        for ($i = 1; $i <= 365 * 20; $i++) {
+        $existingDate = array();
+
+        for ($i = 0; $i < count($memberCreated); $i++) {
+            $existingDate[$memberCreated[$i]->id] = array();
+        }
+
+        for ($i = 1; $i <= 10800; $i++) {
             if ($paidBy >= 5) {
                 $paidBy = 1;
             }
 
-            if ($dues > 3) {
+            if ($dues > count($memberCreated)) {
                 $dues = 1;
             }
 
-            $selectedDate = Carbon::createFromDate($faker->dateTimeBetween('-5 years', 'now'))->getTimestamp();
+            $selectedDate = Carbon::createFromDate($faker->dateTimeBetween('-50 years', '-1 month'))->getTimestamp();
+
+
+            while (in_array(date('m', $selectedDate) . " " . date('Y', $selectedDate), $existingDate)) {
+                $selectedDate = Carbon::createFromDate($faker->dateTimeBetween('-50 years', '-1 month'))->getTimestamp();
+            }
+
+            array_push($existingDate["$dues"], date('m', $selectedDate) . " " . date('Y', $selectedDate));
 
             DuesPaymentLog::create([
                 'dues_member' => $dues++,
-                'amount_paid' => $faker->numberBetween(0, 5000),
+                'amount_paid' => 5000,
                 'paid_for' => $selectedDate,
                 'created_at' => $selectedDate,
                 'created_by' => 6,

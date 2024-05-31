@@ -22,30 +22,67 @@
     // import { Select, Label } from "flowbite-svelte";
     import { page, router } from "@inertiajs/svelte";
     import { writable } from "svelte/store";
+    import Payment from "@C/DetailIuran/Modals/Payment.svelte";
+    import { twMerge } from "tailwind-merge";
 
     const axios = axiosInstance.create();
 
     let clickOutsideModal = false;
     let checkedAll = false;
-    let checkedItems = Array(12).fill(false);
+    let checkedItems: any[] = [];
     let isAnyChecked = writable(false);
-    let civilian: string | null;
-    let rt: string | null;
-    let duesTypes: any[] | null;
+    let civilian: string;
+    let rt: string;
+    let duesTypes: any;
     let currentPage = 1;
     let civilianMdl: any;
+    let paymentLog: any;
+    let selected: any[] = [];
+    let amountPay: number;
+
+    let unpaidData: any[] = [];
+
+    $: canBegine = civilian && rt ? true : false;
+
+    $: detailIsExist = paymentLog ? true : false;
 
     function toggleAll(event: Event) {
         const target = event.target as HTMLInputElement;
         checkedItems = checkedItems.map(() => target.checked);
         checkedAll = target.checked;
+
+        selected = [];
+        if (target.checked) {
+            selected = unpaidData;
+        }
+
         isAnyChecked.set(checkedAll);
     }
 
-    function toggleItem(index: number) {
+    function offAll() {
+        if (!detailIsExist) return;
+
+        setTimeout(() => {
+            const inputs = document.querySelectorAll('input[type="checkbox"]');
+            inputs.forEach((element: any) => {
+                element.checked = false;
+            });
+
+            // checkedItems = [];
+
+            isAnyChecked.set(false);
+        }, 250);
+    }
+
+    function toggleItem(index: number, stat: boolean) {
         return function (event: Event) {
             const target = event.target as HTMLInputElement;
             checkedItems[index] = target.checked;
+
+            if (selected.includes(paymentLog.data[index]))
+                selected.splice(index, 1);
+            else selected.push(paymentLog.data[index]);
+
             checkedAll = checkedItems.every(Boolean);
             isAnyChecked.set(checkedItems.some(Boolean));
         };
@@ -103,8 +140,8 @@
     };
 
     const initPage = async () => {
-        if (!rt) return;
-        if (!civilian) return;
+        if (rt.length < 1) return;
+        if (civilian.length < 1) return;
 
         const types = await getDuesTypes(rt);
         const civilianData = await getCivil(civilian);
@@ -114,17 +151,95 @@
     };
 
     onMount(async () => {
-        extractParams();
-        await initPage();
+        await extractParams();
+        if (canBegine) await initPage();
     });
 
-    const extractParams = () => {
+    const extractParams = async () => {
         const urlParams = new URLSearchParams(location.search);
-        civilian = urlParams.get("civ");
-        rt = urlParams.get("rt");
+        civilian = urlParams.get("civ")!;
+        rt = urlParams.get("rt")!;
 
-        if (!rt) router.visit("/404");
-        if (!civilian) router.visit("/404");
+        if (rt.length < 1) return;
+        if (civilian.length < 1) return;
+    };
+
+    let builder = {};
+    const rebuild = async () => {
+        await initPage();
+        builder = {};
+    };
+
+    const generateUnpaid = (lastPaidDate: number) => {
+        const paidMont = new Date(lastPaidDate * 1000).getMonth();
+        const paidYear = new Date(lastPaidDate * 1000).getFullYear();
+        const currentMont = new Date(Date.now()).getMonth();
+        const currentYear = new Date(Date.now()).getFullYear();
+
+        const generatedUnpainPayment: {
+            paid_for: number;
+            amount_paid: number;
+        }[] = [];
+
+        let loopMonth = paidMont + 1;
+        let loopYear = paidYear;
+
+        // console.log(new Date(lastPaidDate * 1000).getMonth());
+
+        while (loopYear <= currentYear) {
+            while (
+                loopMonth <= currentMont ||
+                (loopYear < currentYear && loopMonth <= 11)
+            ) {
+                let generatedDate = new Date(lastPaidDate * 1000);
+                generatedDate = new Date(generatedDate.setMonth(loopMonth));
+                generatedDate = new Date(generatedDate.setFullYear(loopYear));
+
+                generatedUnpainPayment.push({
+                    paid_for: generatedDate.getTime() / 1000,
+                    amount_paid: 0,
+                });
+
+                if (loopMonth <= 11 && loopYear <= currentYear) {
+                    loopMonth++;
+                } else {
+                    break;
+                }
+            }
+
+            if (loopYear <= currentYear) {
+                loopMonth = 0;
+
+                loopYear++;
+            } else {
+                break;
+            }
+        }
+
+        return generatedUnpainPayment.reverse();
+    };
+
+    const generatesPaymentLog = async (
+        target: string,
+        dues: string,
+        stat: boolean,
+    ) => {
+        const duesDatas = await getDuesMember(target, dues);
+        paymentLog = duesDatas;
+
+        if (!stat) return;
+
+        // console.log(new Date(duesDatas.data[0].paid_for * 1000).getMonth());
+
+        if (duesDatas.data.length > 0) {
+            const dummy = generateUnpaid(duesDatas.data[0].paid_for);
+            unpaidData = dummy;
+
+            paymentLog.data = dummy.concat(duesDatas.data);
+            paymentLog.length = dummy.length;
+        }
+
+        // console.log(paymentLog);
     };
 
     const dateFormatter = (epoc: number) => {
@@ -135,14 +250,14 @@
             "Feb",
             "Mar",
             "Apr",
-            "May",
+            "Mei",
             "Jun",
             "Jul",
-            "Aug",
+            "Agu",
             "Sep",
-            "Oct",
+            "Okt",
             "Nov",
-            "Dec",
+            "Des",
         ];
 
         const day = date.getDate();
@@ -152,8 +267,10 @@
 
         const year = date.getFullYear();
 
-        return `${day} ${monthName} ${year}`;
+        return `${monthName} ${year}`;
     };
+
+    const handleSelected = () => {};
 
     $: isAnyChecked.set(checkedItems.some(Boolean));
 </script>
@@ -221,65 +338,103 @@
                 </p>
 
                 <!-- Tombol bayar sesuai yang di centang -->
+                <!-- {#if duesTypes}
+                    {#if duesTypes.status}
+                    {/if}
+                    {/if} -->
                 <Button
-                    on:click={() => (clickOutsideModal = true)}
+                    on:click={() => {
+                        clickOutsideModal = true;
+                    }}
                     disabled={$isAnyChecked === false}>Bayar</Button
                 >
             </div>
             <Tabs class="px-4">
-                {#if duesTypes}
-                    {#each duesTypes as d}
-                        <TabItem
-                            open
-                            title={d.typeDues == "Security"
-                                ? "Keamanan"
-                                : d.typeDues == "TrashManagement"
-                                  ? "Sampah"
-                                  : d.typeDues == "TrashManagement"
-                                    ? "Event"
-                                    : ""}
-                        >
-                            <Table hoverable={true}>
-                                <TableHead>
-                                    <TableHeadCell class="!p-4">
-                                        <Checkbox
-                                            bind:checked={checkedAll}
-                                            on:change={toggleAll}
-                                        />
-                                    </TableHeadCell>
-                                    <TableHeadCell>Nama Bulan</TableHeadCell>
-                                    <TableHeadCell>Tagihan</TableHeadCell>
-                                    <TableHeadCell>Status</TableHeadCell>
-                                    <!-- <TableHeadCell class="text-center"
+                {#key builder}
+                    {#if civilian != ""}
+                        {#if duesTypes}
+                            {#each duesTypes as d}
+                                <TabItem
+                                    on:focus={async (e) => {
+                                        amountPay = d.amt_dues;
+
+                                        await generatesPaymentLog(
+                                            civilian,
+                                            d.id,
+                                            d.status,
+                                        );
+
+                                        // if ($isAnyChecked)
+                                        offAll();
+                                    }}
+                                    title={d.typeDues == "Security"
+                                        ? "Keamanan"
+                                        : d.typeDues == "TrashManagement"
+                                          ? "Sampah"
+                                          : d.typeDues == "Event"
+                                            ? "Acara"
+                                            : ""}
+                                    inactiveClasses={twMerge(
+                                        "inline-block text-sm font-medium text-center disabled:cursor-not-allowed' p-4 text-gray-500 rounded-t-lg hover:text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300",
+                                        d.status
+                                            ? ""
+                                            : "text-red-500 dark:text-red-500",
+                                    )}
+                                >
+                                    <Table hoverable={true}>
+                                        <TableHead>
+                                            <TableHeadCell class="!p-4">
+                                                {#if d.status}
+                                                    <Checkbox
+                                                        bind:checked={checkedAll}
+                                                        on:change={toggleAll}
+                                                        disabled={!d.status}
+                                                    />
+                                                {/if}
+                                            </TableHeadCell>
+                                            <TableHeadCell
+                                                >Nama Bulan</TableHeadCell
+                                            >
+                                            <TableHeadCell
+                                                >Tagihan</TableHeadCell
+                                            >
+                                            <TableHeadCell>Status</TableHeadCell
+                                            >
+                                            <!-- <TableHeadCell class="text-center"
                                     >Bayar</TableHeadCell
                                 > -->
-                                </TableHead>
-                                <TableBody tableBodyClass="divide-y">
-                                    {#if civilian}
-                                        {#await getDuesMember(civilian, d.id) then data}
-                                            {#each data.data as item, idx}
-                                                <TableBodyRow>
-                                                    <TableBodyCell class="!p-4">
-                                                        <Checkbox
-                                                            bind:checked={checkedItems[
-                                                                idx
-                                                            ]}
-                                                            on:change={toggleItem(
-                                                                idx,
-                                                            )}
-                                                        />
-                                                    </TableBodyCell>
-                                                    <TableBodyCell
-                                                        >{dateFormatter(
-                                                            item.paid_for *
-                                                                1000,
-                                                        )}</TableBodyCell
-                                                    >
-                                                    <TableBodyCell
-                                                        >Rp. {item.amount_paid}</TableBodyCell
-                                                    >
+                                        </TableHead>
+                                        <TableBody tableBodyClass="divide-y">
+                                            {#if paymentLog}
+                                                {#each paymentLog.data as item, idx}
+                                                    <TableBodyRow>
+                                                        <TableBodyCell
+                                                            class="!p-4"
+                                                        >
+                                                            {#if d.status && Number.parseInt(item.amount_paid) < Number.parseInt(d.amt_dues)}
+                                                                <Checkbox
+                                                                    bind:checked={checkedItems[
+                                                                        idx
+                                                                    ]}
+                                                                    on:change={toggleItem(
+                                                                        idx,
+                                                                        item.amount_paid >=
+                                                                            d.amt_dues,
+                                                                    )}
+                                                                />
+                                                            {/if}
+                                                        </TableBodyCell>
+                                                        <TableBodyCell
+                                                            >{dateFormatter(
+                                                                item.paid_for *
+                                                                    1000,
+                                                            )}</TableBodyCell
+                                                        >
+                                                        <TableBodyCell
+                                                            >Rp. {item.amount_paid}</TableBodyCell
+                                                        >
 
-                                                    <!-- {#if item.residentstatus == "PermanentResident"}
+                                                        <!-- {#if item.residentstatus == "PermanentResident"}
                                             <TableBodyCell class="text-center">
                                                 <Badge color="green"
                                                     >Tetap</Badge
@@ -297,106 +452,65 @@
                                                 >
                                             </TableBodyCell>
                                         {/if} -->
-
-                                                    <TableBodyCell
-                                                        class="text-center"
-                                                    >
-                                                        <Badge color="green"
-                                                            >Lunas</Badge
+                                                        <TableBodyCell
+                                                            class="text-center"
                                                         >
-                                                    </TableBodyCell>
+                                                            <!-- {console.log(
+                                                                Number.parseInt(
+                                                                    item.amount_paid,
+                                                                ) <
+                                                                    Number.parseInt(
+                                                                        d.amt_dues,
+                                                                    ),
+                                                                Number.parseInt(
+                                                                    item.amount_paid,
+                                                                ),
+                                                                Number.parseInt(
+                                                                    d.amt_dues,
+                                                                ),
+                                                            )} -->
+                                                            {#if Number.parseFloat(item.amount_paid) >= Number.parseFloat(d.amt_dues)}
+                                                                <Badge
+                                                                    color="green"
+                                                                >
+                                                                    Lunas
+                                                                </Badge>
+                                                            {:else}
+                                                                <Badge
+                                                                    color="red"
+                                                                >
+                                                                    Belum Lunas
+                                                                </Badge>
+                                                            {/if}
+                                                        </TableBodyCell>
 
-                                                    <!-- <TableBodyCell class="text-center">
+                                                        <!-- <TableBodyCell class="text-center">
                                             <Button
                                                 on:click={() =>
                                                     (clickOutsideModal = true)}
                                                 >Bayar</Button
                                             >
                                         </TableBodyCell> -->
-                                                </TableBodyRow>
-                                            {/each}
-                                        {/await}
-                                    {/if}
-                                </TableBody>
-                            </Table>
-                        </TabItem>
-                    {/each}
-                {/if}
+                                                    </TableBodyRow>
+                                                {/each}
+                                            {/if}
+                                        </TableBody>
+                                    </Table>
+                                </TabItem>
+                            {/each}
+                        {/if}
+                    {/if}
+                {/key}
             </Tabs>
         </div>
     </div>
 </Layout>
 
-<Modal
-    title="Detail Pembayaran"
-    bind:open={clickOutsideModal}
-    autoclose
-    outsideclose
->
-    <p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
-        Apakah anda yakin akan pembayaran ini?
-    </p>
-    <Table>
-        <TableHead>
-            <TableHeadCell class="!p-4">
-                <Checkbox bind:checked={checkedAll} on:change={toggleAll} />
-            </TableHeadCell>
-            <TableHeadCell>Nama Bulan</TableHeadCell>
-            <TableHeadCell>Tagihan</TableHeadCell>
-            <TableHeadCell>Status</TableHeadCell>
-            <!-- <TableHeadCell class="text-center"
-                                    >Bayar</TableHeadCell
-                                > -->
-        </TableHead>
-        <TableBody tableBodyClass="divide-y">
-            {#each Array(3) as _, index}
-                <TableBodyRow>
-                    <TableBodyCell class="!p-4">
-                        <Checkbox
-                            bind:checked={checkedItems[index]}
-                            on:change={toggleItem(index)}
-                        />
-                    </TableBodyCell>
-                    <TableBodyCell>Juli</TableBodyCell>
-                    <TableBodyCell>Rp. 100.000</TableBodyCell>
-
-                    <!-- {#if item.residentstatus == "PermanentResident"}
-                                            <TableBodyCell class="text-center">
-                                                <Badge color="green"
-                                                    >Tetap</Badge
-                                                >
-                                            </TableBodyCell>
-                                        {:else if item.residentstatus == "ContractResident"}
-                                            <TableBodyCell class="text-center">
-                                                <Badge color="indigo"
-                                                    >Kontrak</Badge
-                                                >
-                                            </TableBodyCell>
-                                        {:else if item.residentstatus == "Kos"}
-                                            <TableBodyCell class="text-center">
-                                                <Badge color="yellow">Kos</Badge
-                                                >
-                                            </TableBodyCell>
-                                        {/if} -->
-
-                    <TableBodyCell class="text-center">
-                        <Badge color="green">Lunas</Badge>
-                    </TableBodyCell>
-
-                    <!-- <TableBodyCell class="text-center">
-                                            <Button
-                                                on:click={() =>
-                                                    (clickOutsideModal = true)}
-                                                >Bayar</Button
-                                            >
-                                        </TableBodyCell> -->
-                </TableBodyRow>
-            {/each}
-        </TableBody>
-    </Table>
-    <hr />
-    <div class="footer text-end">
-        <Button color="red">Batal</Button>
-        <Button on:click={() => alert('Handle "success"')}>Yakin</Button>
-    </div>
-</Modal>
+{#if selected && clickOutsideModal}
+    <Payment
+        bind:showState={clickOutsideModal}
+        on:comp={rebuild}
+        bind:selected
+        bind:amountPay
+    />
+{/if}

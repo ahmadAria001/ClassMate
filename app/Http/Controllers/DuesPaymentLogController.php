@@ -65,7 +65,7 @@ class DuesPaymentLogController extends Controller
             ->whereHas('dues_member.member', function ($q) use ($member) {
                 return $q->where('id', $member);
             })
-            ->orderByRaw('MONTH(FROM_UNIXTIME(`paid_for`)) ASC, YEAR(FROM_UNIXTIME(`paid_for`)) DESC')
+            ->orderByRaw('FROM_UNIXTIME(`paid_for`) DESC ')
             ->skip($page > 1 ? ($page - 1) * $take : 0)
             ->take($take)
             ->get();
