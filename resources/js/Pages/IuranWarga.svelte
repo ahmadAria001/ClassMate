@@ -16,6 +16,8 @@
     } from "flowbite-svelte";
     import { Select, Label } from "flowbite-svelte";
     import { page } from "@inertiajs/svelte";
+    import Create from "@C/Iuran/Modals/Create.svelte";
+    import Detail from "@C/Iuran/Modals/Detail.svelte";
 
     const axios = axiosInstance.create();
 
@@ -24,6 +26,9 @@
     let value: string;
     let disabledSelectRT: boolean = false;
     let selected: string;
+    let addDues: boolean = false;
+    let builder = {};
+    let detailModal: boolean = false;
 
     if (role === "RT") {
         disabledSelectRT = true;
@@ -103,6 +108,11 @@
         if (value) duesRt = await getDuesTypes(value);
     };
 
+    const rebuild = async () => {
+        await initData();
+        builder = {};
+    };
+
     const getDuesTypes = async (filter: string) => {
         try {
             const response = await axios.get(
@@ -172,8 +182,8 @@
             <div
                 class="block md:flex-row mx-auto justify-around items-start md:items-center min-w-full"
             >
-                <div class="lg:px-4 mb-2 md:mb-0">
-                    <Label for="select-rt" class="mr-2">RT</Label>
+                <div class="mb-2 md:mb-0">
+                    <Label for="select-rt" class="mr-2 lg:mb-1">RT</Label>
                     <Select
                         class="w-full"
                         id="select-rt"
@@ -191,14 +201,18 @@
                         {/each}
                     </Select>
                 </div>
-                <div class="mt-2 lg:px-4">
-                    <Label for="nama_warga" class="mr-2">Cari warga</Label>
+                <div class="mt-2">
+                    <Label for="nama_warga" class="mr-2 lg:mb-1"
+                        >Cari warga</Label
+                    >
                     <Input
                         class="mr-4 w-full"
                         type="text"
                         id="nama_warga"
                         placeholder="Cari Nama Warga"
                     />
+                </div>
+                <div class="text-end">
                     <Button class="mt-2">Cari</Button>
                 </div>
             </div>
@@ -206,22 +220,28 @@
         <div
             class="bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md w-full max-md:mb-5 mb-2"
         >
-            <h5
-                class="text-xl ml-4 mt-3 font-bold leading-none text-gray-900 dark:text-white mb-4"
-            >
-                List Iuran
-            </h5>
+            <div class="flex justify-between px-4 py-4 items-center">
+                <h5
+                    class="text-xl font-bold leading-none text-gray-900 dark:text-white"
+                >
+                    List Iuran
+                </h5>
+                <Button
+                    class=""
+                    size="sm"
+                    on:click={() => {
+                        addDues = true;
+                    }}>Tambah Kategori</Button
+                >
+            </div>
             <div class="block w-full">
                 <div class="lg:px-4 mb-2 md:mb-0">
                     {#if duesRt || duesRt?.data?.lenght > 0}
-                        {console.log(duesRt.data.length)}
                         <Table tableClass="mb-0">
                             <TableHead>
                                 <TableHeadCell>Nama</TableHeadCell>
                                 <TableHeadCell>Jumlah Iuran</TableHeadCell>
-                                <TableHeadCell>
-                                    <span class="sr-only">Status</span>
-                                </TableHeadCell>
+                                <TableHeadCell>Status</TableHeadCell>
                                 <TableHeadCell>
                                     <span class="sr-only">Action</span>
                                 </TableHeadCell>
@@ -252,6 +272,7 @@
                                                 color="green"
                                                 on:click={() => {
                                                     selected = item.id;
+                                                    detailModal = true;
                                                 }}
                                             >
                                                 Detail
@@ -264,9 +285,6 @@
                     {:else}
                         <p>RT tidak memiliki iuran aktif</p>
                     {/if}
-                </div>
-                <div class="mt-2 lg:px-4 w-full flex justify-end pr-5 pb-5">
-                    <Button class="">Cari</Button>
                 </div>
             </div>
         </div>
@@ -305,6 +323,14 @@
     </Table>
 </Layout>
 
+<Create bind:showState={addDues} on:comp={rebuild} />
+{#if selected && detailModal}
+    <Detail
+        bind:showState={detailModal}
+        bind:items={selected}
+        on:comp={rebuild}
+    />
+{/if}
 <!-- {#if selected}
 
 {/if} -->
