@@ -9,6 +9,7 @@ use App\Models\Dues;
 use App\Models\DuesMember;
 use App\Models\DuesPaymentLog;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -75,6 +76,17 @@ class DuesPaymentLogController extends Controller
         return Response()->json([
             'data' => $data->toArray(), 'length' => $length
         ], 200);
+    }
+
+    public function getDuesRT($rt_id): JsonResponse
+    {
+        $data = DuesPaymentLog::withoutTrashed()
+            ->where('paid_by', $rt_id)
+            ->get();
+
+        $length = $data->count();
+
+        return Response()->json(['data' => $data, 'lenght' => $length], 200);
     }
 
     public function create(CreateLog $req)
