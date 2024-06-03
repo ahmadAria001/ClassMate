@@ -9,15 +9,32 @@
         TableBodyRow,
         TableHead,
         TableHeadCell,
+        Toast,
     } from "flowbite-svelte";
-    import { onMount } from "svelte";
     import { twMerge } from "tailwind-merge";
 
+    import axiosInstance from "axios";
+    import { page } from "@inertiajs/svelte";
+    import { createEventDispatcher, onMount } from "svelte";
+    import { CheckCircleSolid, CloseCircleSolid } from "flowbite-svelte-icons";
+
     export let showState = false;
-    export let selected: any[];
+    export let selected: {
+        paid_for: number;
+        amount_paid: number;
+        dues_member: number;
+    }[];
     export let amountPay: number;
 
     let total = 0;
+
+    const dispatch = createEventDispatcher();
+    const axios = axiosInstance.create({ withCredentials: true });
+
+    let err: { status: null | boolean; message: null | string } = {
+        status: null,
+        message: null,
+    };
 
     const dateFormatter = (epoc: number) => {
         const date = new Date(epoc);
@@ -37,7 +54,7 @@
             "Des",
         ];
 
-        const day = date.getDate();
+        // const day = date.getDate();
 
         const monthIndex = date.getMonth();
         const monthName = monthNames[monthIndex];
@@ -47,10 +64,45 @@
         return `${monthName} ${year}`;
     };
 
+    const submitPayment = async () => {
+        try {
+            let body = {
+                payments: selected,
+            };
+
+            console.log(body);
+
+            const response = await axios.post(`/api/dues-payment/`, body, {
+                headers: {
+                    Accept: "application/json",
+                },
+            });
+
+            console.log(response.data);
+
+            err = response.data;
+            showState = false;
+            dispatch("comp");
+
+            setTimeout(() => {
+                err = { status: null, message: null };
+            }, 5000);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     onMount(() => {
+        selected.map(
+            (value) =>
+                (value.amount_paid = Number.parseFloat(amountPay.toString())),
+        );
+
         if (selected.length > 0) {
             total = selected.length * amountPay;
         }
+
+        console.log(amountPay);
     });
 </script>
 
@@ -135,7 +187,30 @@
     </Table>
     <hr />
     <div class="footer text-end">
-        <Button color="red">Batal</Button>
-        <Button on:click={() => alert('Handle "success"')}>Yakin</Button>
+        <Button color="red" on:click={() => (showState = false)}>Batal</Button>
+        <Button
+            on:click={async () => {
+                await submitPayment();
+            }}>Yakin</Button
+        >
     </div>
 </Modal>
+
+{#if err.status != null && err.status == true}
+    <Toast color="green" class="fixed top-10 right-1 z-[50000]">
+        <svelte:fragment slot="icon">
+            <CheckCircleSolid class="w-5 h-5" />
+            <span class="sr-only">Check icon</span>
+        </svelte:fragment>
+        {err.message}
+    </Toast>
+{/if}
+{#if err.status != null && err.status == false}
+    <Toast color="red" class="fixed top-10 right-1 z-[50000]">
+        <svelte:fragment slot="icon">
+            <CloseCircleSolid class="w-5 h-5" />
+            <span class="sr-only">Error icon</span>
+        </svelte:fragment>
+        {err.message}
+    </Toast>
+{/if}

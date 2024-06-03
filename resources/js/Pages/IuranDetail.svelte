@@ -56,6 +56,8 @@
             selected = unpaidData;
         }
 
+        validatePayment();
+
         isAnyChecked.set(checkedAll);
     }
 
@@ -68,7 +70,7 @@
                 element.checked = false;
             });
 
-            // checkedItems = [];
+            selected = [];
 
             isAnyChecked.set(false);
         }, 250);
@@ -79,12 +81,19 @@
             const target = event.target as HTMLInputElement;
             checkedItems[index] = target.checked;
 
-            if (selected.includes(paymentLog.data[index]))
-                selected.splice(index, 1);
-            else selected.push(paymentLog.data[index]);
-
             checkedAll = checkedItems.every(Boolean);
             isAnyChecked.set(checkedItems.some(Boolean));
+
+            if (selected.includes(paymentLog.data[index])) {
+                selected.splice(index, 1);
+            } else {
+                selected.push(paymentLog.data[index]);
+            }
+
+            validatePayment();
+
+            // console.log(paymentLog);
+            // console.log(selected);
         };
     }
 
@@ -170,53 +179,144 @@
         builder = {};
     };
 
-    const generateUnpaid = (lastPaidDate: number) => {
-        const paidMont = new Date(lastPaidDate * 1000).getMonth();
-        const paidYear = new Date(lastPaidDate * 1000).getFullYear();
+    const generateUnpaid = (
+        // lastPaidDate: number, member: number
+        data: any,
+    ) => {
+        // console.log(data);
+        let contained: any[] = [];
+        // const generatedUnpainPayment: {
+        //     paid_for: number;
+        //     amount_paid: number;
+        //     dues_member: number;
+        // }[] = [];
+        interface generatedUnpainPayment {
+            paid_for: number;
+            amount_paid: number;
+            dues_member: number;
+        }
+
+        data.data.map((val: any) => contained.push(val));
+        contained = contained.sort(
+            (first: any, comparator: any) =>
+                first.paid_for > comparator.paid_for,
+        );
+
         const currentMont = new Date(Date.now()).getMonth();
         const currentYear = new Date(Date.now()).getFullYear();
 
-        const generatedUnpainPayment: {
-            paid_for: number;
-            amount_paid: number;
+        let containedDate: {
+            paidDate: string;
+            item: generatedUnpainPayment | any;
         }[] = [];
 
-        let loopMonth = paidMont + 1;
-        let loopYear = paidYear;
+        contained.map((val: any) => {
+            const paidMont = new Date(val.paid_for * 1000).getMonth();
+            const paidYear = new Date(val.paid_for * 1000).getFullYear();
 
-        // console.log(new Date(lastPaidDate * 1000).getMonth());
+            const paidDate = `${paidYear}-${paidMont}-1`;
 
-        while (loopYear <= currentYear) {
-            while (
-                loopMonth <= currentMont ||
-                (loopYear < currentYear && loopMonth <= 11)
-            ) {
-                let generatedDate = new Date(lastPaidDate * 1000);
-                generatedDate = new Date(generatedDate.setMonth(loopMonth));
-                generatedDate = new Date(generatedDate.setFullYear(loopYear));
+            containedDate.push({ paidDate: paidDate, item: val });
+        });
 
-                generatedUnpainPayment.push({
-                    paid_for: generatedDate.getTime() / 1000,
-                    amount_paid: 0,
+        for (let index = 0; index < containedDate.length; index++) {
+            const paidYear =
+                new Date(containedDate[index].item.paid_for * 1000).getMonth() +
+                    1 >
+                11
+                    ? new Date(
+                          containedDate[index].item.paid_for * 1000,
+                      ).getFullYear() + 1
+                    : new Date(
+                          containedDate[index].item.paid_for * 1000,
+                      ).getFullYear();
+            const paidMont =
+                new Date(containedDate[index].item.paid_for * 1000).getMonth() +
+                    1 >
+                11
+                    ? 0
+                    : new Date(
+                          containedDate[index].item.paid_for * 1000,
+                      ).getMonth() + 1;
+
+            const paidDate = `${paidYear}-${paidMont}-1`;
+
+            const hasDate = containedDate.some(
+                (value) => value.paidDate == paidDate,
+            );
+
+            if (!hasDate) {
+                if (paidMont >= 11 && paidYear > currentYear) break;
+
+                let generatedDate = new Date();
+                generatedDate = new Date(generatedDate.setMonth(paidMont));
+                generatedDate = new Date(generatedDate.setFullYear(paidYear));
+
+                containedDate.splice(index, 0, {
+                    paidDate: paidDate,
+                    item: {
+                        paid_for: Number.parseInt(
+                            (generatedDate.getTime() / 1000).toString(),
+                        ),
+                        amount_paid: 0,
+                        dues_member: containedDate[index].item.dues_member.id,
+                    },
                 });
-
-                if (loopMonth <= 11 && loopYear <= currentYear) {
-                    loopMonth++;
-                } else {
-                    break;
-                }
-            }
-
-            if (loopYear <= currentYear) {
-                loopMonth = 0;
-
-                loopYear++;
-            } else {
-                break;
             }
         }
 
-        return generatedUnpainPayment.reverse();
+        containedDate = containedDate.sort(
+            (first: any, comparator: any) =>
+                new Date(first.paidDate) < new Date(comparator.paidDate),
+        );
+
+        const finalData: any[] = [];
+        containedDate.map((value) => finalData.push(value.item));
+
+        return finalData;
+
+        // const paidMont = new Date(lastPaidDate * 1000).getMonth();
+        // const paidYear = new Date(lastPaidDate * 1000).getFullYear();
+        // const currentMont = new Date(Date.now()).getMonth();
+        // const currentYear = new Date(Date.now()).getFullYear();
+
+        // let loopMonth = paidMont + 1;
+        // let loopYear = paidYear;
+
+        // // console.log(new Date(lastPaidDate * 1000).getMonth());
+
+        // while (loopYear <= currentYear) {
+        //     while (
+        //         loopMonth <= currentMont ||
+        //         (loopYear < currentYear && loopMonth <= 11)
+        //     ) {
+        //         let generatedDate = new Date(lastPaidDate * 1000);
+        //         generatedDate = new Date(generatedDate.setMonth(loopMonth));
+        //         generatedDate = new Date(generatedDate.setFullYear(loopYear));
+
+        //         generatedUnpainPayment.push({
+        //             paid_for: generatedDate.getTime() / 1000,
+        //             amount_paid: 0,
+        //             dues_member: member,
+        //         });
+
+        //         if (loopMonth <= 11 && loopYear <= currentYear) {
+        //             loopMonth++;
+        //         } else {
+        //             break;
+        //         }
+        //     }
+
+        //     if (loopYear <= currentYear) {
+        //         loopMonth = 0;
+
+        //         loopYear++;
+        //     } else {
+        //         break;
+        //     }
+        // }
+
+        // return generatedUnpainPayment.reverse();
     };
 
     const generatesPaymentLog = async (
@@ -232,10 +332,15 @@
         // console.log(new Date(duesDatas.data[0].paid_for * 1000).getMonth());
 
         if (duesDatas.data.length > 0) {
-            const dummy = generateUnpaid(duesDatas.data[0].paid_for);
-            unpaidData = dummy;
+            const dummy = generateUnpaid(
+                duesDatas,
+                // duesDatas.data[0].paid_for,
+                // duesDatas.data[0].dues_member.id,
+            );
 
-            paymentLog.data = dummy.concat(duesDatas.data);
+            // unpaidData = dummy;
+
+            paymentLog.data = dummy;
             paymentLog.length = dummy.length;
         }
 
@@ -268,6 +373,53 @@
         const year = date.getFullYear();
 
         return `${monthName} ${year}`;
+    };
+
+    const validatePayment = () => {
+        selected = selected.sort(
+            (first: any, comparator: any) =>
+                first.paid_for < comparator.paid_for,
+        );
+
+        let contained: number[] = [];
+        let missing: number[] = [];
+
+        let localUpaid: any[] = [];
+        unpaidData.map((val) => localUpaid.push(val));
+
+        localUpaid = localUpaid.sort(
+            (first: any, comparator: any) =>
+                first.paid_for < comparator.paid_for,
+        );
+
+        // console.log(localUpaid);
+        // console.log(selected);
+
+        // for (let index = unpaidData.length; index > 0; index--) {
+        //     if (selected)
+        //     contained.push({ indetifier: index, status: selected });
+        // }
+
+        selected.map((value: any) => {
+            contained.push(unpaidData.indexOf(value));
+        });
+
+        contained = contained.sort();
+        console.log(contained);
+
+        const filtered = localUpaid.filter(
+            (value) => !contained.includes(localUpaid.indexOf(value)),
+        );
+
+        filtered.map((val) => missing.push(localUpaid.indexOf(val)));
+
+        console.log(missing);
+
+        if (contained[0] == 0) return true;
+
+        // contained;
+
+        return false;
     };
 
     const handleSelected = () => {};
@@ -346,7 +498,8 @@
                     on:click={() => {
                         clickOutsideModal = true;
                     }}
-                    disabled={$isAnyChecked === false}>Bayar</Button
+                    disabled={$isAnyChecked === false && validatePayment()}
+                    >Bayar</Button
                 >
             </div>
             <Tabs class="px-4">
@@ -364,7 +517,9 @@
                                             d.status,
                                         );
 
-                                        // if ($isAnyChecked)
+                                        console.log(selected);
+                                        console.log(amountPay);
+
                                         offAll();
                                     }}
                                     title={d.typeDues == "Security"

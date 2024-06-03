@@ -23,7 +23,10 @@ class UpdateLog extends FormRequest
     {
         return [
             'id' => 'required|integer|min:1',
-            'amount_paid' => 'required|integer|min:0',
+            'dues_member' => 'required|integer|min:1',
+            'amount_paid' => 'required|integer|min:1',
+            'paid_for' => 'required|integer|min:1',
+            'paid_by' => 'required|integer|min:1',
         ];
     }
 }
