@@ -105,7 +105,6 @@
         //     "initial: " + initialData.duesAmount + " " + initialData.duesName,
         // );
         currentData = { ...initialData };
-        console.log(duesCategoryData);
     });
 
     $: formChanged =
