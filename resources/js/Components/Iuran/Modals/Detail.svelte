@@ -18,6 +18,7 @@
         createSchema,
     } from "@R/Utils/Schema/Dues/Create";
     import { CheckCircleSolid, CloseCircleSolid } from "flowbite-svelte-icons";
+    import { onMount } from "svelte";
 
     export let showState = false;
     export let items: string;
@@ -87,14 +88,25 @@
             },
         );
 
-        initialData = {
-            duesName: response.data.typeDues,
-            duesAmount: response.data.amt_dues,
-        };
-        currentData = { ...initialData };
-
         return response.data;
     };
+
+    let duesCategoryData;
+    onMount(async () => {
+        const response = await getDuesCategoryData(items);
+        duesCategoryData = await response.data;
+
+        // console.log(duesCategoryData);
+        initialData = {
+            duesName: duesCategoryData.typeDues,
+            duesAmount: duesCategoryData.amt_dues,
+        };
+        // console.log(
+        //     "initial: " + initialData.duesAmount + " " + initialData.duesName,
+        // );
+        currentData = { ...initialData };
+        console.log(duesCategoryData);
+    });
 
     $: formChanged =
         initialData.duesName !== currentData.duesName ||
@@ -109,58 +121,50 @@
     bind:open={showState}
     on:close={() => (formChanged = false)}
 >
-    {#await getDuesCategoryData(items) then item}
-        <!-- {console.log(item)} -->
-        {console.log(formChanged)}
-        {(currentData.duesName = item.data.typeDues)}
-        {(currentData.duesAmount = item.data.amt_dues)}
-        <form method="POST" use:form>
-            <div class="mb-4">
-                <Label for="duesCategoryName" class="mb-2">Nama Kategori</Label>
-                <Input
-                    id="duesCategoryName"
-                    name="duesName"
-                    placeholder="Masukan nama kategori"
-                    value={currentData.duesName}
-                    on:input={(e) => (currentData.duesName = e.target.value)}
-                />
-                {#if $errors.duesName}
-                    <span class="text-sm text-red-500">{$errors.duesName}</span>
-                {/if}
-            </div>
-            <div class="mb-4">
-                <Label for="duesAmount" class="mb-2">Jumlah Iuran</Label>
-                <Input
-                    rows="2"
-                    id="duesAmount"
-                    name="duesAmount"
-                    placeholder="Masukan jumlah iuran"
-                    value={currentData.duesName}
-                    on:input={(e) => (currentData.duesAmount = e.target.value)}
-                />
-                {#if $errors.duesAmount}
-                    <span class="text-sm text-red-500"
-                        >{$errors.duesAmount}</span
-                    >
-                {/if}
-            </div>
-            <div class="text-end">
-                <Button type="submit" class="mr-2" color="red">Hapus</Button>
-                {#if item.data.status}
-                    <Button type="submit" class="mr-2" color="yellow"
-                        >Nonaktifkan</Button
-                    >
-                {:else}
-                    <Button type="submit" class="mr-2" color="yellow"
-                        >Aktifkan</Button
-                    >
-                {/if}
-                <Button type="submit" class="" bind:disabled={isDisabled}
-                    >Ubah</Button
+    <form method="POST" use:form>
+        <div class="mb-4">
+            <Label for="duesCategoryName" class="mb-2">Nama Kategori</Label>
+            <Input
+                id="duesCategoryName"
+                name="duesName"
+                placeholder="Masukan nama kategori"
+                value={duesCategoryData?.typeDues}
+                on:input={(e) => (currentData.duesName = e.target.value)}
+            />
+            {#if $errors.duesName}
+                <span class="text-sm text-red-500">{$errors.duesName}</span>
+            {/if}
+        </div>
+        <div class="mb-4">
+            <Label for="duesAmount" class="mb-2">Jumlah Iuran</Label>
+            <Input
+                rows="2"
+                id="duesAmount"
+                name="duesAmount"
+                placeholder="Masukan jumlah iuran"
+                value={duesCategoryData?.amt_dues}
+                on:input={(e) => (currentData.duesAmount = e.target.value)}
+            />
+            {#if $errors.duesAmount}
+                <span class="text-sm text-red-500">{$errors.duesAmount}</span>
+            {/if}
+        </div>
+        <div class="text-end">
+            <Button type="submit" class="mr-2" color="red">Hapus</Button>
+            {#if duesCategoryData?.status}
+                <Button type="submit" class="mr-2" color="yellow"
+                    >Nonaktifkan</Button
                 >
-            </div>
-        </form>
-    {/await}
+            {:else}
+                <Button type="submit" class="mr-2" color="yellow"
+                    >Aktifkan</Button
+                >
+            {/if}
+            <Button type="submit" class="" bind:disabled={isDisabled}
+                >Ubah</Button
+            >
+        </div>
+    </form>
 </Modal>
 
 {#if err.status != null && err.status == true}
