@@ -1,4 +1,4 @@
-<script lang="ts">
+<!-- <script lang="ts">
     import { onMount } from "svelte";
     import Layout from "./Layout.svelte";
     import {
@@ -285,4 +285,597 @@
             </ButtonGroup>
         </div>
     </TableSearch>
+</Layout> -->
+
+<script lang="ts">
+    import { onMount } from "svelte";
+    import Layout from "./Layout.svelte";
+    import {
+        Badge,
+        Table,
+        TableBody,
+        TableBodyCell,
+        TableBodyRow,
+        TableHead,
+        TableHeadCell,
+        TableSearch,
+        Button,
+        Modal,
+        Label,
+        Input,
+        ButtonGroup,
+    } from "flowbite-svelte";
+    import {
+        ChevronLeftOutline,
+        ChevronRightOutline,
+        ImageOutline,
+    } from "flowbite-svelte-icons";
+    let items = [
+        {
+            id: 1,
+            name: "Muhammad Fatoni",
+            address: "Jl. Semangka No. 80",
+            noHp: "081234567890",
+            desc: "Surat Kependudukan",
+            status: "Dalam Proses",
+        },
+    ];
+    let modalDetailReqBansos = false;
+    let searchTerm = "";
+    let currentPosition = 0;
+    const itemsPerPage = 10;
+    const showPage = 5;
+    let totalPages = 0;
+    let pagesToShow: any[] = [];
+    let totalItems: number = items.length;
+    let startPage: number;
+    let endPage: number;
+
+    const updateDataAndPagination = () => {
+        const currentPageItems = items.slice(
+            currentPosition,
+            currentPosition + itemsPerPage,
+        );
+        renderPagination(currentPageItems.length);
+    };
+
+    const loadNextPage = () => {
+        if (currentPosition + itemsPerPage < items.length) {
+            currentPosition += itemsPerPage;
+            updateDataAndPagination();
+        }
+    };
+
+    const loadPreviousPage = () => {
+        if (currentPosition - itemsPerPage >= 0) {
+            currentPosition -= itemsPerPage;
+            updateDataAndPagination();
+        }
+    };
+
+    const renderPagination = (totalItems: number) => {
+        totalPages = Math.ceil(items.length / itemsPerPage);
+        const currentPage = Math.ceil((currentPosition + 1) / itemsPerPage);
+
+        startPage = currentPage - Math.floor(showPage / 2);
+        startPage = Math.max(1, startPage);
+        endPage = Math.min(startPage + showPage - 1, totalPages);
+
+        pagesToShow = Array.from(
+            { length: endPage - startPage + 1 },
+            (_, i) => startPage + i,
+        );
+    };
+
+    const goToPage = (pageNumber: number) => {
+        currentPosition = (pageNumber - 1) * itemsPerPage;
+        updateDataAndPagination();
+    };
+
+    $: startRange = currentPosition + 1;
+    $: endRange = Math.min(currentPosition + itemsPerPage, totalItems);
+
+    onMount(() => {
+        // Call renderPagination when the component initially mounts
+        renderPagination(items.length);
+    });
+
+    $: currentPageItems = items.slice(
+        currentPosition,
+        currentPosition + itemsPerPage,
+    );
+    $: filteredItems = items.filter(
+        (item) =>
+            item.name.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1,
+    );
+
+    // SPK
+    // SAW
+    let alternatif = [
+        { nama: "Alternatif 1", kriteria: [5, 1, 4, 5, 1] },
+        { nama: "Alternatif 2", kriteria: [3, 2, 2, 5, 2] },
+        { nama: "Alternatif 3", kriteria: [2, 4, 1, 2, 5] },
+        { nama: "Alternatif 4", kriteria: [3, 1, 4, 3, 5] },
+        { nama: "Alternatif 5", kriteria: [2, 2, 3, 1, 2] },
+        { nama: "Alternatif 6", kriteria: [3, 1, 2, 2, 1] },
+        { nama: "Alternatif 7", kriteria: [1, 1, 1, 2, 2] },
+        { nama: "Alternatif 8", kriteria: [5, 3, 2, 1, 3] },
+        { nama: "Alternatif 9", kriteria: [2, 3, 2, 5, 3] },
+        { nama: "Alternatif 10", kriteria: [1, 5, 2, 3, 4] },
+    ];
+    let kriteriaBobot = [
+        { nama: "Kriteria 1", bobot: 0.3, type: "cost" },
+        { nama: "Kriteria 2", bobot: 0.25, type: "benefit" },
+        { nama: "Kriteria 3", bobot: 0.15, type: "benefit" },
+        { nama: "Kriteria 4", bobot: 0.1, type: "benefit" },
+        { nama: "Kriteria 5", bobot: 0.2, type: "benefit" },
+    ];
+
+    let normalisasi = [];
+    let hasilAkhir = [];
+
+    // async function fetchData() {
+    //     hitungNormalisasi();
+    //     hitungNilaiAkhir();
+    // }
+
+    function hitungNormalisasi() {
+        normalisasi = alternatif.map((alt) => {
+            return {
+                nama: alt.nama,
+                kriteria: alt.kriteria.map((nilai, index) => {
+                    const max = Math.max(
+                        ...alternatif.map((a) => a.kriteria[index]),
+                    );
+                    const min = Math.min(
+                        ...alternatif.map((a) => a.kriteria[index]),
+                    );
+                    const type = kriteriaBobot[index].type;
+                    return type === "benefit" ? nilai / max : min / nilai;
+                }),
+            };
+        });
+    }
+
+    // Fungsi untuk menghitung nilai akhir
+    function hitungNilaiAkhir() {
+        hasilAkhir = normalisasi.map((alt) => {
+            return {
+                nama: alt.nama,
+                nilai: alt.kriteria.reduce(
+                    (total, nilai, index) =>
+                        total + nilai * kriteriaBobot[index].bobot,
+                    0,
+                ),
+            };
+        });
+        hasilAkhir.sort((a, b) => b.nilai - a.nilai);
+    }
+
+    // // Fetch data saat komponen di-mount
+    // onMount(fetchData);
+    // End SAW
+
+    // TOPSIS
+    let normalisasiTopsis = [];
+    let normalisasiBerbobot = [];
+    let solusiIdealPositif = [];
+    let solusiIdealNegatif = [];
+    let jarakPositif = [];
+    let jarakNegatif = [];
+    let preferensi = [];
+
+    async function fetchData() {
+        hitungNormalisasi();
+        hitungNilaiAkhir();
+        hitungNormalisasiTopsis();
+        hitungNormalisasiTopsisBerbobot();
+        hitungSolusiIdeal();
+        hitungJarak();
+        hitungPreferensi();
+        kombinasiHasilAkhir();
+    }
+
+    function hitungNormalisasiTopsis() {
+        normalisasiTopsis = alternatif.map((alt) => {
+            return {
+                nama: alt.nama,
+                kriteria: alt.kriteria.map((nilai, index) => {
+                    const sumOfSquares = Math.sqrt(
+                        alternatif.reduce(
+                            (sum, a) => sum + Math.pow(a.kriteria[index], 2),
+                            0,
+                        ),
+                    );
+                    return nilai / sumOfSquares;
+                }),
+            };
+        });
+    }
+
+    function hitungNormalisasiTopsisBerbobot() {
+        normalisasiBerbobot = normalisasiTopsis.map((alt) => {
+            return {
+                nama: alt.nama,
+                kriteria: alt.kriteria.map(
+                    (nilai, index) => nilai * kriteriaBobot[index].bobot,
+                ),
+            };
+        });
+    }
+
+    function hitungSolusiIdeal() {
+        // solusiIdealPositif = kriteriaBobot.map((kriteria, index) => {
+        //     return kriteria.type === "benefit"
+        //         ? Math.max(...normalisasiBerbobot.map((a) => a.kriteria[index]))
+        //         : Math.min(
+        //               ...normalisasiBerbobot.map((a) => a.kriteria[index]),
+        //           );
+        // });
+
+        // solusiIdealNegatif = kriteriaBobot.map((kriteria, index) => {
+        //     return kriteria.type === "benefit"
+        //         ? Math.min(...normalisasiBerbobot.map((a) => a.kriteria[index]))
+        //         : Math.max(
+        //               ...normalisasiBerbobot.map((a) => a.kriteria[index]),
+        //           );
+        // });
+        solusiIdealPositif = kriteriaBobot.map((kriteria, index) => {
+            return Math.max(
+                ...normalisasiBerbobot.map((a) => a.kriteria[index]),
+            );
+        });
+
+        solusiIdealNegatif = kriteriaBobot.map((kriteria, index) => {
+            return Math.min(
+                ...normalisasiBerbobot.map((a) => a.kriteria[index]),
+            );
+        });
+    }
+
+    function hitungJarak() {
+        jarakPositif = normalisasiBerbobot.map((alt) => {
+            return {
+                nama: alt.nama,
+                jarak: Math.sqrt(
+                    alt.kriteria.reduce(
+                        (sum, nilai, index) =>
+                            sum +
+                            Math.pow(nilai - solusiIdealPositif[index], 2),
+                        0,
+                    ),
+                ),
+            };
+        });
+
+        jarakNegatif = normalisasiBerbobot.map((alt) => {
+            return {
+                nama: alt.nama,
+                jarak: Math.sqrt(
+                    alt.kriteria.reduce(
+                        (sum, nilai, index) =>
+                            sum +
+                            Math.pow(nilai - solusiIdealNegatif[index], 2),
+                        0,
+                    ),
+                ),
+            };
+        });
+    }
+
+    function hitungPreferensi() {
+        preferensi = jarakPositif.map((alt, index) => {
+            return {
+                nama: alt.nama,
+                nilai:
+                    jarakNegatif[index].jarak /
+                    (jarakNegatif[index].jarak + jarakPositif[index].jarak),
+            };
+        });
+
+        preferensi.sort((a, b) => b.nilai - a.nilai);
+    }
+
+    let kombinasiHasil = [];
+    const bobotSAW = 0.5; // Bobot untuk hasil SAW
+    const bobotTOPSIS = 0.5; // Bobot untuk hasil TOPSIS
+
+    function kombinasiHasilAkhir() {
+        kombinasiHasil = hasilAkhir.map((sawAlt, index) => {
+            const topsisAlt = preferensi.find(
+                (prefAlt) => prefAlt.nama === sawAlt.nama,
+            );
+            return {
+                nama: sawAlt.nama,
+                nilai: sawAlt.nilai * bobotSAW + topsisAlt.nilai * bobotTOPSIS,
+            };
+        });
+
+        kombinasiHasil.sort((a, b) => b.nilai - a.nilai);
+    }
+
+    onMount(fetchData);
+    // End TOPSIS
+</script>
+
+<Layout>
+    <h2 class="text-xl font-semibold mt-6 mb-2">Daftar Pengajuan Bansos</h2>
+    <Table>
+        <TableHead defaultRow={false}>
+            <tr>
+                <TableHeadCell rowspan="3">Alternatif</TableHeadCell>
+                {#each kriteriaBobot as kriteria}
+                    <TableHeadCell>{kriteria.nama}</TableHeadCell>
+                {/each}
+            </tr>
+            <tr>
+                <!-- <TableHeadCell class="sr-only">Bobot</TableHeadCell> -->
+                {#each kriteriaBobot as kriteria}
+                    <TableHeadCell>{kriteria.bobot}</TableHeadCell>
+                {/each}
+            </tr>
+            <tr>
+                <!-- <TableHeadCell class="sr-only">Tipe</TableHeadCell> -->
+                {#each kriteriaBobot as kriteria}
+                    <TableHeadCell>{kriteria.type}</TableHeadCell>
+                {/each}
+            </tr>
+        </TableHead>
+        <TableBody>
+            {#each alternatif as alt}
+                <TableBodyRow>
+                    <TableBodyCell>{alt.nama}</TableBodyCell>
+                    {#each alt.kriteria as nilai}
+                        <TableBodyCell>{nilai}</TableBodyCell>
+                    {/each}
+                </TableBodyRow>
+            {/each}
+        </TableBody>
+    </Table>
+    <h2 class="text-xl font-semibold mt-6 mb-2">Hasil Rekomendasi</h2>
+    <Table>
+        <TableHead>
+            <TableHeadCell>Alternatif</TableHeadCell>
+            <TableHeadCell>Nilai Perhitungan</TableHeadCell>
+        </TableHead>
+        <TableBody>
+            {#each kombinasiHasil as komb}
+                <TableBodyRow>
+                    <TableBodyCell>{komb.nama}</TableBodyCell>
+                    <TableBodyCell>{komb.nilai.toFixed(4)}</TableBodyCell>
+                </TableBodyRow>
+            {/each}
+        </TableBody>
+    </Table>
+    <hr />
+    <h1 class="text-2xl font-bold mb-4">Sistem Pendukung Keputusan (SAW)</h1>
+
+    <h2 class="text-xl font-semibold mt-6 mb-2">
+        Data Alternatif dan Kriteria
+    </h2>
+    <Table>
+        <TableHead>
+            <TableBody>
+                <TableBodyCell>Alternatif</TableBodyCell>
+                {#each kriteriaBobot as kriteria}
+                    <TableBodyCell>{kriteria.nama}</TableBodyCell>
+                {/each}
+            </TableBody>
+        </TableHead>
+        <TableBody>
+            {#each alternatif as alt}
+                <TableBody>
+                    <TableBodyCell>{alt.nama}</TableBodyCell>
+                    {#each alt.kriteria as nilai}
+                        <TableBodyCell>{nilai}</TableBodyCell>
+                    {/each}
+                </TableBody>
+            {/each}
+        </TableBody>
+    </Table>
+
+    <h2 class="text-xl font-semibold mt-6 mb-2">Hasil Normalisasi</h2>
+    <Table>
+        <TableHead>
+            <TableBody>
+                <TableBodyCell>Alternatif</TableBodyCell>
+                {#each kriteriaBobot as kriteria}
+                    <TableBodyCell>{kriteria.nama}</TableBodyCell>
+                {/each}
+            </TableBody>
+        </TableHead>
+        <TableBody>
+            {#each normalisasi as norm}
+                <TableBody>
+                    <TableBodyCell>{norm.nama}</TableBodyCell>
+                    {#each norm.kriteria as nilai}
+                        <TableBodyCell>{nilai.toFixed(2)}</TableBodyCell>
+                    {/each}
+                </TableBody>
+            {/each}
+        </TableBody>
+    </Table>
+
+    <h2 class="text-xl font-semibold mt-6 mb-2">Hasil Akhir</h2>
+    <Table>
+        <TableHead>
+            <TableBody>
+                <TableBodyCell>Alternatif</TableBodyCell>
+                <TableBodyCell>Nilai Akhir</TableBodyCell>
+            </TableBody>
+        </TableHead>
+        <TableBody>
+            {#each hasilAkhir as hasil}
+                <TableBody>
+                    <TableBodyCell>{hasil.nama}</TableBodyCell>
+                    <TableBodyCell>{hasil.nilai.toFixed(2)}</TableBodyCell>
+                </TableBody>
+            {/each}
+        </TableBody>
+    </Table>
+
+    <h1 class="text-2xl font-bold mb-4">Sistem Pendukung Keputusan (TOPSIS)</h1>
+
+    <h2 class="text-xl font-semibold mt-6 mb-2">
+        Data Alternatif dan Kriteria
+    </h2>
+    <Table>
+        <TableHead>
+            <TableBody>
+                <TableBodyCell>Alternatif</TableBodyCell>
+                {#each kriteriaBobot as kriteria}
+                    <TableBodyCell>{kriteria.nama}</TableBodyCell>
+                {/each}
+            </TableBody>
+        </TableHead>
+        <TableBody>
+            {#each alternatif as alt}
+                <TableBody>
+                    <TableBodyCell>{alt.nama}</TableBodyCell>
+                    {#each alt.kriteria as nilai}
+                        <TableBodyCell>{nilai}</TableBodyCell>
+                    {/each}
+                </TableBody>
+            {/each}
+        </TableBody>
+    </Table>
+
+    <h2 class="text-xl font-semibold mt-6 mb-2">Matrik Normalisasi (R)</h2>
+    <Table>
+        <TableHead>
+            <TableBody>
+                <TableBodyCell>Alternatif</TableBodyCell>
+                {#each kriteriaBobot as kriteria}
+                    <TableBodyCell>{kriteria.nama}</TableBodyCell>
+                {/each}
+            </TableBody>
+        </TableHead>
+        <TableBody>
+            {#each normalisasiTopsis as norm}
+                <TableBody>
+                    <TableBodyCell>{norm.nama}</TableBodyCell>
+                    {#each norm.kriteria as nilai}
+                        <TableBodyCell>{nilai.toFixed(4)}</TableBodyCell>
+                    {/each}
+                </TableBody>
+            {/each}
+        </TableBody>
+    </Table>
+
+    <h2 class="text-xl font-semibold mt-6 mb-2">
+        Matrik Normalisasi Berbobot (Y)
+    </h2>
+    <Table>
+        <TableHead>
+            <TableBody>
+                <TableBodyCell>Alternatif</TableBodyCell>
+                {#each kriteriaBobot as kriteria}
+                    <TableBodyCell>{kriteria.nama}</TableBodyCell>
+                {/each}
+            </TableBody>
+        </TableHead>
+        <TableBody>
+            {#each normalisasiBerbobot as norm}
+                <TableBody>
+                    <TableBodyCell>{norm.nama}</TableBodyCell>
+                    {#each norm.kriteria as nilai}
+                        <TableBodyCell>{nilai.toFixed(4)}</TableBodyCell>
+                    {/each}
+                </TableBody>
+            {/each}
+        </TableBody>
+    </Table>
+
+    <h2 class="text-xl font-semibold mt-6 mb-2">
+        Solusi Ideal Positif (A<sup>+</sup>) dan Solusi Ideal Negatif (A<sup
+            >-</sup
+        >)
+    </h2>
+    <Table>
+        <TableHead>
+            <TableBody>
+                <TableBodyCell>Kriteria</TableBodyCell>
+                {#each kriteriaBobot as kriteria}
+                    <TableBodyCell>{kriteria.nama}</TableBodyCell>
+                {/each}
+            </TableBody>
+        </TableHead>
+        <TableBody>
+            <TableBody>
+                <TableBodyCell
+                    >Solusi Ideal Positif (A<sup>+</sup>)</TableBodyCell
+                >
+                {#each solusiIdealPositif as nilai}
+                    <TableBodyCell>{nilai.toFixed(4)}</TableBodyCell>
+                {/each}
+            </TableBody>
+            <TableBody>
+                <TableBodyCell
+                    >Solusi Ideal Negatif (A<sup>-</sup>)</TableBodyCell
+                >
+                {#each solusiIdealNegatif as nilai}
+                    <TableBodyCell>{nilai.toFixed(4)}</TableBodyCell>
+                {/each}
+            </TableBody>
+        </TableBody>
+    </Table>
+
+    <h2 class="text-xl font-semibold mt-6 mb-2">
+        Jarak Solusi Ideal Positif (D<sup>+</sup>) dan Jarak Solusi Ideal
+        Negatif (D<sup>-</sup>)
+    </h2>
+    <Table>
+        <TableHead>
+            <TableBody>
+                <TableBodyCell>Alternatif</TableBodyCell>
+                <TableBodyCell>Jarak Positif (D<sup>+</sup>)</TableBodyCell>
+                <TableBodyCell>Jarak Negatif (D<sup>-</sup>)</TableBodyCell>
+            </TableBody>
+        </TableHead>
+        <TableBody>
+            {#each jarakPositif as jarakP, index}
+                <TableBody>
+                    <TableBodyCell>{jarakP.nama}</TableBodyCell>
+                    <TableBodyCell>{jarakP.jarak.toFixed(4)}</TableBodyCell>
+                    <TableBodyCell
+                        >{jarakNegatif[index].jarak.toFixed(4)}</TableBodyCell
+                    >
+                </TableBody>
+            {/each}
+        </TableBody>
+    </Table>
+
+    <h2 class="text-xl font-semibold mt-6 mb-2">Nilai Preferensi (V)</h2>
+    <Table>
+        <TableHead>
+            <TableBody>
+                <TableBodyCell>Alternatif</TableBodyCell>
+                <TableBodyCell>Nilai Preferensi (V)</TableBodyCell>
+            </TableBody>
+        </TableHead>
+        <TableBody>
+            {#each preferensi as pref}
+                <TableBody>
+                    <TableBodyCell>{pref.nama}</TableBodyCell>
+                    <TableBodyCell>{pref.nilai.toFixed(4)}</TableBodyCell>
+                </TableBody>
+            {/each}
+        </TableBody>
+    </Table>
+
+    <h2 class="text-xl font-semibold mt-6 mb-2">Final answers</h2>
+    <Table>
+        <TableHead>
+            <TableHeadCell>Alternatif</TableHeadCell>
+            <TableHeadCell>Nilai Preferensi (V)</TableHeadCell>
+        </TableHead>
+        <TableBody>
+            {#each kombinasiHasil as komb}
+                <TableBodyRow>
+                    <TableBodyCell>{komb.nama}</TableBodyCell>
+                    <TableBodyCell>{komb.nilai.toFixed(4)}</TableBodyCell>
+                </TableBodyRow>
+            {/each}
+        </TableBody>
+    </Table>
 </Layout>
