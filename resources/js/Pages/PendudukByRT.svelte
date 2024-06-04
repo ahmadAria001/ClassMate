@@ -310,7 +310,7 @@
                                     >{item.fullName}</TableBodyCell
                                 >
                                 <TableBodyCell>{item.address}</TableBodyCell>
-                                <TableBodyCell class="text-center"
+                                <TableBodyCell class="text-left"
                                     >{item.job}</TableBodyCell
                                 >
                                 {#if item.residentstatus == "PermanentResident"}
@@ -497,7 +497,7 @@
                                     {#each data.data[0].civils as item, idx}
                                         <TableBodyRow>
                                             <TableBodyCell
-                                                tdClass="flex gap-2 justify-center align-middle my-6"
+                                                tdClass="flex gap-2 my-6 {(!item.isFamilyHead)? 'pl-7':''}"
                                             >
                                                 {#if item.isFamilyHead}
                                                     <svg
@@ -633,11 +633,11 @@
                     <span class="font-semibold text-gray-900 dark:text-white">
                         {currentPage < 2
                             ? 1
-                            : data.data.length < 5
+                            : data.data.length < 6
                               ? data.length - data.data.length + 1
                               : data.data.length + 1}
                         -
-                        {data.data.length < 5
+                        {data.data.length < 6
                             ? data.length
                             : data.data.length * currentPage}
                     </span>

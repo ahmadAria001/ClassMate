@@ -175,7 +175,7 @@
         class="bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md flex flex-col w-full"
     >
         <div class="w-full text-end flex justify-between p-4">
-            <p class="text-2xl font-bold text-black">Catatan Pengeluaran</p>
+            <p class="text-2xl font-bold text-black dark:text-white">Catatan Pengeluaran</p>
         </div>
         <Table tableClass="mb-0">
             <TableHead>

@@ -167,7 +167,7 @@
                 {#if data}
                     {#each data.data as item, idx}
                         <TableBodyRow>
-                            <TableBodyCell>{idx + 1}</TableBodyCell>
+                            <TableBodyCell class="text-center">{idx + 1}</TableBodyCell>
 
                             <TableBodyCell
                                 >{item.request_by.fullName}</TableBodyCell
