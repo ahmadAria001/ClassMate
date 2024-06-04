@@ -18,6 +18,7 @@ Route::prefix('civilian')->group(function () {
 
     Route::get('/', [CivilianController::class, 'get'])->middleware(CiviliantGet::class);
     Route::get('/{filter}', [CivilianController::class, 'get'])->middleware(CiviliantGet::class);
+    Route::get('/rt/{rt_id}', [CivilianController::class, 'getCivilanRT'])->middleware(CiviliantGet::class);
     Route::get('/head/{rt_id}', [CivilianController::class, 'getFamilyHead'])->middleware(CiviliantGet::class);
 
     Route::get('/{column}/{operator}/{value}', [CivilianController::class, 'getCustom'])->middleware(CiviliantGet::class);

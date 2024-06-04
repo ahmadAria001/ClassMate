@@ -22,9 +22,9 @@ class CreateLog extends FormRequest
     public function rules(): array
     {
         return [
-            'paid_by' => 'required|integer|min:1',
-            'dues_id' => 'required|integer|min:1',
-            'amount_paid' => 'required|integer|min:0'
+            'payments.*.dues_member' => 'required|integer|min:1',
+            'payments.*.amount_paid' => 'required|integer|min:1',
+            'payments.*.paid_for' => 'required|integer|min:1',
         ];
     }
 }
