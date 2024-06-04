@@ -256,7 +256,7 @@
                         paid_for: Number.parseInt(
                             (generatedDate.getTime() / 1000).toString(),
                         ),
-                        amount_paid: 0,
+                        amount_paid: amountPay,
                         dues_member: containedDate[index].item.dues_member.id,
                     },
                 });
@@ -564,7 +564,7 @@
                                                         <TableBodyCell
                                                             class="!p-4"
                                                         >
-                                                            {#if d.status && Number.parseInt(item.amount_paid) < Number.parseInt(d.amt_dues)}
+                                                            {#if d.status && !item.id}
                                                                 <Checkbox
                                                                     bind:checked={checkedItems[
                                                                         idx
@@ -622,7 +622,7 @@
                                                                     d.amt_dues,
                                                                 ),
                                                             )} -->
-                                                            {#if Number.parseFloat(item.amount_paid) >= Number.parseFloat(d.amt_dues)}
+                                                            {#if item.id}
                                                                 <Badge
                                                                     color="green"
                                                                 >

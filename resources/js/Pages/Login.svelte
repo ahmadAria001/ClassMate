@@ -21,7 +21,7 @@
     };
 
     const signIn = async (values: z.infer<typeof Login>) => {
-        const response = await router.post("/api/auth/signin", {
+        const response = await axios.post("/api/auth/signin", {
             username: values.username,
             password: values.password,
             _token: $page.props.csrf_token,
@@ -29,7 +29,7 @@
 
         const data = response.data;
 
-        console.log(data);
+        if (data.status) window.location = "/beranda";
     };
 
     const errHandler = () => {};
