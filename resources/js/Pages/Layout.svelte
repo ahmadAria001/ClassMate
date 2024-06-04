@@ -91,12 +91,12 @@
                 },
             },
             {
-                name: "Laporan",
+                name: "Pengajuan",
                 icon: ClipboardSolid,
                 isOpenItems: false,
                 children: {
                     "Surat Keterangan": "/daftar-pengajuan-surat",
-                    "Laporan Keuangan": "/keuangan",
+                    // "Laporan Keuangan": "/keuangan",
                     "Bantuan Sosial": "/daftar-bansos",
                 },
             },
@@ -141,12 +141,12 @@
                 },
             },
             {
-                name: "Laporan",
+                name: "Pengajuan",
                 icon: ClipboardSolid,
                 isOpenItems: false,
                 children: {
-                    "Surat Ket. Warga": "/daftar-pengajuan-surat",
-                    "Bantuan sosial": "/daftar-bansos",
+                    "Surat Keterangan": "/daftar-pengajuan-surat",
+                    "Bantuan Sosial": "/daftar-bansos",
                 },
             },
             {
@@ -188,16 +188,16 @@
                 isOpenItems: false,
                 children: {
                     "Daftar Pengaduan": "/daftar-pengaduan",
-                    "Status Pengaduan warga": "/status-pengaduan",
+                    "Status Pengaduan Warga": "/status-pengaduan",
                 },
             },
             {
-                name: "Laporan",
+                name: "Pengajuan",
                 icon: ClipboardSolid,
                 isOpenItems: false,
                 children: {
-                    "Surat Ket. Warga": "/daftar-pengajuan-surat",
-                    "Bantuan sosial": "/daftar-bansos",
+                    "Surat Keterangan": "/daftar-pengajuan-surat",
+                    "Bantuan Sosial": "/daftar-bansos",
                 },
             },
             {
@@ -238,11 +238,11 @@
                 },
             },
             {
-                name: "Surat",
+                name: "Pengajuan",
                 icon: ClipboardSolid,
                 isOpenItems: false,
                 children: {
-                    "Status Surat": "/status-pengajuan",
+                    "Status Pengajuan": "/status-pengajuan",
                 },
             },
             {
@@ -433,11 +433,11 @@
 
         <div class="flex items-center md:order-2">
             <DarkMode class="mr-3" />
-            <Button
+            <!-- <Button
                 id="notification"
                 class="mr-3 p-2.5 border-none"
                 color="alternative"><BellSolid /></Button
-            >
+            > -->
             <Avatar
                 id="avatar-menu"
                 src={new String($page.props.auth.user.pict).includes(
@@ -481,7 +481,7 @@
         <Dropdown triggeredBy="#avatar-menu" class="w-52 z-[100]">
             <DropdownHeader>
                 <span class="block text-sm max-w-full truncate"
-                    >{$page.props.auth.user.fullName}</span
+                    >Halo, {$page.props.auth.user.fullName}</span
                 >
                 <span class="block truncate text-sm font-medium"
                     ><b>{role}</b></span
