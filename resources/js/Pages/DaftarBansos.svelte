@@ -392,16 +392,16 @@
     // SPK
     // SAW
     let alternatif = [
-        { nama: "Alternatif 1", kriteria: [5, 1, 4, 5, 1] },
-        { nama: "Alternatif 2", kriteria: [3, 2, 2, 5, 2] },
-        { nama: "Alternatif 3", kriteria: [2, 4, 1, 2, 5] },
-        { nama: "Alternatif 4", kriteria: [3, 1, 4, 3, 5] },
-        { nama: "Alternatif 5", kriteria: [2, 2, 3, 1, 2] },
-        { nama: "Alternatif 6", kriteria: [3, 1, 2, 2, 1] },
-        { nama: "Alternatif 7", kriteria: [1, 1, 1, 2, 2] },
-        { nama: "Alternatif 8", kriteria: [5, 3, 2, 1, 3] },
-        { nama: "Alternatif 9", kriteria: [2, 3, 2, 5, 3] },
-        { nama: "Alternatif 10", kriteria: [1, 5, 2, 3, 4] },
+        { id: 1, nama: "Alternatif 1", kriteria: [70, 80, 90, 60, 50] },
+        { id: 2, nama: "Alternatif 2", kriteria: [60, 85, 75, 70, 65] },
+        { id: 3, nama: "Alternatif 3", kriteria: [75, 60, 80, 55, 70] },
+        { id: 4, nama: "Alternatif 4", kriteria: [80, 70, 85, 65, 55] },
+        { id: 5, nama: "Alternatif 5", kriteria: [65, 75, 70, 80, 60] },
+        { id: 6, nama: "Alternatif 6", kriteria: [90, 65, 60, 75, 85] },
+        { id: 7, nama: "Alternatif 7", kriteria: [85, 90, 65, 70, 75] },
+        { id: 8, nama: "Alternatif 8", kriteria: [70, 85, 90, 60, 80] },
+        { id: 9, nama: "Alternatif 9", kriteria: [60, 75, 85, 55, 90] },
+        { id: 10, nama: "Alternatif 10", kriteria: [75, 80, 60, 70, 65] },
     ];
     let kriteriaBobot = [
         { nama: "Kriteria 1", bobot: 0.3, type: "cost" },
@@ -422,6 +422,7 @@
     function hitungNormalisasi() {
         normalisasi = alternatif.map((alt) => {
             return {
+                id: alt.id,
                 nama: alt.nama,
                 kriteria: alt.kriteria.map((nilai, index) => {
                     const max = Math.max(
@@ -441,6 +442,7 @@
     function hitungNilaiAkhir() {
         hasilAkhir = normalisasi.map((alt) => {
             return {
+                id: alt.id,
                 nama: alt.nama,
                 nilai: alt.kriteria.reduce(
                     (total, nilai, index) =>
@@ -479,6 +481,7 @@
     function hitungNormalisasiTopsis() {
         normalisasiTopsis = alternatif.map((alt) => {
             return {
+                id: alt.id,
                 nama: alt.nama,
                 kriteria: alt.kriteria.map((nilai, index) => {
                     const sumOfSquares = Math.sqrt(
@@ -496,6 +499,7 @@
     function hitungNormalisasiTopsisBerbobot() {
         normalisasiBerbobot = normalisasiTopsis.map((alt) => {
             return {
+                id: alt.id,
                 nama: alt.nama,
                 kriteria: alt.kriteria.map(
                     (nilai, index) => nilai * kriteriaBobot[index].bobot,
@@ -536,6 +540,7 @@
     function hitungJarak() {
         jarakPositif = normalisasiBerbobot.map((alt) => {
             return {
+                id: alt.id,
                 nama: alt.nama,
                 jarak: Math.sqrt(
                     alt.kriteria.reduce(
@@ -550,6 +555,7 @@
 
         jarakNegatif = normalisasiBerbobot.map((alt) => {
             return {
+                id: alt.id,
                 nama: alt.nama,
                 jarak: Math.sqrt(
                     alt.kriteria.reduce(
@@ -566,6 +572,7 @@
     function hitungPreferensi() {
         preferensi = jarakPositif.map((alt, index) => {
             return {
+                id: alt.id,
                 nama: alt.nama,
                 nilai:
                     jarakNegatif[index].jarak /
@@ -586,6 +593,7 @@
                 (prefAlt) => prefAlt.nama === sawAlt.nama,
             );
             return {
+                id: sawAlt.id,
                 nama: sawAlt.nama,
                 nilai: sawAlt.nilai * bobotSAW + topsisAlt.nilai * bobotTOPSIS,
             };
@@ -599,7 +607,24 @@
 </script>
 
 <Layout>
-    <h2 class="text-xl font-semibold mt-6 mb-2">Daftar Pengajuan Bansos</h2>
+    <h2 class="text-xl font-semibold mt-6 mb-2">Hasil Rekomendasi</h2>
+    <Table>
+        <TableHead>
+            <TableHeadCell>Alternatif</TableHeadCell>
+            <TableHeadCell>Nilai Perhitungan</TableHeadCell>
+        </TableHead>
+        <TableBody>
+            {#each kombinasiHasil as komb}
+                <TableBodyRow>
+                    <TableBodyCell>{komb.id}</TableBodyCell>
+                    <TableBodyCell>{komb.nama}</TableBodyCell>
+                    <TableBodyCell>{komb.nilai.toFixed(4)}</TableBodyCell>
+                </TableBodyRow>
+            {/each}
+        </TableBody>
+    </Table>
+
+    <!-- <h2 class="text-xl font-semibold mt-6 mb-2">Daftar Pengajuan Bansos</h2>
     <Table>
         <TableHead defaultRow={false}>
             <tr>
@@ -609,13 +634,11 @@
                 {/each}
             </tr>
             <tr>
-                <!-- <TableHeadCell class="sr-only">Bobot</TableHeadCell> -->
                 {#each kriteriaBobot as kriteria}
                     <TableHeadCell>{kriteria.bobot}</TableHeadCell>
                 {/each}
             </tr>
             <tr>
-                <!-- <TableHeadCell class="sr-only">Tipe</TableHeadCell> -->
                 {#each kriteriaBobot as kriteria}
                     <TableHeadCell>{kriteria.type}</TableHeadCell>
                 {/each}
@@ -877,5 +900,5 @@
                 </TableBodyRow>
             {/each}
         </TableBody>
-    </Table>
+    </Table> -->
 </Layout>
