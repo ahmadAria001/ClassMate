@@ -58,7 +58,17 @@ class DuesController extends Controller
             $data = Dues::withoutTrashed()->with('rt_id')->get();
         }
 
-        return Response()->json(['data' => $data], 200);
+        $createdDues = array();
+        $key = "x";
+
+        for ($i = 1; $i <= 6; $i++) {
+            $createdDues[$key] = array();
+            for ($ix = 0; $ix < 2; $ix++) {
+                array_push($createdDues[$key], ["a" => 'sda']);
+            }
+        }
+
+        return Response()->json(['data' => $data, 'test' => $createdDues], 200);
     }
 
     public function manageDuesView(Request $request)

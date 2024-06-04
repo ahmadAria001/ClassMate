@@ -104,30 +104,7 @@ class UserController extends Controller
 
             if ($data->wasRecentlyCreated) {
                 $data->created_at = Carbon::now()->timestamp;
-
-                if (str_contains($req->url(), 'api')) {
-                    $token = $req->bearerToken();
-
-                    if (!$token) {
-                        $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
-
-                        if (!$token) {
-                            return Response()->json(
-                                [
-                                    'message' => 'Unauthorized',
-                                ],
-                                401,
-                            );
-                        }
-                    }
-
-                    $pat = PersonalAccessToken::findToken($token);
-                    $model = $pat->tokenable();
-
-                    $data->created_by = $model->get('id')[0]->id;
-                } else {
-                    $data->created_by = Auth::id();
-                }
+                $data->created_by = $data->id;
 
                 $data->save();
 

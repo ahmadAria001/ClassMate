@@ -29,6 +29,7 @@
     const axios = axiosInstance.create({ withCredentials: true });
 
     let role = $page.props.auth.user.role;
+    let id_rt = $page.props.auth.user.rt_id;
     let announcement: any;
     let citizenActivity: any;
 
@@ -143,10 +144,18 @@
 
     const getData = async () => {
         try {
+            const civilianUrl =
+                role === "RT" || role === "Warga"
+                    ? `/api/civilian/rt/${id_rt}`
+                    : `/api/civilian`;
+            const paymentUrl =
+                role === "RT" || role === "Warga"
+                    ? `/api/dues-payment/rt/${id_rt}`
+                    : `/api/dues-payment`;
             const [responseCivilian, responseDues, responseDocs] =
                 await Promise.all([
-                    axios.get(`/api/civilian/`),
-                    axios.get(`/api/dues-payment`),
+                    axios.get(civilianUrl),
+                    axios.get(paymentUrl),
                     axios.get(`/api/docs/complaint`),
                 ]);
 

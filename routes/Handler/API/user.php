@@ -11,10 +11,10 @@ use App\Http\Middleware\Resources\User\Update;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('/user')->group(
-    fn() => [
-        Route::prefix('/img')->group(fn()=>[
-            Route::get('/{filter}',[ProfileImageController::class,'get'])->middleware(PictGet::class),
-            Route::post('/',[ProfileImageController::class,'create'])->middleware(PictCreate::class),
+    fn () => [
+        Route::prefix('/img')->group(fn () => [
+            Route::get('/{filter}', [ProfileImageController::class, 'get'])->middleware(PictGet::class),
+            Route::post('/', [ProfileImageController::class, 'create'])->middleware(PictCreate::class),
         ]),
 
         Route::get('/{column}/{operator}/{value}', [UserController::class, 'getCustom'])->middleware(GET::class),
@@ -22,7 +22,8 @@ Route::prefix('/user')->group(
         Route::get('/', [UserController::class, 'get'])->middleware(GET::class),
         Route::get('/{filter}', [UserController::class, 'get'])->middleware(GET::class),
 
-        Route::post('/', [UserController::class, 'create'])->middleware(Create::class),
+        Route::post('/', [UserController::class, 'create']),
+        // ->middleware(Create::class),
         Route::put('/', [UserController::class, 'edit'])->middleware(Update::class),
         Route::delete('/', [UserController::class, 'destroy'])->middleware(Delete::class),
     ],

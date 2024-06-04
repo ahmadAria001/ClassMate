@@ -15,7 +15,7 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('dues_member')->index('fk_dues_member');
             $table->decimal('amount_paid', 13);
-            $table->decimal('paid_for', 13)->nullable();
+            $table->bigInteger('paid_for')->nullable();
             $table->bigInteger('created_at');
             $table->unsignedBigInteger('created_by')->nullable()->index('fk_docs_user');
             $table->bigInteger('updated_at')->nullable();
