@@ -4,7 +4,7 @@
         Input,
         Label,
         Modal,
-        Textarea,
+        Select,
         Toast,
     } from "flowbite-svelte";
 
@@ -72,11 +72,24 @@
     <form method="POST" use:form>
         <div class="mb-4">
             <Label for="duesCategoryName" class="mb-2">Nama Kategori</Label>
-            <Input
+            <Select
                 id="duesCategoryName"
                 name="duesName"
                 placeholder="Masukan nama kategori"
-            />
+            >
+                <!-- name="residentstatus"
+                id="residentstatus" -->
+                <!-- placeholder="Pilih Status Penduduk" -->
+                <option value="Security">Keamanan</option>
+                <option value="TrashManagement">Sampah</option>
+                <option value="Event">Acara</option>
+                <option value="Funeral">Kematian</option>
+            </Select>
+            <!-- <Input
+                id="duesCategoryName"
+                name="duesName"
+                placeholder="Masukan nama kategori"
+            /> -->
             {#if $errors.duesName}
                 <span class="text-sm text-red-500">{$errors.duesName}</span>
             {/if}

@@ -219,27 +219,6 @@
             {/key}
         </TableBody>
 
-        <!-- modal -->
-        <Create bind:showState={addAnnoucement} />
-
-        {#if selected}
-            <Detail
-                bind:showState={modalPreview}
-                bind:items={selected}
-                on:comp={rebuild}
-            />
-            <Edit
-                bind:showState={modalEdit}
-                bind:target={selected}
-                on:comp={rebuild}
-            />
-            <Delete
-                bind:showState={deleteModal}
-                bind:target={selected}
-                on:comp={rebuild}
-            />
-        {/if}
-
         <div
             slot="footer"
             class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0 p-4"
@@ -289,3 +268,25 @@
         </div>
     </TableSearch>
 </Layout>
+
+<Create bind:showState={addAnnoucement} on:comp={rebuild} />
+
+{#if selected && modalPreview}
+    <Detail
+        bind:showState={modalPreview}
+        bind:items={selected}
+        on:comp={rebuild}
+    />
+{/if}
+
+{#if selected && modalEdit}
+    <Edit bind:showState={modalEdit} bind:target={selected} on:comp={rebuild} />
+{/if}
+
+{#if selected && deleteModal}
+    <Delete
+        bind:showState={deleteModal}
+        bind:target={selected}
+        on:comp={rebuild}
+    />
+{/if}

@@ -12,7 +12,21 @@ class DocRequest extends Model
     use HasFactory, SoftDeletes;
 
     protected $table = 'doc_request';
-    protected $fillable = ['requestStatus', 'request_by', 'docs_id', 'created_at', 'created_by', 'updated_at', 'updated_by', 'deleted_at', 'deleted_by'];
+    protected $fillable = [
+        'requestStatus',
+        'request_by',
+        'docs_id',
+        'rt_stat',
+        'responsed_by_rt',
+        'rw_stat',
+        'responsed_by_rw',
+        'created_at',
+        'created_by',
+        'updated_at',
+        'updated_by',
+        'deleted_at',
+        'deleted_by'
+    ];
 
     protected $dateFormat = 'U';
 

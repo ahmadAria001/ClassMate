@@ -15,6 +15,10 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->enum('requestStatus', ['Resolved', 'Declined', 'Open'])->default('Open');
             $table->unsignedBigInteger('request_by')->index('fk_request_by');
+            $table->tinyInteger('rt_stat')->default(2);
+            $table->unsignedBigInteger('responsed_by_rt')->nullable();
+            $table->tinyInteger('rw_stat')->default(2);
+            $table->unsignedBigInteger('responsed_by_rw')->nullable();
             $table->unsignedBigInteger('docs_id')->index('fk_request_docs');
             $table->bigInteger('created_at');
             $table->unsignedBigInteger('created_by')->nullable()->index('fk_user');

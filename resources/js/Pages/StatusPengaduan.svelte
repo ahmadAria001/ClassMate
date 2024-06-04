@@ -166,7 +166,7 @@
                     {#each data.data as item}
                         <TableBodyRow>
                             <TableBodyCell
-                                >{item.created_by.civilian_id
+                                >{item?.created_by.civilian_id
                                     .fullName}</TableBodyCell
                             >
                             <!-- <TableBodyCell
@@ -174,7 +174,7 @@
                                     .address}</TableBodyCell
                             > -->
                             <TableBodyCell
-                                >{item.created_by.civilian_id
+                                >{item?.created_by.civilian_id
                                     .phone}</TableBodyCell
                             >
                             <TableBodyCell
