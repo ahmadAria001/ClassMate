@@ -106,12 +106,19 @@ class DuesController extends Controller
         $payload = $req->safe()->collect();
 
         try {
-            $exist = Dues::find([
-                'typeDues' => $payload->get('typeDues'),
-                'rt_id' => $payload->get('rt_id'),
-            ]);
+            $exist = Dues::withoutTrashed()->where(
+                'typeDues',
+                '=',
+                $payload->get('typeDues')
+            )->where(
+                'rt_id',
+                '=',
+                $payload->get('rt_id')
+            )->first();
+            // ,
+            error_log($payload->get('typeDues'));
 
-            if (count($exist) > 0) {
+            if ($exist) {
                 return Response()->json(
                     [
                         'status' => false,

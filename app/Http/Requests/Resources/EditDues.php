@@ -24,9 +24,7 @@ class EditDues extends FormRequest
         return [
             'id' => 'required|integer',
             'typeDues' => 'required|string',
-            'description' => 'required|string',
             'amt_dues' => 'required|integer',
-            'amt_fund' => 'required|integer',
             'status' => 'required|boolean',
             'rt_id' => 'required|integer',
         ];

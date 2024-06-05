@@ -256,7 +256,7 @@
                                             >Rp. {item.amt_dues}</TableBodyCell
                                         >
                                         <TableBodyCell>
-                                            {#if item.status}
+                                            {#if item.status == 1}
                                                 <Badge color="green"
                                                     >Aktif</Badge
                                                 >
@@ -269,7 +269,7 @@
                                         <TableBodyCell tdClass="divide-y">
                                             <Button
                                                 type="button"
-                                                color="green"
+                                                color="blue"
                                                 on:click={() => {
                                                     selected = item.id;
                                                     detailModal = true;
@@ -290,41 +290,42 @@
         </div>
     </div>
 
-    <div class="bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md w-full max-md:mb-5 mb-3">
+    <div
+        class="bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md w-full max-md:mb-5 mb-3"
+    >
+        <Table tableClass="mb-0">
+            <TableHead>
+                <TableHeadCell>Nama Lengkap</TableHeadCell>
+                <TableHeadCell>Alamat</TableHeadCell>
+                <TableHeadCell class="text-center"
+                    >Status Kependudukan</TableHeadCell
+                >
+                <TableHeadCell>
+                    <span class="sr-only">Edit</span>
+                </TableHeadCell>
+            </TableHead>
+            <TableBody tableBodyClass="divide-y">
+                {#if data}
+                    {#each data.data as item, idx}
+                        <TableBodyRow>
+                            <TableBodyCell>{item?.fullName}</TableBodyCell>
+                            <TableBodyCell>{item.address}</TableBodyCell>
+                            <TableBodyCell class="text-center">
+                                <Badge color="green">Tetap</Badge>
+                            </TableBodyCell>
+                            <TableBodyCell>
+                                <Button
+                                    href={`/iuran/detail?rt=${encodeURIComponent(item.rt_id.id)}&civ=${encodeURIComponent(item.id)}`}
+                                    >Detail</Button
+                                >
+                            </TableBodyCell>
+                        </TableBodyRow>
+                    {/each}
+                {/if}
+            </TableBody>
+        </Table>
         <div class="mb-3"></div>
-    <Table tableClass="mb-0">
-        <TableHead>
-            <TableHeadCell>Nama Lengkap</TableHeadCell>
-            <TableHeadCell>Alamat</TableHeadCell>
-            <TableHeadCell class="text-center"
-                >Status Kependudukan</TableHeadCell
-            >
-            <TableHeadCell>
-                <span class="sr-only">Edit</span>
-            </TableHeadCell>
-        </TableHead>
-        <TableBody tableBodyClass="divide-y">
-            {#if data}
-                {#each data.data as item, idx}
-                    <TableBodyRow>
-                        <TableBodyCell>{item?.fullName}</TableBodyCell>
-                        <TableBodyCell>{item.address}</TableBodyCell>
-                        <TableBodyCell class="text-center">
-                            <Badge color="green">Tetap</Badge>
-                        </TableBodyCell>
-                        <TableBodyCell>
-                            <Button
-                                href={`/iuran/detail?rt=${encodeURIComponent(item.rt_id.id)}&civ=${encodeURIComponent(item.id)}`}
-                                >Detail</Button
-                            >
-                        </TableBodyCell>
-                    </TableBodyRow>
-                {/each}
-            {/if}
-        </TableBody>
-    </Table>
-    <div class="mb-3"></div>
-</div>
+    </div>
 </Layout>
 
 <Create bind:showState={addDues} on:comp={rebuild} />
