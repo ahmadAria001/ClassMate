@@ -3,7 +3,6 @@
     import Layout from "./Layout.svelte";
     import {
         Badge,
-        Table,
         TableBody,
         TableBodyCell,
         TableBodyRow,
@@ -11,9 +10,6 @@
         TableHeadCell,
         TableSearch,
         Button,
-        Modal,
-        Label,
-        Input,
         ButtonGroup,
     } from "flowbite-svelte";
 
@@ -23,9 +19,13 @@
     } from "flowbite-svelte-icons";
     import Create from "@C/Pengaduan/Modals/Create.svelte";
 
+    import { page } from "@inertiajs/svelte";
     import axiosInstance from "axios";
 
     const axios = axiosInstance.create({ withCredentials: true });
+    const itemsPerPage = 10;
+    const showPage = 5;
+    const role = $page.props.auth.user.role;
 
     let items = [
         {
@@ -45,16 +45,17 @@
             status: "Dalam Proses",
         },
     ];
+
+    let data: any;
     let addComplaintModal = false;
     let searchTerm = "";
     let currentPosition = 0;
-    const itemsPerPage = 10;
-    const showPage = 5;
     let totalPages = 0;
     let pagesToShow: any[] = [];
     let totalItems: number = items.length;
     let startPage: number;
     let endPage: number;
+    let currentPage = 1;
 
     let builder = {};
 
@@ -103,12 +104,56 @@
         updateDataAndPagination();
     };
 
+    const getComplainPaged = async (page: number) => {
+        let url = "";
+
+        if (role == "RT")
+            url = `/api/docs/complaint/rt/${encodeURIComponent(page)}`;
+        if (role == "Warga")
+            url = `/api/docs/complaint/warga/${encodeURIComponent(page)}`;
+        if (role != "RT" || role != "Warga")
+            url = `/api/docs/complaint/warga/${encodeURIComponent(page)}`;
+
+        try {
+            const response = await axios.get(url, {
+                headers: {
+                    Accept: "*/*",
+                },
+            });
+            return response.data;
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const getComplaints = async (id: string = "") => {
+        try {
+            const response = await axios.get(
+                `/api/docs/complaint/${encodeURIComponent(id)}`,
+                {
+                    headers: {
+                        Accept: "*/*",
+                    },
+                },
+            );
+            return response.data;
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const initPage = async () => {
+        data = await getComplainPaged(currentPage);
+    };
+
     $: startRange = currentPosition + 1;
     $: endRange = Math.min(currentPosition + itemsPerPage, totalItems);
 
-    onMount(() => {
+    onMount(async () => {
         // Call renderPagination when the component initially mounts
         renderPagination(items.length);
+
+        await initPage();
     });
 
     $: currentPageItems = items.slice(
@@ -119,19 +164,6 @@
         (item) =>
             item.problem.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1,
     );
-
-    const getComplaints = async (id: string = "") => {
-        try {
-            const response = await axios.get(`/api/docs/complaint/${id}`, {
-                headers: {
-                    Accept: "*/*",
-                },
-            });
-            return response.data;
-        } catch (error) {
-            console.error(error);
-        }
-    };
 </script>
 
 <Layout>
@@ -162,11 +194,11 @@
         </TableHead>
         <TableBody>
             {#key builder}
-                {#await getComplaints() then data}
+                {#if data}
                     {#each data.data as item}
                         <TableBodyRow>
                             <TableBodyCell
-                                >{item.created_by.civilian_id
+                                >{item?.created_by.civilian_id
                                     .fullName}</TableBodyCell
                             >
                             <!-- <TableBodyCell
@@ -174,7 +206,7 @@
                                     .address}</TableBodyCell
                             > -->
                             <TableBodyCell
-                                >{item.created_by.civilian_id
+                                >{item?.created_by.civilian_id
                                     .phone}</TableBodyCell
                             >
                             <TableBodyCell
@@ -201,7 +233,7 @@
                             {/if}
                         </TableBodyRow>
                     {/each}
-                {/await}
+                {/if}
             {/key}
         </TableBody>
 

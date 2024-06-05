@@ -7,13 +7,16 @@ use App\Http\Requests\Resources\Docs\DeleteComplaint;
 use App\Http\Requests\Resources\Docs\UpdateComplaint;
 use App\Models\Complaint;
 use App\Models\Docs;
+use App\Models\User;
 use Carbon\Carbon;
-use Intervention\Image\Laravel\Facades\Image;
+use Spatie\Image\Image;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Laravel\Sanctum\PersonalAccessToken;
 use ReflectionClass;
+use App\Utils\AccessToken;
 
 class ComplaintController extends Controller
 {
@@ -102,15 +105,95 @@ class ComplaintController extends Controller
     public function get($filter = null)
     {
         $data = null;
+        error_log(strlen($filter));
 
-        if ($filter) {
-            $data = Complaint::withoutTrashed()->with('docs_id', 'created_by.civilian_id', 'updated_by')->find($filter);
+        if ($filter && strlen($filter) > 0) {
+            $data = Complaint::withoutTrashed()->with('docs_id', 'created_by.civilian_id', 'updated_by')
+                ->whereHas('created_by.civilian_id', function ($q) use ($filter) {
+                    $q->whereAny(['nik', 'fullName', 'birthplace', 'birthplace', 'birthplace', 'status', 'address', 'religion', 'job'], 'LIKE', "%$filter%");
+                    // $q->where('fullName', 'LIKE', "%$filter%");
+                })
+                ->orWhereAny(['id', 'complaintStatus'], 'LIKE', "%$filter%");
+
+            // dd($data);
         } else {
-            $data = Complaint::withoutTrashed()->with('docs_id', 'created_by.civilian_id', 'updated_by')->get();
+            $data = Complaint::withoutTrashed()->with('docs_id', 'created_by.civilian_id', 'updated_by');
         }
 
-        return Response()->json(['data' => $data], 200);
+        $length = $data->count();
+
+        return Response()->json(['data' => $data->get(), 'length' => $length]);
     }
+
+    public function getPaged($page = 1)
+    {
+        $take = 5;
+
+        $data = Complaint::withoutTrashed()
+            ->with('docs_id', 'created_by.civilian_id', 'updated_by')
+            ->skip($page > 1 ? ($page - 1) * $take : 0)
+            ->take($take)
+            ->get();
+
+        $length = Complaint::withoutTrashed()->count();
+
+        return response()->json(['data' => $data, 'length' => $length]);
+    }
+
+    public function getByWarga(Request $req, $page = 1)
+    {
+        $data = null;
+        $take = 5;
+        $identity = AccessToken::getToken($req);
+
+        if (!$req) abort(401);
+        $model = $identity->tokenable();
+        $user = User::withoutTrashed()->with('civilian_id.rt_id')->where('id', $model->get('id')[0]->id)->get()->first();
+
+        $data = Complaint::withoutTrashed()
+            ->with('docs_id', 'created_by.civilian_id', 'updated_by')
+            ->whereHas('created_by', function ($q) use ($user) {
+                $q->where(
+                    'id',
+                    $user->id
+                );
+            })
+            ->skip($page > 1 ? ($page - 1) * $take : 0)
+            ->take($take)
+            ->get();
+
+        $length = $data->count();
+
+        return response()->json(['data' => $data, 'length' => $length]);
+    }
+
+    public function getByRT(Request $req, $page = 1)
+    {
+        $data = null;
+        $take = 5;
+        $identity = AccessToken::getToken($req);
+
+        if (!$req) abort(401);
+        $model = $identity->tokenable();
+        $user = User::withoutTrashed()->with('civilian_id.rt_id')->where('id', $model->get('id')[0]->id)->get()->first();
+
+        $data = Complaint::withoutTrashed()
+            ->with('docs_id', 'created_by.civilian_id', 'updated_by')
+            ->whereHas('created_by.civilian_id.rt_id', function ($q) use ($user) {
+                $q->where(
+                    'id',
+                    $user->getRelation('civilian_id')->rt_id
+                );
+            })
+            ->skip($page > 1 ? ($page - 1) * $take : 0)
+            ->take($take)
+            ->get();
+
+        $length = $data->count();
+
+        return response()->json(['data' => $data, 'length' => $length]);
+    }
+
     public function create(CreateComplaint $request)
     {
         $payload = $request->safe()->collect();
@@ -133,13 +216,22 @@ class ComplaintController extends Controller
                     'attachment' => $image ? $name : null,
                 ]);
 
-                $path = public_path('assets/uploads') . '/' . $name;
-                [$width, $height] = getimagesize($image->getFileInfo());
+                if (!Storage::directoryExists('public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads')) {
+                    // File::makeDirectory(, 0755, true, true);
+                    Storage::makeDirectory('public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads');
+                }
 
-                Image::read($image)
-                    ->resize($width > 1080 ? 1080 : $width, $height > 1080 ? 1080 : $height)
-                    ->toJpeg()
-                    ->save($path);
+                $path =
+                    // public_path('storage') . DIRECTORY_SEPARATOR .
+                    'public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR;
+
+                [$width, $height] = getimagesize($image->getFileInfo());
+                $loadedImg = Image::load($image->getRealPath());
+                $compressedImg = $loadedImg
+                    ->width($width > 1080 ? 1080 : $width)
+                    ->height($height > 1080 ? 1080 : $height)
+                    ->quality(20)
+                    ->save(Storage::path($path) . $name);
             } else {
                 $data = Complaint::firstOrCreate([
                     'docs_id' => $docs->id,
@@ -177,6 +269,7 @@ class ComplaintController extends Controller
                     $docs->created_by = Auth::id();
                     $data->created_by = Auth::id();
                 }
+
                 $docs->save();
                 $data->save();
 
@@ -251,13 +344,23 @@ class ComplaintController extends Controller
 
                 if (!$data->attachment || $image->getClientOriginalName() != $data->attachment) {
                     $name = $image ? Carbon::now() . '_' . $image->getClientOriginalName() : null;
-                    $path = public_path('assets/uploads') . '/' . $name;
-                    [$width, $height] = getimagesize($image->getFileInfo());
 
-                    Image::read($image)
-                        ->resize($width > 1080 ? 1080 : $width, $height > 1080 ? 1080 : $height)
-                        ->toJpeg()
-                        ->save($path);
+                    if (!Storage::directoryExists('public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads')) {
+                        // File::makeDirectory(, 0755, true, true);
+                        Storage::makeDirectory('public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads');
+                    }
+
+                    $path =
+                        // public_path('storage') . DIRECTORY_SEPARATOR .
+                        'public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR;
+
+                    [$width, $height] = getimagesize($image->getFileInfo());
+                    $loadedImg = Image::load($image->getRealPath());
+                    $compressedImg = $loadedImg
+                        ->width($width > 1080 ? 1080 : $width)
+                        ->height($height > 1080 ? 1080 : $height)
+                        ->quality(20)
+                        ->save(Storage::path($path) . $name);
 
                     $data->update(['attachment' => $name]);
                     $data->save();

@@ -32,6 +32,9 @@
         ClipboardSolid,
         VolumeUpSolid,
         BellSolid,
+        ChartMixedDollarSolid,
+        ChartMixedDollarOutline,
+        FileDocOutline,
     } from "flowbite-svelte-icons";
     import { twMerge } from "tailwind-merge";
     import { writable } from "svelte/store";
@@ -70,6 +73,16 @@
                 },
             },
             {
+                name: "Keuangan",
+                icon: ChartMixedDollarOutline,
+                isOpenItems: false,
+                children: {
+                    Iuran: "/iuran",
+                    // Pengeluaran: "/pengeluaran",
+                    "Catatan Pembayaran": "/log-pembayaran",
+                },
+            },
+            {
                 name: "Pengaduan",
                 icon: FileSolid,
                 isOpenItems: false,
@@ -78,13 +91,13 @@
                 },
             },
             {
-                name: "Laporan",
+                name: "Pengajuan",
                 icon: ClipboardSolid,
                 isOpenItems: false,
                 children: {
-                    "Surat Ket. Warga": "/daftar-pengajuan-surat",
-                    "Laporan keuangan": "/keuangan",
-                    "Bantuan sosial": "/daftar-bansos",
+                    "Surat Keterangan": "/daftar-pengajuan-surat",
+                    // "Laporan Keuangan": "/keuangan",
+                    "Bantuan Sosial": "/daftar-bansos",
                 },
             },
             {
@@ -110,6 +123,16 @@
                 },
             },
             {
+                name: "Keuangan",
+                icon: ChartMixedDollarOutline,
+                isOpenItems: false,
+                children: {
+                    Iuran: "/iuran",
+                    // Pengeluaran: "/pengeluaran",
+                    "Catatan Pembayaran": "/log-pembayaran",
+                },
+            },
+            {
                 name: "Pengaduan",
                 icon: FileSolid,
                 isOpenItems: false,
@@ -118,12 +141,12 @@
                 },
             },
             {
-                name: "Laporan",
+                name: "Pengajuan",
                 icon: ClipboardSolid,
                 isOpenItems: false,
                 children: {
-                    "Surat Ket. Warga": "/daftar-pengajuan-surat",
-                    "Bantuan sosial": "/daftar-bansos",
+                    "Surat Keterangan": "/daftar-pengajuan-surat",
+                    "Bantuan Sosial": "/daftar-bansos",
                 },
             },
             {
@@ -150,26 +173,36 @@
                 },
             },
             {
+                name: "Keuangan",
+                icon: ChartMixedDollarOutline,
+                isOpenItems: false,
+                children: {
+                    Iuran: "/iuran",
+                    // Pengeluaran: "/pengeluaran",
+                    "Catatan Pembayaran": "/log-pembayaran",
+                },
+            },
+            {
                 name: "Pengaduan",
                 icon: FileSolid,
                 isOpenItems: false,
                 children: {
                     "Daftar Pengaduan": "/daftar-pengaduan",
-                    "Status Pengaduan warga": "/status-pengaduan",
+                    "Status Pengaduan Warga": "/status-pengaduan",
                 },
             },
             {
-                name: "Laporan",
+                name: "Pengajuan",
                 icon: ClipboardSolid,
                 isOpenItems: false,
                 children: {
-                    "Surat Ket. Warga": "/daftar-pengajuan-surat",
-                    "Bantuan sosial": "/daftar-bansos",
+                    "Surat Keterangan": "/daftar-pengajuan-surat",
+                    "Bantuan Sosial": "/daftar-bansos",
                 },
             },
             {
                 name: "Surat",
-                icon: ClipboardSolid,
+                icon: FileDocOutline,
                 isOpenItems: false,
                 children: {
                     "Status Surat": "/status-pengajuan",
@@ -201,15 +234,15 @@
                 icon: FileSolid,
                 isOpenItems: false,
                 children: {
-                    "Status pengaduan": "/status-pengaduan",
+                    "Status Pengaduan": "/status-pengaduan",
                 },
             },
             {
-                name: "Surat",
+                name: "Pengajuan",
                 icon: ClipboardSolid,
                 isOpenItems: false,
                 children: {
-                    "Status Surat": "/status-pengajuan",
+                    "Status Pengajuan": "/status-pengajuan",
                 },
             },
             {
@@ -301,14 +334,7 @@
     ];
 
     const logout = async () => {
-        const { data, status } = await axios.get("/api/auth/signout");
-
-        if (status != 200) {
-            router.visit("/login");
-            return;
-        }
-
-        router.visit("/login");
+        await router.get("/api/auth/signout");
     };
 </script>
 
@@ -317,7 +343,7 @@
     <Navbar
         let:hidden
         let:toggle
-        class="border-b-2 h-16 fixed m-0 dark:bg-gray-800"
+        class="border-b-2 h-16 fixed m-0 dark:bg-gray-800 z-30"
     >
         <NavHamburger
             onClick={toggleDrawer}
@@ -407,22 +433,23 @@
 
         <div class="flex items-center md:order-2">
             <DarkMode class="mr-3" />
-            <Button
+            <!-- <Button
                 id="notification"
                 class="mr-3 p-2.5 border-none"
                 color="alternative"><BellSolid /></Button
-            >
+            > -->
             <Avatar
                 id="avatar-menu"
-                src={$page.props.auth.user.pict
-                    ? `${$page.props.auth.user.pict}`
+                src={new String($page.props.auth.user.pict).includes(
+                    "/uploads/",
+                )
+                    ? $page.props.auth.user.pict
                     : ""}
                 class="cursor-pointer"
             />
-            <!-- <NavHamburger class1="w-full md:flex md:w-auto md:order-1" /> -->
         </div>
         <Dropdown triggeredBy="#notification" class="p-0 max-w-md">
-            <Listgroup class="border-none">
+            <!-- <Listgroup class="border-none">
                 <h3
                     class="text-center p-3 text-sm font-medium text-black bg-gray-50 dark:bg-gray-700 dark:text-white font-bold rounded-t-lg"
                 >
@@ -449,12 +476,12 @@
                 >
                     <p>Lihat Semua</p>
                 </a>
-            </Listgroup>
+            </Listgroup> -->
         </Dropdown>
         <Dropdown triggeredBy="#avatar-menu" class="w-52 z-[100]">
             <DropdownHeader>
                 <span class="block text-sm max-w-full truncate"
-                    >{$page.props.auth.user.fullName}</span
+                    >Halo, {$page.props.auth.user.fullName}</span
                 >
                 <span class="block truncate text-sm font-medium"
                     ><b>{role}</b></span
@@ -484,51 +511,7 @@
             class="mb- text-black dark:text-white lg:hidden"
         />
     </div>
-    <!-- <Sidebar asideClass="w-54">
-        <SidebarWrapper class="rounded-none pt-0 bg-white">
-            <SidebarGroup ulClass={groupClass} class="mb-3">
-                {#each filtermenu as { name, icon, children, href, isOpenItems } (name)}
-                    {#if children}
-                        <SidebarDropdownWrapper
-                            label={name}
-                            class="pr-3 bg-gray-100 dark:bg-gray-700"
-                            isOpen={isOpenItems}
-                        >
-                            <svelte:component this={icon} slot="icon" />
-                            {#each Object.entries(children) as [title, href]}
-                                <SidebarItem
-                                    label={title}
-                                    {href}
-                                    spanClass="ml-9"
-                                    class={twMerge(
-                                        itemClass,
-                                        $url == href
-                                            ? "bg-gray-100 dark:bg-gray-900"
-                                            : "",
-                                    )}
-                                />
-                            {/each}
-                        </SidebarDropdownWrapper>
-                    {:else}
-                        <SidebarItem
-                            label={name}
-                            {href}
-                            spanClass="ml-3"
-                            class={twMerge(
-                                itemClass,
-                                $url == href
-                                    ? "bg-gray-100 dark:bg-gray-900"
-                                    : "",
-                            )}
-                        >
-                            <svelte:component this={icon} slot="icon" />
-                        </SidebarItem>
-                    {/if}
-                {/each}
-            </SidebarGroup>
-        </SidebarWrapper>
-    </Sidebar> -->
-    <Sidebar asideClass="w-54">
+    <Sidebar asideClass="w-54 sidebar ">
         <SidebarWrapper class="rounded-none pt-0 bg-white">
             <SidebarGroup ulClass={groupClass} class="mb-3">
                 {#each filtermenu as { name, icon, children, href } (name)}
@@ -576,8 +559,10 @@
     </Sidebar>
 </Drawer>
 
-<div class="bg-white dark:bg-gray-900 h-screen flex px-4 mx-auto w-full mb-14">
-    <main class=" lg:ml-64 mt-4 w-full mx-auto" style="margin-top: 5rem">
+<div
+    class="bg-white dark:bg-gray-900 flex px-4 mx-auto w-full min-h-screen pb-14"
+>
+    <main class="h-full lg:ml-64 mt-4 w-full mx-auto" style="margin-top: 5rem">
         <slot />
     </main>
 </div>

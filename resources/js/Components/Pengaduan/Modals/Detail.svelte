@@ -107,9 +107,12 @@
     };
 
     const getAsset = async (fileName: string) => {
-        const response = await axios.get(`/assets/uploads/${fileName}`, {
-            responseType: "blob",
-        });
+        const response = await axios.get(
+            `/storage/assets/uploads/${fileName}`,
+            {
+                responseType: "blob",
+            },
+        );
 
         const fileInput = document.getElementById(
             "dropzone-file",
@@ -215,7 +218,7 @@
             <img
                 src={selectedImage
                     ? selectedImage
-                    : `/assets/uploads/${item.data.attachment}`}
+                    : `/storage/assets/uploads/${item.data.attachment}`}
                 alt="Selected Image"
                 class={item.data.attachment || selectedImage
                     ? "w-full h-auto max-h-72 mb-3 rounded-lg border-2 border-gray-500"

@@ -80,6 +80,7 @@ class Login extends Controller
                 }
                 if ($user->role === 'Warga') {
                     $token_abilities = [
+                        'ActivityController:get',
                         'ComplaintController:__invoke', 'ComplaintController:get', 'ComplaintController:create',
                         'DocRequestController:__invoke', 'DocRequestController:get', 'DocRequestController:create',
                         'FinancialAssistanceController:__invoke', 'FinancialAssistanceController:get', 'FinancialAssistanceController:create', 'FinancialAssistanceController:edit',
@@ -101,6 +102,19 @@ class Login extends Controller
 
                 error_log($generatedToken->plainTextToken);
 
+                // if (str_contains($req->header('referer'), "login")) {
+                //     return redirect('beranda')->cookie($cookie);
+                // }
+                if (str_contains($req->header('referer'), "login")) {
+                    return Response()
+                        ->json([
+                            'status' => true,
+                            'token' => $generatedToken->plainTextToken,
+                            'exp' => now()->addWeek()->timestamp,
+                        ])
+                        ->cookie($cookie);
+                }
+
                 return Response()
                     ->json([
                         'status' => true,
@@ -111,6 +125,7 @@ class Login extends Controller
             }
 
             $user = Auth::attempt($req->only('username', 'password'));
+            // return redirect('beranda');
             return Inertia::render('Auth/Civilian');
         } catch (\Throwable $th) {
             error_log($th);

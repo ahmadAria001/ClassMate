@@ -137,7 +137,7 @@
 <svelte:head>
     <title>{title}</title>
 </svelte:head>
-<Layout active={title}>
+<Layout>
     <TableSearch
         placeholder="Cari Warga"
         hoverable={true}

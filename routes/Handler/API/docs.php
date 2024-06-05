@@ -33,6 +33,10 @@ Route::prefix('/docs')->group(function () {
         Route::get('/{filter}', [DocRequestController::class, 'get'])->middleware(GetRequest::class);
         Route::get('/p/{page}', [DocRequestController::class, 'getPaged'])->middleware(GetRequest::class);
 
+        Route::get('/warga/{page}', [DocRequestController::class, 'getByWarga'])->middleware(GetRequest::class);
+        Route::get('/rt/{page}', [DocRequestController::class, 'getForRT'])->middleware(GetRequest::class);
+        Route::get('/rw/{page}', [DocRequestController::class, 'getForRW'])->middleware(GetRequest::class);
+
         Route::post('/', [DocRequestController::class, 'create'])->middleware(CreateRequest::class);
         Route::put('/', [DocRequestController::class, 'edit'])->middleware(UpdateRequest::class);
         Route::delete('/', [DocRequestController::class, 'destroy'])->middleware(DeleteRequest::class);
@@ -41,6 +45,10 @@ Route::prefix('/docs')->group(function () {
     Route::prefix('/complaint')->group(function () {
         Route::get('/', [ComplaintController::class, 'get'])->middleware([GetComplaint::class]);
         Route::get('/{filter}', [ComplaintController::class, 'get'])->middleware(GetComplaint::class);
+        Route::get('/warga/{page}', [ComplaintController::class, 'getByWarga'])->middleware(GetComplaint::class);
+        Route::get('/rt/{page}', [ComplaintController::class, 'getByRT'])->middleware(GetComplaint::class);
+        Route::get('/p/{page}', [ComplaintController::class, 'getPaged'])->middleware(GetComplaint::class);
+
         Route::post('/', [ComplaintController::class, 'create'])->middleware(CreateComplaint::class);
         Route::put('/', [ComplaintController::class, 'edit'])->middleware(UpdateComplaint::class);
         Route::delete('/', [ComplaintController::class, 'destroy'])->middleware(DeleteComplaint::class);
@@ -49,6 +57,7 @@ Route::prefix('/docs')->group(function () {
     Route::prefix('/documentation')->group(function () {
         Route::get('/', [DocumentationController::class, 'get'])->middleware(GetDocumentation::class);
         Route::get('/{filter}', [DocumentationController::class, 'get'])->middleware(GetDocumentation::class);
+
         Route::post('/', [DocumentationController::class, 'create'])->middleware(CreateDocumentation::class);
         Route::post('/update', [DocumentationController::class, 'edit'])->middleware(UpdateDocumentation::class);
         Route::delete('/', [DocumentationController::class, 'destroy'])->middleware(DeleteDocumentation::class);

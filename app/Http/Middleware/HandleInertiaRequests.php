@@ -82,8 +82,8 @@ class HandleInertiaRequests extends Middleware
 
                     $model = $pat->tokenable();
 
-                    $userID = $model->get()->first()->civilian_id;
-                    $user = Civilian::with('rt_id')->where('id', '=', $userID)->first();
+                    $userID = $model->get()->first()->id;
+                    $user = Civilian::with('rt_id')->where('id', '=', $model->get()->first()->civilian_id)->first();
                     $rt = $user->rt_id;
 
                     return [
@@ -93,6 +93,7 @@ class HandleInertiaRequests extends Middleware
                         'fullName' => $user->fullName,
                         'nik' => $user->nik,
                         'rt_id' => $rt,
+                        'intro' => $model->get()->first()->intro,
                         'pict' => asset('storage' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . $model->get('pict')->first()->pict),
                         // . DIRECTORY_SEPARATOR . 'public'
                         'civ_id' => $user->id,

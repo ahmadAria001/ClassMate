@@ -66,6 +66,18 @@ class CivilianController extends Controller
         return Response()->json(['data' => $data], 200);
     }
 
+
+    public function getCivilanRT($rt_id): JsonResponse
+    {
+        $data = Civilian::withoutTrashed()
+            ->where('rt_id', $rt_id)
+            ->get();
+
+        $length = $data->count();
+
+        return Response()->json(['data' => $data, 'lenght' => $length], 200);
+    }
+
     public function getFamilyHead($rt_id): JsonResponse
     {
         $data = Civilian::withoutTrashed()

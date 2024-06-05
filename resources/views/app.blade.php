@@ -698,6 +698,15 @@
             z-index: 10
         }
 
+        #sidebar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        #sidebar::-webkit-scrollbar {
+            display: none;
+        }
+
         @media (prefers-reduced-motion: no-preference) {
             .motion-safe\:hover\:scale-\[1\.01\]:hover {
                 --tw-scale-x: 1.01;

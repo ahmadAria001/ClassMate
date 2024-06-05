@@ -18,6 +18,7 @@
         ChevronRightOutline,
     } from "flowbite-svelte-icons";
 
+    import { page } from "@inertiajs/svelte";
     import axiosInstance from "axios";
     import Create from "@C/PengajuanSurat/Modals/Create.svelte";
 
@@ -49,11 +50,14 @@
             status: "Dalam Proses",
         },
     ];
+
+    const role = $page.props.auth.user.role;
+    const itemsPerPage = 10;
+    const showPage = 5;
+
     let addCertificate = false;
     let searchTerm = "";
     let currentPosition = 0;
-    const itemsPerPage = 10;
-    const showPage = 5;
     let totalPages = 0;
     let pagesToShow: any[] = [];
     let totalItems: number = items.length;
@@ -103,9 +107,12 @@
     };
 
     const getRequestDocs = async (page = 1) => {
-        const response = await axios.get(
-            `/api/docs/request/p/${encodeURIComponent(page)}`,
-        );
+        const url =
+            role == "Warga"
+                ? `/api/docs/request/warga/${encodeURIComponent(page)}`
+                : `/api/docs/request/p/${encodeURIComponent(page)}`;
+
+        const response = await axios.get(url);
 
         return response.data;
     };
@@ -165,9 +172,43 @@
         <TableBody>
             {#key builder}
                 {#if data}
-                    {#each data.data as item, idx}
+                    {#if data.length > 0}
+                        {#each data.data as item, idx}
+                            <TableBodyRow>
+                                <TableBodyCell>{idx + 1}</TableBodyCell>
+
+                                <TableBodyCell
+                                    >{item.request_by.fullName}</TableBodyCell
+                                >
+                                <TableBodyCell
+                                    >{item.request_by.address}</TableBodyCell
+                                >
+                                <TableBodyCell
+                                    >{item.request_by.phone}</TableBodyCell
+                                >
+                                <TableBodyCell
+                                    >{item.docs_id.description}</TableBodyCell
+                                >
+                                {#if item.requestStatus == "Resolved"}
+                                    <TableBodyCell class="text-center">
+                                        <Badge color="green">Disetujui</Badge>
+                                    </TableBodyCell>
+                                {:else if item.requestStatus == "Open"}
+                                    <TableBodyCell class="text-center">
+                                        <Badge color="indigo"
+                                            >Dalam Proses</Badge
+                                        >
+                                    </TableBodyCell>
+                                {:else}
+                                    <TableBodyCell class="text-center">
+                                        <Badge color="red">Ditolak</Badge>
+                                    </TableBodyCell>
+                                {/if}
+                            </TableBodyRow>
+                        {/each}
+                        <!-- {:else}
                         <TableBodyRow>
-                            <TableBodyCell>{idx + 1}</TableBodyCell>
+                            <TableBodyCell class="text-center">{idx + 1}</TableBodyCell>
 
                             <TableBodyCell
                                 >{item.request_by.fullName}</TableBodyCell
@@ -194,8 +235,8 @@
                                     <Badge color="red">Ditolak</Badge>
                                 </TableBodyCell>
                             {/if}
-                        </TableBodyRow>
-                    {/each}
+                        </TableBodyRow> -->
+                    {/if}
                 {/if}
             {/key}
         </TableBody>
@@ -212,7 +253,9 @@
                     Showing
                     <span class="font-semibold text-gray-900 dark:text-white">
                         {currentPage < 2
-                            ? 1
+                            ? data.data.length == 0
+                                ? 0
+                                : 1
                             : data.data.length < 5
                               ? data.length - data.data.length + 1
                               : data.data.length + 1}

@@ -22,15 +22,14 @@
         QuestionCircleSolid,
         UsersGroupOutline,
         FileImportOutline,
-        DotsHorizontalOutline,
-        ChevronDownOutline,
-        ChevronRightOutline,
+        CashOutline,
     } from "flowbite-svelte-icons";
     import CardInfo from "@C/HomePage/CardInfo.svelte";
 
     const axios = axiosInstance.create({ withCredentials: true });
 
     let role = $page.props.auth.user.role;
+    let id_rt = $page.props.auth.user.rt_id;
     let announcement: any;
     let citizenActivity: any;
 
@@ -122,6 +121,9 @@
         legend: {
             position: string;
             fontFamily: string;
+            labels: {
+                colors: string;
+            };
         };
         yaxis: {
             labels: {
@@ -145,10 +147,18 @@
 
     const getData = async () => {
         try {
+            const civilianUrl =
+                role === "RT" || role === "Warga"
+                    ? `/api/civilian/rt/${id_rt}`
+                    : `/api/civilian`;
+            const paymentUrl =
+                role === "RT" || role === "Warga"
+                    ? `/api/dues-payment/rt/${id_rt}`
+                    : `/api/dues-payment`;
             const [responseCivilian, responseDues, responseDocs] =
                 await Promise.all([
-                    axios.get(`/api/civilian/`),
-                    axios.get(`/api/dues-payment`),
+                    axios.get(civilianUrl),
+                    axios.get(paymentUrl),
                     axios.get(`/api/docs/complaint`),
                 ]);
 
@@ -251,6 +261,13 @@
         legend: {
             position: "bottom",
             fontFamily: "Inter, sans-serif",
+            labels: {
+                colors: document
+                    .getElementsByTagName("html")[0]
+                    .className.includes("darl")
+                    ? "#fffffff"
+                    : "#0000000",
+            },
         },
         yaxis: {
             labels: {
@@ -369,19 +386,19 @@
                 title="Jumlah Warga"
                 value={data?.civilianCount}
                 icon={UsersGroupOutline}
-                iconBgClass="bg-green-500"
+                iconBgClass="bg-gray-900 dark:bg-gray-700"
             />
             <CardInfo
                 title="Jumlah Iuran Terkumpul"
                 value={data?.totalDues}
-                icon={UsersGroupOutline}
-                iconBgClass="bg-green-500"
+                icon={CashOutline}
+                iconBgClass="bg-gray-900 dark:bg-gray-700"
             />
             <CardInfo
                 title="Jumlah Laporan Masuk"
                 value={data?.complaintCount}
                 icon={FileImportOutline}
-                iconBgClass="bg-green-500"
+                iconBgClass="bg-gray-900 dark:bg-gray-700"
             />
         </div>
 
@@ -400,7 +417,7 @@
                     <div class="flex justify-end items-center"></div>
                 </div>
 
-                <Chart {options} class="py-6" />
+                <Chart {options} class="py-6 dark:text-white" />
 
                 <!-- <div
                     class="grid grid-cols-1 items-center border-gray-200 border-t dark:border-gray-700 justify-between"

@@ -27,11 +27,9 @@
             _token: $page.props.csrf_token,
         });
 
-        const { status, token, exp } = response.data;
-        // if (status) setCookie("token", response.data.token, exp);
+        const data = response.data;
 
-        // before '/civilian'
-        router.visit("/beranda");
+        if (data.status) window.location = "/beranda";
     };
 
     const errHandler = () => {};
