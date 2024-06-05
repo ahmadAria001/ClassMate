@@ -191,11 +191,11 @@
                     >Status Kependudukan</Label
                 >
                 <Select
-                    class="my-2"
+                    bind:value={resstatval}
                     items={statusList}
+                    class="my-2"
                     placeholder="Pilih Status Penduduk"
                     size="sm"
-                    bind:value={resstatval}
                     name="residentstatus"
                     id="residentstatus"
                 />

@@ -6,6 +6,7 @@ use App\Http\Requests\Resources\RT\Create;
 use App\Http\Requests\Resources\RT\Delete;
 use App\Http\Requests\Resources\RT\Update;
 use App\Models\RT;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
@@ -272,11 +273,19 @@ class RtController extends Controller
                 ->find(['id' => $payload->get('id')])
                 ->first();
 
+            $old_leader = $data->leader_id;
+
             if ($data) {
                 if (Auth::guard('web')->check()) {
                     $data->update([
                         'leader_id' => $payload->get('leader_id'),
                         'number' => $payload->get('number'),
+                        'updated_by' => Auth::id(),
+                    ]);
+
+                    $leader = User::withoutTrashed()->where('id', $payload->get('leader_id'))->first();
+                    $leader->update([
+                        'role' => 'RT',
                         'updated_by' => Auth::id(),
                     ]);
                 } else {
@@ -301,6 +310,20 @@ class RtController extends Controller
                     $data->update([
                         'leader_id' => $payload->get('leader_id'),
                         'number' => $payload->get('number'),
+                        'updated_by' => $model->get('id')[0]->id,
+                    ]);
+
+                    $leader = User::withoutTrashed()->where('id', $payload->get('leader_id'))->first();
+                    $leader->update([
+                        'role' => 'RT',
+                        'updated_by' => $model->get('id')[0]->id,
+                    ]);
+                }
+
+                if ($old_leader) {
+                    $formerLeader = User::withoutTrashed()->where('id', $old_leader)->first();
+                    $formerLeader->update([
+                        'role' => 'Warga',
                         'updated_by' => $model->get('id')[0]->id,
                     ]);
                 }

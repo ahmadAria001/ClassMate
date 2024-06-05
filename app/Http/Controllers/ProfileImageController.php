@@ -16,7 +16,7 @@ class ProfileImageController extends Controller
 {
     public function get($filter)
     {
-        $model = User::withoutTrashed()->where('id', $filter)->first();
+        $model = User::withoutTrashed()->where('id', '=', $filter)->first();
         return Response()->json(['pict' => $model->pict], 200);
     }
 

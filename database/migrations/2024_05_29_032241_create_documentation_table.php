@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('documentation', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('docs_id')->index('fk_documentantion_docs');
-            $table->enum('contentType', ['Complaint', 'Dues', 'Event', 'Administration'])->nullable();
+            $table->enum('contentType', ['Complaint', 'Dues', 'Event', 'Administration', 'Funeral'])->nullable();
             $table->text('contentAttachment')->nullable();
             $table->text('contentDesc')->nullable();
             $table->bigInteger('created_at');

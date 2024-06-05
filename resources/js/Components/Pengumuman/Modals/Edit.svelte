@@ -10,7 +10,7 @@
 
     import { page } from "@inertiajs/svelte";
     import axiosInstance from "axios";
-    import { onMount } from "svelte";
+    import { createEventDispatcher, onMount } from "svelte";
     import { createForm } from "felte";
     import { validator } from "@felte/validator-zod";
 
@@ -24,12 +24,15 @@
     export let target: string;
 
     const axios = axiosInstance.create({ withCredentials: true });
+    const dispatch = createEventDispatcher();
+
     let err: { status: null | boolean; message: null | string } = {
         status: null,
         message: null,
     };
 
     let selectedImage: any | null = null;
+    let data: any;
 
     const { form, isSubmitting, errors } = createForm<UpdateSchema>({
         extend: validator<UpdateSchema>({
@@ -65,6 +68,8 @@
 
             err = response.data;
             showState = false;
+            dispatch("comp");
+
             setTimeout(() => {
                 err = { status: null, message: null };
             }, 5000);
@@ -111,9 +116,12 @@
     };
 
     const getAsset = async (fileName: string) => {
-        const response = await axios.get(`/assets/uploads/${fileName}`, {
-            responseType: "blob",
-        });
+        const response = await axios.get(
+            `/storage/assets/uploads/${fileName}`,
+            {
+                responseType: "blob",
+            },
+        );
 
         const fileInput = document.getElementById(
             "dropzone-file",
@@ -128,20 +136,25 @@
         if (fileInput) fileInput.files = dt.files;
     };
 
-    const initialLoad = async (filter: string) => {
-        const data = await getNewsData(filter);
-        return data;
+    const initialLoad = async () => {
+        data = await getNewsData(target);
     };
 
     onMount(async () => {
-        const data = await getNewsData(target);
+        await initialLoad();
 
         await getAsset(data.data.attachment);
     });
 </script>
 
-<Modal title="Edit Pengumuman" bind:open={showState}>
-    {#await initialLoad(target) then item}
+<Modal
+    title="Edit Pengumuman"
+    bind:open={showState}
+    on:close={() => {
+        showState = false;
+    }}
+>
+    {#if data}
         <form method="POST" use:form>
             <div class="mb-4">
                 <Label for="titleAnnouncement" class="mb-2"
@@ -149,7 +162,7 @@
                 >
                 <Input
                     id="titleAnnouncement"
-                    value={item.data.title}
+                    value={data.data.title}
                     name="title"
                     placeholder="Judul Pengumuman"
                 />
@@ -163,7 +176,7 @@
                     rows="2"
                     id="desc"
                     name="desc"
-                    value={item.data.desc}
+                    value={data.data.desc}
                     placeholder="Isi Pengumuman"
                 />
                 {#if $errors.desc}
@@ -174,14 +187,14 @@
                 <img
                     src={selectedImage
                         ? selectedImage
-                        : `/assets/uploads/${item.data.attachment}`}
+                        : `/storage/assets/uploads/${data.data.attachment}`}
                     alt="Selected Image"
-                    class={item.data.attachment || selectedImage
+                    class={data.data.attachment || selectedImage
                         ? "w-full h-auto max-h-72 mb-3 rounded-lg border-2 border-gray-500"
                         : "hidden"}
                 />
                 <div
-                    class={!selectedImage && !item.data.attachment
+                    class={!selectedImage && !data.data.attachment
                         ? "flex items-center justify-center w-full bg-upload"
                         : "h-20 overflow-hidden mt-2 bg-upload"}
                     style=""
@@ -234,7 +247,7 @@
                 <Button type="submit" disabled={!isSubmitting}>Simpan</Button>
             </div>
         </form>
-    {/await}
+    {/if}
 </Modal>
 
 {#if err.status != null && err.status == true}

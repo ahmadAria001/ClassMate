@@ -217,6 +217,9 @@
             containedDate.push({ paidDate: paidDate, item: val });
         });
 
+        const member_id =
+            containedDate[containedDate.length - 1].item.dues_member.id;
+
         for (let index = 0; index < containedDate.length; index++) {
             const paidYear =
                 new Date(containedDate[index].item.paid_for * 1000).getMonth() +
@@ -242,24 +245,43 @@
             const hasDate = containedDate.some(
                 (value) => value.paidDate == paidDate,
             );
+            console.log(hasDate);
+
+            if (paidYear > currentYear) break;
+
+            if (paidYear >= currentYear && paidMont > currentMont) break;
 
             if (!hasDate) {
-                if (paidMont >= 11 && paidYear > currentYear) break;
-
                 let generatedDate = new Date();
                 generatedDate = new Date(generatedDate.setMonth(paidMont));
                 generatedDate = new Date(generatedDate.setFullYear(paidYear));
 
-                containedDate.splice(index, 0, {
-                    paidDate: paidDate,
-                    item: {
-                        paid_for: Number.parseInt(
-                            (generatedDate.getTime() / 1000).toString(),
-                        ),
-                        amount_paid: amountPay,
-                        dues_member: containedDate[index].item.dues_member.id,
-                    },
-                });
+                if (index != containedDate.length - 1) {
+                    console.log(index);
+                    containedDate.splice(index, 0, {
+                        paidDate: paidDate,
+                        item: {
+                            paid_for: Number.parseInt(
+                                (generatedDate.getTime() / 1000).toString(),
+                            ),
+                            amount_paid: amountPay,
+                            dues_member: member_id,
+                        },
+                    });
+
+                    index--;
+                } else {
+                    containedDate.push({
+                        paidDate: paidDate,
+                        item: {
+                            paid_for: Number.parseInt(
+                                (generatedDate.getTime() / 1000).toString(),
+                            ),
+                            amount_paid: amountPay,
+                            dues_member: member_id,
+                        },
+                    });
+                }
             }
         }
 
@@ -272,6 +294,52 @@
         containedDate.map((value) => finalData.push(value.item));
 
         return finalData;
+
+        // for (let index = 0; index < containedDate.length; index++) {
+        //     const paidYear =
+        //         new Date(containedDate[index].item.paid_for * 1000).getMonth() +
+        //             1 >
+        //         11
+        //             ? new Date(
+        //                   containedDate[index].item.paid_for * 1000,
+        //               ).getFullYear() + 1
+        //             : new Date(
+        //                   containedDate[index].item.paid_for * 1000,
+        //               ).getFullYear();
+        //     const paidMont =
+        //         new Date(containedDate[index].item.paid_for * 1000).getMonth() +
+        //             1 >
+        //         11
+        //             ? 0
+        //             : new Date(
+        //                   containedDate[index].item.paid_for * 1000,
+        //               ).getMonth() + 1;
+
+        //     const paidDate = `${paidYear}-${paidMont}-1`;
+
+        //     const hasDate = containedDate.some(
+        //         (value) => value.paidDate == paidDate,
+        //     );
+
+        //     if (!hasDate) {
+        //         if (paidMont > 11 && paidYear >= currentYear) break;
+
+        //         let generatedDate = new Date();
+        //         generatedDate = new Date(generatedDate.setMonth(paidMont));
+        //         generatedDate = new Date(generatedDate.setFullYear(paidYear));
+
+        //         containedDate.splice(index, 0, {
+        //             paidDate: paidDate,
+        //             item: {
+        //                 paid_for: Number.parseInt(
+        //                     (generatedDate.getTime() / 1000).toString(),
+        //                 ),
+        //                 amount_paid: amountPay,
+        //                 dues_member: containedDate[index].item.dues_member.id,
+        //             },
+        //         });
+        //     }
+        // }
 
         // const paidMont = new Date(lastPaidDate * 1000).getMonth();
         // const paidYear = new Date(lastPaidDate * 1000).getFullYear();

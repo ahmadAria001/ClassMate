@@ -36,6 +36,8 @@ class DuesController extends Controller
 
         $pat = PersonalAccessToken::findToken($token);
 
+        if (!$pat) return redirect('login');
+
         if ($pat->cant((new ReflectionClass($this))->getShortName() . ':create') && $pat->cant((new ReflectionClass($this))->getShortName() . ':edit') && $pat->cant((new ReflectionClass($this))->getShortName() . ':destroy')) {
             return abort(404);
         }

@@ -20,6 +20,8 @@
             },
         );
 
+        console.log(response.data);
+
         return response.data;
     };
 </script>
@@ -28,7 +30,7 @@
     {#await getNewsData(items) then item}
         <img
             src={item.data.attachment
-                ? `/assets/uploads/${item.data.attachment}`
+                ? `/storage/assets/uploads/${item.data.attachment}`
                 : defaultImg}
             alt=""
             class="w-full h-auto max-h-72 mb-3 rounded-lg border-2 border-gray-500"
