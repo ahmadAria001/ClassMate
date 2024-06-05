@@ -208,13 +208,33 @@
                         {/each}
                     {:else}
                         <TableBodyRow>
-                            <TableBodyCell colspan="6">
-                                <span
-                                    class="w-full flex justify-center align-middle text-gray-400 text-lg my-5"
-                                >
-                                    Tidak ada data untuk ditampilkan
-                                </span>
-                            </TableBodyCell>
+                            <TableBodyCell class="text-center">{idx + 1}</TableBodyCell>
+
+                            <TableBodyCell
+                                >{item.request_by.fullName}</TableBodyCell
+                            >
+                            <TableBodyCell
+                                >{item.request_by.address}</TableBodyCell
+                            >
+                            <TableBodyCell
+                                >{item.request_by.phone}</TableBodyCell
+                            >
+                            <TableBodyCell
+                                >{item.docs_id.description}</TableBodyCell
+                            >
+                            {#if item.requestStatus == "Resolved"}
+                                <TableBodyCell class="text-center">
+                                    <Badge color="green">Disetujui</Badge>
+                                </TableBodyCell>
+                            {:else if item.requestStatus == "Open"}
+                                <TableBodyCell class="text-center">
+                                    <Badge color="indigo">Dalam Proses</Badge>
+                                </TableBodyCell>
+                            {:else}
+                                <TableBodyCell class="text-center">
+                                    <Badge color="red">Ditolak</Badge>
+                                </TableBodyCell>
+                            {/if}
                         </TableBodyRow>
                     {/if}
                 {/if}
