@@ -91,7 +91,7 @@
         return response.data;
     };
 
-    let duesCategoryData: any;
+    let duesCategoryData;
     onMount(async () => {
         const response = await getDuesCategoryData(items);
         duesCategoryData = await response.data;
@@ -120,54 +120,50 @@
     bind:open={showState}
     on:close={() => (formChanged = false)}
 >
-    {#if duesCategoryData}
-        <form method="POST" use:form>
-            <div class="mb-4">
-                <Label for="duesCategoryName" class="mb-2">Nama Kategori</Label>
-                <Input
-                    id="duesCategoryName"
-                    name="duesName"
-                    placeholder="Masukan nama kategori"
-                    value={duesCategoryData?.typeDues}
-                    on:input={(e) => (currentData.duesName = e.target.value)}
-                />
-                {#if $errors.duesName}
-                    <span class="text-sm text-red-500">{$errors.duesName}</span>
-                {/if}
-            </div>
-            <div class="mb-4">
-                <Label for="duesAmount" class="mb-2">Jumlah Iuran</Label>
-                <Input
-                    rows="2"
-                    id="duesAmount"
-                    name="duesAmount"
-                    placeholder="Masukan jumlah iuran"
-                    value={duesCategoryData?.amt_dues}
-                    on:input={(e) => (currentData.duesAmount = e.target.value)}
-                />
-                {#if $errors.duesAmount}
-                    <span class="text-sm text-red-500"
-                        >{$errors.duesAmount}</span
-                    >
-                {/if}
-            </div>
-            <div class="text-end">
-                <Button type="submit" class="mr-2" color="red">Hapus</Button>
-                {#if duesCategoryData?.status}
-                    <Button type="submit" class="mr-2" color="yellow"
-                        >Nonaktifkan</Button
-                    >
-                {:else}
-                    <Button type="submit" class="mr-2" color="yellow"
-                        >Aktifkan</Button
-                    >
-                {/if}
-                <Button type="submit" class="" bind:disabled={isDisabled}
-                    >Ubah</Button
+    <form method="POST" use:form>
+        <div class="mb-4">
+            <Label for="duesCategoryName" class="mb-2">Nama Kategori</Label>
+            <Input
+                id="duesCategoryName"
+                name="duesName"
+                placeholder="Masukan nama kategori"
+                value={duesCategoryData?.typeDues}
+                on:input={(e) => (currentData.duesName = e.target.value)}
+            />
+            {#if $errors.duesName}
+                <span class="text-sm text-red-500">{$errors.duesName}</span>
+            {/if}
+        </div>
+        <div class="mb-4">
+            <Label for="duesAmount" class="mb-2">Jumlah Iuran</Label>
+            <Input
+                rows="2"
+                id="duesAmount"
+                name="duesAmount"
+                placeholder="Masukan jumlah iuran"
+                value={duesCategoryData?.amt_dues}
+                on:input={(e) => (currentData.duesAmount = e.target.value)}
+            />
+            {#if $errors.duesAmount}
+                <span class="text-sm text-red-500">{$errors.duesAmount}</span>
+            {/if}
+        </div>
+        <div class="text-end">
+            <Button type="submit" class="mr-2" color="red">Hapus</Button>
+            {#if duesCategoryData?.status}
+                <Button type="submit" class="mr-2" color="yellow"
+                    >Nonaktifkan</Button
                 >
-            </div>
-        </form>
-    {/if}
+            {:else}
+                <Button type="submit" class="mr-2" color="yellow"
+                    >Aktifkan</Button
+                >
+            {/if}
+            <Button type="submit" class="" bind:disabled={isDisabled}
+                >Ubah</Button
+            >
+        </div>
+    </form>
 </Modal>
 
 {#if err.status != null && err.status == true}
