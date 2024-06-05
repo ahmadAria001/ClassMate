@@ -23,10 +23,9 @@ class Update extends FormRequest
     {
         return [
             'id' => 'required|integer|min:1',
-            'username' => 'required|string',
-            'password' => 'required|string',
-            'role' => 'required|string',
-            'civilian_id' => 'required|integer|min:1',
+            'username' => 'string|min:1',
+            'intro' => 'string|min:1',
+            'role' => 'string|min:1',
         ];
     }
 }

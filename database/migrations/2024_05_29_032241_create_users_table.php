@@ -18,6 +18,7 @@ return new class extends Migration
             $table->enum('role', ['RT', 'RW', 'Warga', 'Admin'])->nullable();
             $table->unsignedBigInteger('civilian_id')->nullable()->index('fk_users_civilian');
             $table->text('pict')->nullable();
+            $table->text('intro')->nullable();
             $table->bigInteger('created_at');
             $table->unsignedBigInteger('created_by')->nullable()->index('fk_user');
             $table->bigInteger('updated_at')->nullable();

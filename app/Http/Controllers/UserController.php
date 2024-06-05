@@ -6,6 +6,7 @@ use App\Http\Requests\Resources\User\Create;
 use App\Http\Requests\Resources\User\Delete;
 use App\Http\Requests\Resources\User\Update;
 use App\Models\Civilian;
+use App\Models\RT;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -57,6 +58,13 @@ class UserController extends Controller
         }
 
         return Response()->json(['data' => $data], 200);
+    }
+
+    public function getRW()
+    {
+        $data =  User::withoutTrashed()->with('civilian_id.rt_id')->where('role', '=', "RW")->get();
+
+        return Response()->json(['data' => $data->first()], 200);
     }
 
     public function getCustom($column, $operator, $value)
@@ -131,15 +139,19 @@ class UserController extends Controller
         $payload = $req->safe()->collect();
 
         try {
+            $formerRW = User::withoutTrashed()->where('role', 'RW')->first();
             $data = User::withTrashed()
                 ->find(['id' => $payload->get('id')])
                 ->first();
 
+            $old_role = $data->role;
+
             if ($data) {
                 if (Auth::guard('web')->check()) {
                     $data->update([
-                        'leader_id' => $payload->get('leader_id'),
-                        'number' => $payload->get('number'),
+                        'username' => $payload->get('username') ? $payload->get('username') : $data->username,
+                        'role' => $payload->get('role') ? $payload->get('role') : $data->role,
+                        'intro' => $payload->get('intro') ? $payload->get('intro') : $data->intro,
                         'updated_by' => Auth::id(),
                     ]);
                 } else {
@@ -162,10 +174,22 @@ class UserController extends Controller
                     $model = $pat->tokenable();
 
                     $data->update([
-                        'leader_id' => $payload->get('leader_id'),
-                        'number' => $payload->get('number'),
+                        'username' => $payload->get('username') ? $payload->get('username') : $data->username,
+                        'role' => $payload->get('role') ? $payload->get('role') : $data->role,
+                        'intro' => $payload->get('intro') ? $payload->get('intro') : $data->intro,
                         'updated_by' => $model->get('id')[0]->id,
                     ]);
+                }
+
+                if ($payload->get('role') == 'RW' && $formerRW) {
+                    $formerRW->update(['role' => 'Warga']);
+                    $formerRW->save();
+                }
+
+                if ($old_role == 'RT') {
+                    $rt = RT::withoutTrashed()->find($data->id)->first();
+                    $rt->update(['leader_id' => null]);
+                    $rt->save();
                 }
 
                 return Response()->json([

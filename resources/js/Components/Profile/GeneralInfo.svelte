@@ -1,16 +1,80 @@
 <script lang="ts">
     import { page } from "@inertiajs/svelte";
 
-    import { Button, Card, Input, Label, Select, Toast } from "flowbite-svelte";
+    import {
+        Button,
+        Card,
+        Input,
+        Label,
+        Select,
+        Textarea,
+        Toast,
+    } from "flowbite-svelte";
+    import { createEventDispatcher, onMount } from "svelte";
+    import axiosInstance from "axios";
+    import { CheckCircleSolid, CloseCircleSolid } from "flowbite-svelte-icons";
 
     export let data: any;
 
     const user = $page.props.auth.user;
+    const dispatch = createEventDispatcher();
+    const axios = axiosInstance.create({ withCredentials: true });
+
+    let intro: string;
+    let err: { status: null | boolean; message: null | string } = {
+        status: null,
+        message: null,
+    };
     let residentStatus = [
         { value: "PermanentResident", name: "Penduduk asli" },
         { value: "ContractResident", name: "Kontrak" },
         { value: "Kos", name: "Kos" },
     ];
+
+    const handleSubmitIntro = async () => {
+        try {
+            let body = {
+                id: data.data[0].id,
+                intro: intro,
+                _token: $page.props.csrf_token,
+            };
+
+            const response = await axios.put("/api/user", body);
+
+            err = response.data;
+            dispatch("comp");
+
+            console.log(response.data);
+
+            setTimeout(() => {
+                err = { status: null, message: null };
+            }, 5000);
+        } catch (error) {
+            err = {
+                message: error?.response?.data?.message,
+                status: error?.response?.data?.status,
+            };
+            setTimeout(() => {
+                err = { status: null, message: null };
+            }, 5000);
+
+            console.error(error);
+
+            if (error?.response?.status == 401) {
+                err = {
+                    message: "Anda tidak memiliki izin",
+                    status: false,
+                };
+                setTimeout(() => {
+                    err = { status: null, message: null };
+                }, 5000);
+            }
+        }
+    };
+
+    onMount(() => {
+        intro = user.intro;
+    });
 </script>
 
 <Card class="max-w-full z-0">
@@ -145,9 +209,44 @@
                     value={user.role}
                 />
             </div>
+            {#if user.role == "RW"}
+                <div class="col-span-full">
+                    <Label for="intro" class="mb-2">Kata Sambutan</Label>
+                    <Textarea
+                        id="intro"
+                        placeholder="Sambutan"
+                        name="intro"
+                        bind:value={intro}
+                    />
+                    <div class="flex justify-end mt-2">
+                        <Button on:click={handleSubmitIntro}
+                            >Ubah Sambutan</Button
+                        >
+                    </div>
+                </div>
+            {/if}
         </div>
     {/if}
     <!-- <div class="block flex"> -->
     <!--     <Button type="submit" class="ml-auto">Simpan Perubahan</Button> -->
     <!-- </div> -->
 </Card>
+
+{#if err.status != null && err.status == true}
+    <Toast color="green" class="fixed top-3 right-1 z-[50000]">
+        <svelte:fragment slot="icon">
+            <CheckCircleSolid class="w-5 h-5" />
+            <span class="sr-only">Check icon</span>
+        </svelte:fragment>
+        {err.message}
+    </Toast>
+{/if}
+{#if err.status != null && err.status == false}
+    <Toast color="red" class="fixed top-3 right-1 z-[50000]">
+        <svelte:fragment slot="icon">
+            <CloseCircleSolid class="w-5 h-5" />
+            <span class="sr-only">Error icon</span>
+        </svelte:fragment>
+        {err.message}
+    </Toast>
+{/if}

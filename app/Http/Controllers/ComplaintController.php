@@ -7,6 +7,7 @@ use App\Http\Requests\Resources\Docs\DeleteComplaint;
 use App\Http\Requests\Resources\Docs\UpdateComplaint;
 use App\Models\Complaint;
 use App\Models\Docs;
+use App\Models\User;
 use Carbon\Carbon;
 use Spatie\Image\Image;
 use Illuminate\Http\Request;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Laravel\Sanctum\PersonalAccessToken;
 use ReflectionClass;
+use App\Utils\AccessToken;
 
 class ComplaintController extends Controller
 {
@@ -103,15 +105,95 @@ class ComplaintController extends Controller
     public function get($filter = null)
     {
         $data = null;
+        error_log(strlen($filter));
 
-        if ($filter) {
-            $data = Complaint::withoutTrashed()->with('docs_id', 'created_by.civilian_id', 'updated_by')->find($filter);
+        if ($filter && strlen($filter) > 0) {
+            $data = Complaint::withoutTrashed()->with('docs_id', 'created_by.civilian_id', 'updated_by')
+                ->whereHas('created_by.civilian_id', function ($q) use ($filter) {
+                    $q->whereAny(['nik', 'fullName', 'birthplace', 'birthplace', 'birthplace', 'status', 'address', 'religion', 'job'], 'LIKE', "%$filter%");
+                    // $q->where('fullName', 'LIKE', "%$filter%");
+                })
+                ->orWhereAny(['id', 'complaintStatus'], 'LIKE', "%$filter%");
+
+            // dd($data);
         } else {
-            $data = Complaint::withoutTrashed()->with('docs_id', 'created_by.civilian_id', 'updated_by')->get();
+            $data = Complaint::withoutTrashed()->with('docs_id', 'created_by.civilian_id', 'updated_by');
         }
 
-        return Response()->json(['data' => $data], 200);
+        $length = $data->count();
+
+        return Response()->json(['data' => $data->get(), 'length' => $length]);
     }
+
+    public function getPaged($page = 1)
+    {
+        $take = 5;
+
+        $data = Complaint::withoutTrashed()
+            ->with('docs_id', 'created_by.civilian_id', 'updated_by')
+            ->skip($page > 1 ? ($page - 1) * $take : 0)
+            ->take($take)
+            ->get();
+
+        $length = Complaint::withoutTrashed()->count();
+
+        return response()->json(['data' => $data, 'length' => $length]);
+    }
+
+    public function getByWarga(Request $req, $page = 1)
+    {
+        $data = null;
+        $take = 5;
+        $identity = AccessToken::getToken($req);
+
+        if (!$req) abort(401);
+        $model = $identity->tokenable();
+        $user = User::withoutTrashed()->with('civilian_id.rt_id')->where('id', $model->get('id')[0]->id)->get()->first();
+
+        $data = Complaint::withoutTrashed()
+            ->with('docs_id', 'created_by.civilian_id', 'updated_by')
+            ->whereHas('created_by', function ($q) use ($user) {
+                $q->where(
+                    'id',
+                    $user->id
+                );
+            })
+            ->skip($page > 1 ? ($page - 1) * $take : 0)
+            ->take($take)
+            ->get();
+
+        $length = $data->count();
+
+        return response()->json(['data' => $data, 'length' => $length]);
+    }
+
+    public function getByRT(Request $req, $page = 1)
+    {
+        $data = null;
+        $take = 5;
+        $identity = AccessToken::getToken($req);
+
+        if (!$req) abort(401);
+        $model = $identity->tokenable();
+        $user = User::withoutTrashed()->with('civilian_id.rt_id')->where('id', $model->get('id')[0]->id)->get()->first();
+
+        $data = Complaint::withoutTrashed()
+            ->with('docs_id', 'created_by.civilian_id', 'updated_by')
+            ->whereHas('created_by.civilian_id.rt_id', function ($q) use ($user) {
+                $q->where(
+                    'id',
+                    $user->getRelation('civilian_id')->rt_id
+                );
+            })
+            ->skip($page > 1 ? ($page - 1) * $take : 0)
+            ->take($take)
+            ->get();
+
+        $length = $data->count();
+
+        return response()->json(['data' => $data, 'length' => $length]);
+    }
+
     public function create(CreateComplaint $request)
     {
         $payload = $request->safe()->collect();

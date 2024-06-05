@@ -8,7 +8,6 @@
         TableBodyRow,
         TableHead,
         TableHeadCell,
-        TableSearch,
         Button,
         ButtonGroup,
         Popover,
@@ -18,11 +17,16 @@
         ChevronRightOutline,
         QuestionCircleSolid,
     } from "flowbite-svelte-icons";
+    import TableSearch from "@C/General/TableSearch.svelte";
 
+    import { page } from "@inertiajs/svelte";
     import axiosInstance from "axios";
     import Edit from "@C/Pengaduan/Modals/Detail.svelte";
 
     const axios = axiosInstance.create({ withCredentials: true });
+    const itemsPerPage = 10;
+    const showPage = 5;
+    const role = $page.props.auth.user.role;
 
     let items = [
         {
@@ -42,17 +46,18 @@
             status: "Dalam Proses",
         },
     ];
+
+    let data: any;
     let modalDetailPengaduan = false;
     let searchTerm = "";
     let currentPosition = 0;
-    const itemsPerPage = 10;
-    const showPage = 5;
     let totalPages = 0;
     let pagesToShow: any[] = [];
     let totalItems: number = items.length;
     let startPage: number;
     let endPage: number;
     let selected: string | null = null;
+    let currentPage = 1;
 
     let builder = {};
 
@@ -101,9 +106,21 @@
         updateDataAndPagination();
     };
 
-    const getComplaints = async (id: string = "") => {
+    const getComplainPaged = async (page: number) => {
+        let format = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
+        if (format.test(encodeURIComponent(page))) return;
+
+        let url = "";
+
+        if (role == "RT")
+            url = `/api/docs/complaint/rt/${encodeURIComponent(page)}`;
+        if (role == "Warga")
+            url = `/api/docs/complaint/warga/${encodeURIComponent(page)}`;
+        if (role != "RT" && role != "Warga")
+            url = `/api/docs/complaint/${encodeURIComponent(page)}`;
+
         try {
-            const response = await axios.get(`/api/docs/complaint/${id}`, {
+            const response = await axios.get(url, {
                 headers: {
                     Accept: "*/*",
                 },
@@ -114,12 +131,46 @@
         }
     };
 
+    const getComplaints = async (id: string = "") => {
+        let format = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
+        if (format.test(encodeURIComponent(id))) return;
+
+        try {
+            const response = await axios.get(
+                `/api/docs/complaint/${encodeURIComponent(id)}`,
+                {
+                    headers: {
+                        Accept: "*/*",
+                    },
+                },
+            );
+
+            console.log(response.data);
+            return response.data;
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const initPage = async () => {
+        data = await getComplainPaged(currentPage);
+    };
+
+    const handleSearch = async (filterInput: string) => {
+        if (!filterInput) return;
+
+        data = await getComplaints(filterInput);
+        rebuild();
+    };
+
     $: startRange = currentPosition + 1;
     $: endRange = Math.min(currentPosition + itemsPerPage, totalItems);
 
-    onMount(() => {
+    onMount(async () => {
         // Call renderPagination when the component initially mounts
         renderPagination(items.length);
+
+        await initPage();
     });
 
     $: currentPageItems = items.slice(
@@ -133,14 +184,7 @@
 </script>
 
 <Layout>
-    <TableSearch
-        placeholder="Cari Pengaduan"
-        hoverable={true}
-        bind:inputValue={searchTerm}
-        divClass="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg overflow-hidden"
-        innerDivClass="flex items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4"
-        classInput="text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2  pl-10"
-    >
+    <TableSearch on:search={(e) => handleSearch(e.detail.value)}>
         <div
             slot="header"
             class="md:w-auto flex flex-row space-y-2 md:space-y-0 items-stretch md:items-center justify-end md:space-x-3 flex-shrink-0"
@@ -153,95 +197,98 @@
             <TableHeadCell class="text-center">Status</TableHeadCell>
             <TableHeadCell class="sr-only">Aksi</TableHeadCell>
         </TableHead>
-        <TableBody>
+        <TableBody tableBodyClass="overflow-scroll max-w-full">
             {#key builder}
-                {#await getComplaints() then data}
-                    {#each data.data as item}
-                        <TableBodyRow>
-                            <TableBodyCell>
-                                <span
-                                    class="w-1/4 truncate
+                {#if data}
+                    {#if data.data.length > 0}
+                        {#each data.data as item}
+                            <TableBodyRow>
+                                <TableBodyCell>
+                                    <span
+                                        class="w-1/4 truncate
 "
-                                >
-                                    {item.created_by.civilian_id.fullName}
-                                </span>
-                            </TableBodyCell>
-                            <TableBodyCell tdClass="max-w-52">
-                                <div
-                                    class="flex justify-between align-middle gap-2"
-                                >
-                                    <span class="w-full truncate">
-                                        {item.created_by.civilian_id.address}
+                                    >
+                                        {item.created_by.civilian_id.fullName}
                                     </span>
-                                    <QuestionCircleSolid
-                                        id={`address-${item.id}`}
-                                    />
-                                </div>
-                            </TableBodyCell>
-                            <TableBodyCell
-                                >{item.created_by.civilian_id
-                                    .phone}</TableBodyCell
+                                </TableBodyCell>
+                                <TableBodyCell tdClass="max-w-52">
+                                    <div
+                                        class="flex justify-between align-middle gap-2"
+                                    >
+                                        <span class="w-full truncate">
+                                            {item.created_by.civilian_id
+                                                .address}
+                                        </span>
+                                        <QuestionCircleSolid
+                                            id={`address-${item.id}`}
+                                        />
+                                    </div>
+                                </TableBodyCell>
+                                <TableBodyCell
+                                    >{item.created_by.civilian_id
+                                        .phone}</TableBodyCell
+                                >
+                                <TableBodyCell class="w-20">
+                                    <div
+                                        class="flex justify-between max-w-52 align-middle gap-2"
+                                    >
+                                        <span class="w-full truncate">
+                                            {item.docs_id.description}
+                                        </span>
+                                        <QuestionCircleSolid
+                                            id={`desc-${item.id}`}
+                                        />
+                                    </div>
+                                </TableBodyCell>
+                                {#if item.complaintStatus == "Resolved"}
+                                    <TableBodyCell class="text-center">
+                                        <Badge color="green"
+                                            >{item.complaintStatus}</Badge
+                                        >
+                                    </TableBodyCell>
+                                {:else if item.complaintStatus == "Open"}
+                                    <TableBodyCell class="text-center">
+                                        <Badge color="primary"
+                                            >{item.complaintStatus}</Badge
+                                        >
+                                    </TableBodyCell>
+                                {:else}
+                                    <TableBodyCell class="text-center">
+                                        <Badge color="red"
+                                            >{item.complaintStatus}</Badge
+                                        >
+                                    </TableBodyCell>
+                                {/if}
+
+                                <TableBodyCell>
+                                    <Button
+                                        color="blue"
+                                        on:click={() => {
+                                            selected = item.id;
+                                            modalDetailPengaduan = true;
+                                        }}>Detail</Button
+                                    >
+                                </TableBodyCell>
+                            </TableBodyRow>
+
+                            <Popover
+                                class="w-64 text-sm text-black dark:text-white"
+                                title="Alamat"
+                                triggeredBy={`#address-${item.id}`}
                             >
-                            <TableBodyCell class="w-20">
-                                <div
-                                    class="flex justify-between max-w-52 align-middle gap-2"
-                                >
-                                    <span class="w-full truncate">
-                                        {item.docs_id.description}
-                                    </span>
-                                    <QuestionCircleSolid
-                                        id={`desc-${item.id}`}
-                                    />
-                                </div>
-                            </TableBodyCell>
-                            {#if item.complaintStatus == "Resolved"}
-                                <TableBodyCell class="text-center">
-                                    <Badge color="green"
-                                        >{item.complaintStatus}</Badge
-                                    >
-                                </TableBodyCell>
-                            {:else if item.complaintStatus == "Open"}
-                                <TableBodyCell class="text-center">
-                                    <Badge color="primary"
-                                        >{item.complaintStatus}</Badge
-                                    >
-                                </TableBodyCell>
-                            {:else}
-                                <TableBodyCell class="text-center">
-                                    <Badge color="red"
-                                        >{item.complaintStatus}</Badge
-                                    >
-                                </TableBodyCell>
-                            {/if}
+                                {item.created_by.civilian_id.address}
+                            </Popover>
 
-                            <TableBodyCell>
-                                <Button
-                                    color="blue"
-                                    on:click={() => {
-                                        selected = item.id;
-                                        modalDetailPengaduan = true;
-                                    }}>Detail</Button
-                                >
-                            </TableBodyCell>
-                        </TableBodyRow>
-
-                        <Popover
-                            class="w-64 text-sm text-black dark:text-white"
-                            title="Alamat"
-                            triggeredBy={`#address-${item.id}`}
-                        >
-                            {item.created_by.civilian_id.address}
-                        </Popover>
-
-                        <Popover
-                            class="w-64 text-sm text-black dark:text-white"
-                            title="Masalah"
-                            triggeredBy={`#desc-${item.id}`}
-                        >
-                            {item.docs_id.description}
-                        </Popover>
-                    {/each}
-                {/await}
+                            <Popover
+                                class="w-64 text-sm text-black dark:text-white"
+                                title="Masalah"
+                                triggeredBy={`#desc-${item.id}`}
+                            >
+                                {item.docs_id.description}
+                            </Popover>
+                        {/each}
+                    {/if}
+                {/if}
             {/key}
         </TableBody>
 

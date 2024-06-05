@@ -121,6 +121,9 @@
         legend: {
             position: string;
             fontFamily: string;
+            labels: {
+                colors: string;
+            };
         };
         yaxis: {
             labels: {
@@ -258,6 +261,13 @@
         legend: {
             position: "bottom",
             fontFamily: "Inter, sans-serif",
+            labels: {
+                colors: document
+                    .getElementsByTagName("html")[0]
+                    .className.includes("darl")
+                    ? "#fffffff"
+                    : "#0000000",
+            },
         },
         yaxis: {
             labels: {
