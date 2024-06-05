@@ -135,7 +135,7 @@
                     {#if data.data.attachment}
                         <div class="mb-4">
                             <img
-                                src={`/assets/uploads/${data.data.attachment}`}
+                                src={`/storage/assets/uploads/${data.data.attachment}`}
                                 alt="Selected Image"
                                 class="w-full h-auto max-h-72 mb-3 rounded-lg border-2 border-gray-500"
                             />

@@ -45,12 +45,12 @@
     let selectedDues: string;
     let selectedMethod: string;
     let dues = [
-        { value: "sampah", name: "sampah" },
-        { value: "keamanan", name: "keamanan" },
+        { value: "sampah", name: "Sampah" },
+        { value: "keamanan", name: "Keamanan" },
     ];
     let methodpayment = [
-        { value: "cash", name: "cash" },
-        { value: "transfer", name: "transfer" },
+        { value: "cash", name: "Cash" },
+        { value: "transfer", name: "Transfer" },
     ];
     let currentPosition = 0;
     const itemsPerPage = 10;

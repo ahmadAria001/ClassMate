@@ -33,6 +33,10 @@ Route::prefix('/docs')->group(function () {
         Route::get('/{filter}', [DocRequestController::class, 'get'])->middleware(GetRequest::class);
         Route::get('/p/{page}', [DocRequestController::class, 'getPaged'])->middleware(GetRequest::class);
 
+        Route::get('/warga/{page}', [DocRequestController::class, 'getByWarga'])->middleware(GetRequest::class);
+        Route::get('/rt/{page}', [DocRequestController::class, 'getForRT'])->middleware(GetRequest::class);
+        Route::get('/rw/{page}', [DocRequestController::class, 'getForRW'])->middleware(GetRequest::class);
+
         Route::post('/', [DocRequestController::class, 'create'])->middleware(CreateRequest::class);
         Route::put('/', [DocRequestController::class, 'edit'])->middleware(UpdateRequest::class);
         Route::delete('/', [DocRequestController::class, 'destroy'])->middleware(DeleteRequest::class);

@@ -290,6 +290,8 @@
         </div>
     </div>
 
+    <div class="bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md w-full max-md:mb-5 mb-3">
+        <div class="mb-3"></div>
     <Table tableClass="mb-0">
         <TableHead>
             <TableHeadCell>Nama Lengkap</TableHeadCell>
@@ -321,6 +323,8 @@
             {/if}
         </TableBody>
     </Table>
+    <div class="mb-3"></div>
+</div>
 </Layout>
 
 <Create bind:showState={addDues} on:comp={rebuild} />

@@ -3,7 +3,14 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-
+use App\Models\Activity;
+use App\Models\Certificate;
+use App\Models\Complaint;
+use App\Models\DocRequest;
+use App\Models\Docs;
+use App\Models\Documentation;
+use App\Models\FinancialAssistance;
+use App\Models\News;
 use App\Models\RT;
 use App\Models\User;
 use Carbon\Carbon;
@@ -56,6 +63,75 @@ class DatabaseSeeder extends Seeder
                 ]);
             }
         }
+
+        for ($i = 1; $i <= 5; $i++) {
+            News::create([
+                'title' => $faker->sentence(),
+                'desc' => $faker->sentences(2, true),
+                'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
+                'created_by' => $i,
+            ]);
+        }
+
+        for ($i = 1; $i <= 5; $i++) {
+            FinancialAssistance::create([
+                'request_by' => $i,
+                'tanggungan' => $faker->sentence(),
+                'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
+                'created_by' => $i,
+            ]);
+        }
+
+        for ($i = 1; $i <= 5; $i++) {
+            Certificate::create([
+                'request_by' => $i,
+                'desc' => $faker->sentence(),
+                'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
+                'created_by' => $i,
+            ]);
+        }
+
+        for ($i = 1; $i <= 4; $i++) {
+            $docsType = ['Complaint', 'Event', 'Administration', 'Request'];
+
+            Docs::create([
+                'type' => $docsType[$i - 1],
+                'description' => $faker->sentence(),
+                'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
+                'created_by' => $i,
+            ]);
+        }
+
+        Activity::create([
+            'docs_id' => 2,
+            'name' => $faker->title(),
+            'startDate' => Carbon::createFromDate($faker->dateTimeBetween())->getTimestamp(),
+            'endDate' => Carbon::createFromDate($faker->dateTimeBetween())->getTimestamp(),
+            'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
+            'location' => $faker->address(),
+            'created_by' => 1,
+        ]);
+
+        Complaint::create([
+            'docs_id' => 1,
+            'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
+            'created_by' => 1,
+        ]);
+
+        Documentation::create([
+            'docs_id' => 3,
+            'contentType' => 'Administration',
+            'contentDesc' => $faker->sentence(6, true),
+            'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
+            'created_by' => 1,
+        ]);
+
+        DocRequest::create([
+            'docs_id' => 4,
+            'request_by' => 1,
+            'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
+            'created_by' => 1,
+        ]);
     }
 
     private $duesQuery  = "

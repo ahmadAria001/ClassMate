@@ -8,9 +8,10 @@ use App\Http\Requests\Resources\Docs\UpdateComplaint;
 use App\Models\Complaint;
 use App\Models\Docs;
 use Carbon\Carbon;
-use Intervention\Image\Laravel\Facades\Image;
+use Spatie\Image\Image;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Laravel\Sanctum\PersonalAccessToken;
 use ReflectionClass;
@@ -133,13 +134,22 @@ class ComplaintController extends Controller
                     'attachment' => $image ? $name : null,
                 ]);
 
-                $path = public_path('assets/uploads') . '/' . $name;
-                [$width, $height] = getimagesize($image->getFileInfo());
+                if (!Storage::directoryExists('public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads')) {
+                    // File::makeDirectory(, 0755, true, true);
+                    Storage::makeDirectory('public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads');
+                }
 
-                Image::read($image)
-                    ->resize($width > 1080 ? 1080 : $width, $height > 1080 ? 1080 : $height)
-                    ->toJpeg()
-                    ->save($path);
+                $path =
+                    // public_path('storage') . DIRECTORY_SEPARATOR .
+                    'public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR;
+
+                [$width, $height] = getimagesize($image->getFileInfo());
+                $loadedImg = Image::load($image->getRealPath());
+                $compressedImg = $loadedImg
+                    ->width($width > 1080 ? 1080 : $width)
+                    ->height($height > 1080 ? 1080 : $height)
+                    ->quality(20)
+                    ->save(Storage::path($path) . $name);
             } else {
                 $data = Complaint::firstOrCreate([
                     'docs_id' => $docs->id,
@@ -177,6 +187,7 @@ class ComplaintController extends Controller
                     $docs->created_by = Auth::id();
                     $data->created_by = Auth::id();
                 }
+
                 $docs->save();
                 $data->save();
 
@@ -251,13 +262,23 @@ class ComplaintController extends Controller
 
                 if (!$data->attachment || $image->getClientOriginalName() != $data->attachment) {
                     $name = $image ? Carbon::now() . '_' . $image->getClientOriginalName() : null;
-                    $path = public_path('assets/uploads') . '/' . $name;
-                    [$width, $height] = getimagesize($image->getFileInfo());
 
-                    Image::read($image)
-                        ->resize($width > 1080 ? 1080 : $width, $height > 1080 ? 1080 : $height)
-                        ->toJpeg()
-                        ->save($path);
+                    if (!Storage::directoryExists('public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads')) {
+                        // File::makeDirectory(, 0755, true, true);
+                        Storage::makeDirectory('public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads');
+                    }
+
+                    $path =
+                        // public_path('storage') . DIRECTORY_SEPARATOR .
+                        'public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR;
+
+                    [$width, $height] = getimagesize($image->getFileInfo());
+                    $loadedImg = Image::load($image->getRealPath());
+                    $compressedImg = $loadedImg
+                        ->width($width > 1080 ? 1080 : $width)
+                        ->height($height > 1080 ? 1080 : $height)
+                        ->quality(20)
+                        ->save(Storage::path($path) . $name);
 
                     $data->update(['attachment' => $name]);
                     $data->save();

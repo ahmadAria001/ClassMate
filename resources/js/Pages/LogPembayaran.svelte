@@ -178,6 +178,7 @@
             <p class="text-2xl font-bold text-black dark:text-white">
                 Catatan Pengeluaran
             </p>
+
         </div>
         <Table tableClass="mb-0">
             <TableHead>

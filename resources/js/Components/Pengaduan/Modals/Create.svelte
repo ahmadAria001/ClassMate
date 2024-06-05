@@ -116,7 +116,7 @@
                 rows="2"
                 id="desc"
                 name="description"
-                placeholder="Isi Pengumuman"
+                placeholder="Isi Permasalahan"
             />
             {#if $errors.description}
                 <span class="text-sm text-red-500">{$errors.description}</span>
