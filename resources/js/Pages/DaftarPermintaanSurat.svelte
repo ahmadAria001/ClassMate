@@ -3,7 +3,6 @@
     import Layout from "./Layout.svelte";
     import {
         Badge,
-        Table,
         TableBody,
         TableBodyCell,
         TableBodyRow,
@@ -11,17 +10,14 @@
         TableHeadCell,
         TableSearch,
         Button,
-        Modal,
-        Label,
-        Input,
         ButtonGroup,
     } from "flowbite-svelte";
     import {
         ChevronLeftOutline,
         ChevronRightOutline,
-        ImageOutline,
     } from "flowbite-svelte-icons";
 
+    import { page } from "@inertiajs/svelte";
     import axiosInstance from "axios";
     import Edit from "@C/PengajuanSurat/Modals/Edit.svelte";
 
@@ -68,17 +64,28 @@
         builder = {};
     };
 
+    const role = $page.props.auth.user.role;
+
     const getRequestDocs = async (page = 1) => {
-        const response = await axios.get(
-            `/api/docs/request/p/${encodeURIComponent(page)}`,
-        );
+        let url: string = "";
+
+        if (role == "RT")
+            url = `/api/docs/request/rt/${encodeURIComponent(page)}`;
+
+        if (role == "RW")
+            url = `/api/docs/request/rw/${encodeURIComponent(page)}`;
+
+        if (role == "Admin")
+            url = `/api/docs/request/p/${encodeURIComponent(page)}`;
+
+        const response = await axios.get(url);
 
         return response.data;
     };
 
     const initData = async () => {
         data = await getRequestDocs(currentPage);
-        console.log(data);
+        // console.log(data);
     };
 
     const updateDataAndPagination = () => {
@@ -130,6 +137,8 @@
         renderPagination(items.length);
 
         await initData();
+
+        console.log(data);
     });
 
     $: currentPageItems = items.slice(

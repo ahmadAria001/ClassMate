@@ -12,6 +12,8 @@
 
     const axios = axiosInstance.create({ withCredentials: true });
     const dispatch = createEventDispatcher();
+    const role = $page.props.auth.user.role;
+
     let data: any | null = null;
     let err: { status: null | boolean; message: null | string } = {
         status: null,
@@ -39,6 +41,27 @@
         }
     };
 
+    const getUser = async (id: string) => {
+        try {
+            const response = await axios.get(
+                `/api/user/${encodeURIComponent(id)}`,
+            );
+
+            return response.data?.data;
+        } catch (error) {
+            err = {
+                message: error?.response?.data?.message,
+                status: error?.response?.data?.status,
+            };
+            showState = false;
+            setTimeout(() => {
+                err = { status: null, message: null };
+            }, 5000);
+
+            return null;
+        }
+    };
+
     const initData = async () => {
         data = await getRequestDocs(target);
         console.log(data);
@@ -46,11 +69,13 @@
 
     const submitChange = async (values: any) => {
         try {
-            let body = {
-                id: values.id,
-                requestStatus: values.requestStatus,
-                _token: $page.props.csrf_token,
-            };
+            let localizedData = data;
+            localizedData._token = $page.props.csrf_token;
+            localizedData.request_by = Number.parseInt(
+                localizedData.request_by,
+            );
+
+            let body = localizedData;
 
             const response = await axios.put("/api/docs/request", body);
 
@@ -145,24 +170,68 @@
                     value={data.docs_id.description}
                 />
             </div>
-            <div class="flex justify-end gap-5">
-                <Button
-                    type="button"
-                    color="red"
-                    on:click={async () => {
-                        data.requestStatus = "Declined";
-                        await submitChange(data);
-                    }}>Tolak</Button
-                >
-                <Button
-                    type="button"
-                    color="green"
-                    on:click={async () => {
-                        data.requestStatus = "Resolved";
-                        await submitChange(data);
-                    }}>Terima</Button
-                >
+            <div class="mb-4 flex justify-between">
+                {#if data.rt_stat != 2}
+                    {#await getUser(data.responsed_by_rt) then data}
+                        <div class="mb-4">
+                            <Label class="mb-2">Dijawab Oleh RT</Label>
+                            <p
+                                class="block w-full disabled:cursor-not-allowed disabled:opacity-50 dark:text-white text-black rtl:text-right"
+                            >
+                                {data[0].civilian_id.fullName}
+                            </p>
+                        </div>
+                    {/await}
+                {/if}
+                {#if data.rw_stat != 2}
+                    {#await getUser(data.responsed_by_rw) then data}
+                        <div class="mb-4">
+                            <Label class="mb-2">Dijawab Oleh RW</Label>
+                            <p
+                                class="block w-full disabled:cursor-not-allowed disabled:opacity-50 dark:text-white text-black rtl:text-right"
+                            >
+                                {data[0].civilian_id.fullName}
+                            </p>
+                        </div>
+                    {/await}
+                {/if}
             </div>
+            {#if (data.rt_stat == 2 && role == "RT") || (data.rw_stat == 2 && role == "RW")}
+                <div class="flex justify-end gap-5">
+                    <Button
+                        type="button"
+                        color="red"
+                        on:click={async () => {
+                            if (role == "RT") {
+                                data.rt_stat = 0;
+                                data.responsed_by_rt = $page.props.auth.user.id;
+                            }
+                            if (role == "RW") {
+                                data.rw_stat = 0;
+                                data.responsed_by_rw = $page.props.auth.user.id;
+                            }
+
+                            await submitChange(data);
+                        }}>Tolak</Button
+                    >
+                    <Button
+                        type="button"
+                        color="green"
+                        on:click={async () => {
+                            if (role == "RT") {
+                                data.rt_stat = 1;
+                                data.responsed_by_rt = $page.props.auth.user.id;
+                            }
+                            if (role == "RW") {
+                                data.rw_stat = 1;
+                                data.responsed_by_rw = $page.props.auth.user.id;
+                            }
+
+                            await submitChange(data);
+                        }}>Terima</Button
+                    >
+                </div>
+            {/if}
         </section>
     {/if}
 </Modal>

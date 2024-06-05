@@ -19,10 +19,13 @@
         createSchema,
     } from "@R/Utils/Schema/News/Create";
     import { CheckCircleSolid, CloseCircleSolid } from "flowbite-svelte-icons";
+    import { createEventDispatcher } from "svelte";
 
     export let showState = false;
 
     const axios = axiosInstance.create({ withCredentials: true });
+    const dispatch = createEventDispatcher();
+
     let err: { status: null | boolean; message: null | string } = {
         status: null,
         message: null,
@@ -56,6 +59,8 @@
 
             err = response.data;
             showState = false;
+            dispatch("comp");
+
             setTimeout(() => {
                 err = { status: null, message: null };
             }, 5000);
