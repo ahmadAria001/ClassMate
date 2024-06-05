@@ -118,7 +118,8 @@
                 icon: UsersGroupSolid,
                 isOpenItems: false,
                 children: {
-                    "Lihat Data Warga": "/daftar-rt",
+                    "Lihat Data Warga": "/warga-rt",
+                    "Lihat Data RT": "/daftar-rt",
                     "Arsip Warga": "/arsip-penduduk",
                 },
             },
@@ -168,7 +169,7 @@
                 isOpenItems: false,
                 children: {
                     "Lihat Data Warga": "/warga-rt",
-                    "Lihat Data Warga RT": "/daftar-rt",
+                    "Lihat Data RT": "/daftar-rt",
                     "Arsip Warga": "/arsip-penduduk",
                 },
             },

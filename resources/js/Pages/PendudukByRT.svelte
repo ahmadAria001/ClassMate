@@ -268,16 +268,18 @@
         innerDivClass="flex items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4"
         classInput="text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2  pl-10"
     >
-        <div
-            slot="header"
-            class="md:w-auto flex flex-row space-y-2 md:space-y-0 items-stretch md:items-center justify-end md:space-x-3 flex-shrink-0"
+    <div
+        slot="header"
+        class="md:w-auto flex flex-row space-y-2 md:space-y-0 items-stretch md:items-center justify-end md:space-x-3 flex-shrink-0">
+        {#if role === "RT"}
+        <Button
+            on:click={() => {
+                addCivilian = true;
+            }}>+ Tambah Warga</Button
         >
-            <Button
-                on:click={() => {
-                    addCivilian = true;
-                }}>+ Tambah Warga</Button
-            >
-        </div>
+        {/if}
+    </div>       
+        
 
         <Create bind:showState={addCivilian} on:comp={rebuild} />
 

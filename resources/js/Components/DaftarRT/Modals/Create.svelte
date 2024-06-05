@@ -139,7 +139,7 @@
                     <Label for="number" class="mb-2">Nomor RT</Label>
                     <Input
                         id="number"
-                        placeholder="Alamat"
+                        placeholder="Nomor RT"
                         name="number"
                         type="number"
                     />

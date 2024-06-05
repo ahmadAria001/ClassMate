@@ -178,7 +178,7 @@
 
 <Layout>
     <TableSearch
-        placeholder="Cari Warga"
+        placeholder="Cari Ketua RT"
         hoverable={true}
         bind:inputValue={searchTerm}
         divClass="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg overflow-hidden"

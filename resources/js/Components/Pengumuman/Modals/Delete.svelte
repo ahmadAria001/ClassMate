@@ -94,7 +94,7 @@
                 <h3
                     class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400"
                 >
-                    Apa anda yakin ingin menghapus data ini?
+                    Apakah anda yakin ingin menghapus pengumuman ini?
                 </h3>
                 <div class="grid grid-cols-1 gap-4">
                     <div class="mb-4 hidden">
@@ -159,16 +159,16 @@
                 <h3
                     class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400"
                 >
-                    Apakah yakin ingin menghapus warga ini?
+                    Hapus pengumuman ini?
                 </h3>
                 <Button
                     color="red"
                     type="submit"
                     disabled={$isSubmitting}
-                    class="me-2">Ya, yakin</Button
+                    class="me-2">Hapus</Button
                 >
                 <Button color="alternative" on:click={() => (showState = false)}
-                    >Tidak, batal</Button
+                    >Batal</Button
                 >
             </div>
         {/await}
