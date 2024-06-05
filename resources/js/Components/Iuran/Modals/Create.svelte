@@ -85,11 +85,6 @@
                 <option value="Event">Acara</option>
                 <option value="Funeral">Kematian</option>
             </Select>
-            <!-- <Input
-                id="duesCategoryName"
-                name="duesName"
-                placeholder="Masukan nama kategori"
-            /> -->
             {#if $errors.duesName}
                 <span class="text-sm text-red-500">{$errors.duesName}</span>
             {/if}

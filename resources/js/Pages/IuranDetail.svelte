@@ -241,7 +241,6 @@
                       ).getMonth() + 1;
 
             const paidDate = `${paidYear}-${paidMont}-1`;
-            console.log(paidDate);
 
             const hasDate = containedDate.some(
                 (value) => value.paidDate == paidDate,
@@ -283,9 +282,6 @@
                         },
                     });
                 }
-
-                // containedDate = loopMonth <= currentMont ||
-                //         (loopYear < currentYear && loopMonth <= 11)containedDate;
             }
         }
 
