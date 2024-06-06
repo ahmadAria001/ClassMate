@@ -23,6 +23,7 @@
 
     let role: string = $page.props.auth.user.role;
     let rt_id: string = $page.props.auth.user.rt_id;
+    let hiddenAction: string;
     let value: string;
     let disabledSelectRT: boolean = false;
     let selected: string;
@@ -34,6 +35,7 @@
         disabledSelectRT = true;
         value = rt_id;
     } else {
+        hiddenAction = "hidden";
         value = "";
     }
 
@@ -189,7 +191,7 @@
                         id="select-rt"
                         placeholder="Pilih RT"
                         bind:value
-                        {disabledSelectRT}
+                        disabled={disabledSelectRT}
                         on:change={handleSelectChange}
                     >
                         {#each dataRT as { id, name, number }, idx}
@@ -227,7 +229,7 @@
                     List Iuran
                 </h5>
                 <Button
-                    class=""
+                    class={hiddenAction}
                     size="sm"
                     on:click={() => {
                         addDues = true;
