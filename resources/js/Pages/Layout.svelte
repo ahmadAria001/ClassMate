@@ -55,7 +55,7 @@
         icon: any;
         href?: string;
         isOpenItems?: boolean;
-        children?: { [key: string]: string };
+        children?: { [key: string]: string[] };
     }
 
     let filtermenu: MenuItem[] = [];
@@ -68,8 +68,8 @@
                 icon: UsersGroupSolid,
                 isOpenItems: false,
                 children: {
-                    "Lihat Data Warga": "/warga-rt",
-                    "Arsip Warga": "/arsip-penduduk",
+                    "Lihat Data Warga": ["/warga-rt"],
+                    "Arsip Warga": ["/arsip-penduduk"],
                 },
             },
             {
@@ -77,9 +77,9 @@
                 icon: ChartMixedDollarOutline,
                 isOpenItems: false,
                 children: {
-                    Iuran: "/iuran",
+                    Iuran: ["/iuran", "/iuran/detail"],
                     // Pengeluaran: "/pengeluaran",
-                    "Catatan Pembayaran": "/log-pembayaran",
+                    "Catatan Pembayaran": ["/log-pembayaran"],
                 },
             },
             {
@@ -87,7 +87,7 @@
                 icon: FileSolid,
                 isOpenItems: false,
                 children: {
-                    "Daftar Pengaduan": "/daftar-pengaduan",
+                    "Daftar Pengaduan": ["/daftar-pengaduan"],
                 },
             },
             {
@@ -95,9 +95,9 @@
                 icon: ClipboardSolid,
                 isOpenItems: false,
                 children: {
-                    "Surat Keterangan": "/daftar-pengajuan-surat",
+                    "Surat Keterangan": ["/daftar-pengajuan-surat"],
                     // "Laporan Keuangan": "/keuangan",
-                    "Bantuan Sosial": "/daftar-bansos",
+                    "Bantuan Sosial": ["/daftar-bansos"],
                 },
             },
             {
@@ -105,8 +105,8 @@
                 icon: VolumeUpSolid,
                 isOpenItems: false,
                 children: {
-                    Pengumuman: "/pengumuman",
-                    "Kegiatan Warga": "/kegiatan-warga",
+                    Pengumuman: ["/pengumuman"],
+                    "Kegiatan Warga": ["/kegiatan-warga"],
                 },
             },
         ];
@@ -118,8 +118,8 @@
                 icon: UsersGroupSolid,
                 isOpenItems: false,
                 children: {
-                    "Lihat Data Warga": "/daftar-rt",
-                    "Arsip Warga": "/arsip-penduduk",
+                    "Lihat Data Warga": ["/daftar-rt"],
+                    "Arsip Warga": ["/arsip-penduduk"],
                 },
             },
             {
@@ -127,9 +127,9 @@
                 icon: ChartMixedDollarOutline,
                 isOpenItems: false,
                 children: {
-                    Iuran: "/iuran",
+                    Iuran: ["/iuran"],
                     // Pengeluaran: "/pengeluaran",
-                    "Catatan Pembayaran": "/log-pembayaran",
+                    "Catatan Pembayaran": ["/log-pembayaran"],
                 },
             },
             {
@@ -137,7 +137,7 @@
                 icon: FileSolid,
                 isOpenItems: false,
                 children: {
-                    "Daftar Pengaduan": "/daftar-pengaduan",
+                    "Daftar Pengaduan": ["/daftar-pengaduan"],
                 },
             },
             {
@@ -145,8 +145,8 @@
                 icon: ClipboardSolid,
                 isOpenItems: false,
                 children: {
-                    "Surat Keterangan": "/daftar-pengajuan-surat",
-                    "Bantuan Sosial": "/daftar-bansos",
+                    "Surat Keterangan": ["/daftar-pengajuan-surat"],
+                    "Bantuan Sosial": ["/daftar-bansos"],
                 },
             },
             {
@@ -154,8 +154,8 @@
                 icon: VolumeUpSolid,
                 isOpenItems: false,
                 children: {
-                    Pengumuman: "/pengumuman",
-                    "Kegiatan Warga": "/kegiatan-warga",
+                    Pengumuman: ["/pengumuman"],
+                    "Kegiatan Warga": ["/kegiatan-warga"],
                 },
             },
         ];
@@ -167,9 +167,9 @@
                 icon: UsersGroupSolid,
                 isOpenItems: false,
                 children: {
-                    "Lihat Data Warga": "/warga-rt",
-                    "Lihat Data Warga RT": "/daftar-rt",
-                    "Arsip Warga": "/arsip-penduduk",
+                    "Lihat Data Warga": ["/warga-rt"],
+                    "Lihat Data Warga RT": ["/daftar-rt"],
+                    "Arsip Warga": ["/arsip-penduduk"],
                 },
             },
             {
@@ -177,9 +177,9 @@
                 icon: ChartMixedDollarOutline,
                 isOpenItems: false,
                 children: {
-                    Iuran: "/iuran",
+                    Iuran: ["/iuran", "/iuran/detail"],
                     // Pengeluaran: "/pengeluaran",
-                    "Catatan Pembayaran": "/log-pembayaran",
+                    "Catatan Pembayaran": ["/log-pembayaran"],
                 },
             },
             {
@@ -187,8 +187,8 @@
                 icon: FileSolid,
                 isOpenItems: false,
                 children: {
-                    "Daftar Pengaduan": "/daftar-pengaduan",
-                    "Status Pengaduan Warga": "/status-pengaduan",
+                    "Daftar Pengaduan": ["/daftar-pengaduan"],
+                    "Status Pengaduan Warga": ["/status-pengaduan"],
                 },
             },
             {
@@ -196,8 +196,8 @@
                 icon: ClipboardSolid,
                 isOpenItems: false,
                 children: {
-                    "Surat Keterangan": "/daftar-pengajuan-surat",
-                    "Bantuan Sosial": "/daftar-bansos",
+                    "Surat Keterangan": ["/daftar-pengajuan-surat"],
+                    "Bantuan Sosial": ["/daftar-bansos"],
                 },
             },
             {
@@ -205,7 +205,7 @@
                 icon: FileDocOutline,
                 isOpenItems: false,
                 children: {
-                    "Status Surat": "/status-pengajuan",
+                    "Status Surat": ["/status-pengajuan"],
                 },
             },
             {
@@ -213,8 +213,8 @@
                 icon: VolumeUpSolid,
                 isOpenItems: false,
                 children: {
-                    Pengumuman: "/pengumuman",
-                    "Kegiatan Warga": "/kegiatan-warga",
+                    Pengumuman: ["/pengumuman"],
+                    "Kegiatan Warga": ["/kegiatan-warga"],
                 },
             },
             {
@@ -222,7 +222,7 @@
                 icon: VolumeUpSolid,
                 isOpenItems: false,
                 children: {
-                    "Status Bantuan Sosial": "/status-bansos",
+                    "Status Bantuan Sosial": ["/status-bansos"],
                 },
             },
         ];
@@ -234,7 +234,7 @@
                 icon: FileSolid,
                 isOpenItems: false,
                 children: {
-                    "Status Pengaduan": "/status-pengaduan",
+                    "Status Pengaduan": ["/status-pengaduan"],
                 },
             },
             {
@@ -242,7 +242,7 @@
                 icon: ClipboardSolid,
                 isOpenItems: false,
                 children: {
-                    "Status Pengajuan": "/status-pengajuan",
+                    "Status Pengajuan": ["/status-pengajuan"],
                 },
             },
             {
@@ -250,17 +250,24 @@
                 icon: VolumeUpSolid,
                 isOpenItems: false,
                 children: {
-                    "Status Bantuan Sosial": "/status-bansos",
+                    "Status Bantuan Sosial": ["/status-bansos"],
                 },
             },
         ];
     }
 
-    function isActiveChild(
-        children: { [key: string]: string },
-        currentUrl: string,
-    ): boolean {
-        return Object.values(children).includes(currentUrl);
+    // function isActiveChild(
+    //     children: { [key: string]: string[] },
+    //     currentUrl: string,
+    // ): boolean {
+    //     return Object.values(children).some((urlArray) =>
+    //         urlArray.includes(currentUrl),
+    //     );
+    // }
+    function isActiveChild(children: string, currentUrl: string) {
+        return Object.values(children).some((urlArray) =>
+            urlArray.some((url) => currentUrl.startsWith(url)),
+        );
     }
 
     let site = {
@@ -524,14 +531,14 @@
                                 : false}
                         >
                             <svelte:component this={icon} slot="icon" />
-                            {#each Object.entries(children) as [title, href]}
+                            {#each Object.entries(children) as [title, hrefs]}
                                 <SidebarItem
                                     label={title}
-                                    {href}
+                                    href={hrefs[0]}
                                     spanClass="ml-9"
                                     class={twMerge(
                                         itemClass,
-                                        $url == href
+                                        $url.includes(hrefs[0])
                                             ? "bg-gray-100 dark:bg-gray-900"
                                             : "",
                                     )}
