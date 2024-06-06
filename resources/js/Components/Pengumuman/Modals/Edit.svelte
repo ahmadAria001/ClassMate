@@ -243,8 +243,8 @@
                     >
                 {/if}
             </div>
-            <div class="flex">
-                <Button type="submit" disabled={!isSubmitting}>Simpan</Button>
+            <div class="block flex">
+                <Button type="submit" class="ml-auto" disabled={!isSubmitting}>Simpan</Button>
             </div>
         </form>
     {/if}
