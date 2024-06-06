@@ -121,6 +121,9 @@
         legend: {
             position: string;
             fontFamily: string;
+            labels: {
+                colors: string;
+            };
         };
         yaxis: {
             labels: {
@@ -156,7 +159,7 @@
                 await Promise.all([
                     axios.get(civilianUrl),
                     axios.get(paymentUrl),
-                    axios.get(`/api/docs/complaint`),
+                    axios.get(`/api/docs/complaint/rt/1`),
                 ]);
 
             const countCivilian = responseCivilian.data;
@@ -258,6 +261,13 @@
         legend: {
             position: "bottom",
             fontFamily: "Inter, sans-serif",
+            labels: {
+                colors: document
+                    .getElementsByTagName("html")[0]
+                    .className.includes("darl")
+                    ? "#fffffff"
+                    : "#0000000",
+            },
         },
         yaxis: {
             labels: {

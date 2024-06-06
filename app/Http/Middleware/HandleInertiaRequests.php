@@ -93,6 +93,7 @@ class HandleInertiaRequests extends Middleware
                         'fullName' => $user->fullName,
                         'nik' => $user->nik,
                         'rt_id' => $rt,
+                        'intro' => $model->get()->first()->intro,
                         'pict' => asset('storage' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . $model->get('pict')->first()->pict),
                         // . DIRECTORY_SEPARATOR . 'public'
                         'civ_id' => $user->id,

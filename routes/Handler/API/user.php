@@ -22,6 +22,8 @@ Route::prefix('/user')->group(
         Route::get('/', [UserController::class, 'get'])->middleware(GET::class),
         Route::get('/{filter}', [UserController::class, 'get'])->middleware(GET::class),
 
+        Route::get('/rw/current', [UserController::class, 'getRW'])->middleware(GET::class),
+
         Route::post('/', [UserController::class, 'create']),
         // ->middleware(Create::class),
         Route::put('/', [UserController::class, 'edit'])->middleware(Update::class),

@@ -114,7 +114,7 @@ class DocRequestController extends Controller
             ->whereHas('request_by.rt_id', function ($q) use ($user) {
                 $q->where(
                     'id',
-                    $user->getRelation('civilian_id')->id
+                    $user->getRelation('civilian_id')->rt_id
                 );
             })
             ->skip($page > 1 ? ($page - 1) * $take : 0)

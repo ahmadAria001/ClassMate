@@ -206,7 +206,7 @@
                                 {/if}
                             </TableBodyRow>
                         {/each}
-                    {:else}
+                        <!-- {:else}
                         <TableBodyRow>
                             <TableBodyCell class="text-center">{idx + 1}</TableBodyCell>
 
@@ -235,7 +235,7 @@
                                     <Badge color="red">Ditolak</Badge>
                                 </TableBodyCell>
                             {/if}
-                        </TableBodyRow>
+                        </TableBodyRow> -->
                     {/if}
                 {/if}
             {/key}
