@@ -227,9 +227,6 @@
             {/if}
         </div>
     {/if}
-    <!-- <div class="block flex"> -->
-    <!--     <Button type="submit" class="ml-auto">Simpan Perubahan</Button> -->
-    <!-- </div> -->
 </Card>
 
 {#if err.status != null && err.status == true}

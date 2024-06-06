@@ -81,7 +81,10 @@ class DuesPaymentLogController extends Controller
     public function getDuesRT($rt_id): JsonResponse
     {
         $data = DuesPaymentLog::withoutTrashed()
-            ->where('paid_by', $rt_id)
+            ->with('dues_member.dues')
+            ->whereHas('dues_member.dues', function ($q) use ($rt_id) {
+                $q->where('rt_id', '=', $rt_id);
+            })
             ->get();
 
         $length = $data->count();

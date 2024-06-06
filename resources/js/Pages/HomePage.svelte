@@ -159,7 +159,7 @@
                 await Promise.all([
                     axios.get(civilianUrl),
                     axios.get(paymentUrl),
-                    axios.get(`/api/docs/complaint`),
+                    axios.get(`/api/docs/complaint/rt/1`),
                 ]);
 
             const countCivilian = responseCivilian.data;
