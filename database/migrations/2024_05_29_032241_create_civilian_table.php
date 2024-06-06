@@ -15,7 +15,7 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->char('nik', 16)->index();
             $table->string('fullName', 100)->nullable();
-            $table->string('birthplace', 20)->nullable();
+            $table->string('birthplace', 50)->nullable();
             $table->bigInteger('birthdate')->nullable();
             $table->enum('residentstatus', ['ContractResident', 'PermanentResident', 'Kos'])->nullable();
             $table->char('nkk', 16)->nullable();
