@@ -73,7 +73,7 @@
             </a>
             <form use:form method="POST">
                 <Label class="space-y-2 mb-3">
-                    <span class="dark:text-black">NIK</span>
+                    <span class="dark:text-black">Username</span>
                     <Input
                         class="dark:bg-white dark:text-black"
                         type="text"

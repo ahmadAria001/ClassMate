@@ -22,6 +22,7 @@
     import { writable } from "svelte/store";
     import Payment from "@C/DetailIuran/Modals/Payment.svelte";
     import { twMerge } from "tailwind-merge";
+    import { page } from "@inertiajs/svelte";
 
     const axios = axiosInstance.create();
 
@@ -37,6 +38,12 @@
     let paymentLog: any;
     let selected: any[] = [];
     let amountPay: number;
+    let hiddenAction: string;
+    let role: string = $page.props.auth.user.role;
+    if (role === "RT") {
+    } else {
+        hiddenAction = "hidden";
+    }
 
     let unpaidData: any[] = [];
 
@@ -493,6 +500,7 @@
                     {/if}
                     {/if} -->
                 <Button
+                    class={hiddenAction}
                     on:click={() => {
                         clickOutsideModal = true;
                     }}
@@ -541,7 +549,9 @@
                                                     <Checkbox
                                                         bind:checked={checkedAll}
                                                         on:change={toggleAll}
-                                                        disabled={!d.status}
+                                                        disabled={role === "RT"
+                                                            ? !d.status
+                                                            : true}
                                                     />
                                                 {/if}
                                             </TableHeadCell>
@@ -574,6 +584,10 @@
                                                                         item.amount_paid >=
                                                                             d.amt_dues,
                                                                     )}
+                                                                    disabled={role ===
+                                                                    "RT"
+                                                                        ? !d.status
+                                                                        : true}
                                                                 />
                                                             {/if}
                                                         </TableBodyCell>
