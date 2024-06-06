@@ -293,7 +293,7 @@
                 {/if}
             </div>
         </div>
-        <div class="mb-4">
+        <div class="mb-4 w-fit">
             <Label for="famhead" class="mb-2">Kepala Keluarga</Label>
             {#if data.data.residentstatus != "PermanentResident" || data.data.status != "Aktif"}
                 <Toggle
@@ -301,6 +301,7 @@
                     onclick="return false"
                     placeholder="Status"
                     name="isFamilyHead"
+                    class="w-fit"
                 />
             {:else}
                 <Toggle
@@ -308,6 +309,7 @@
                     placeholder="Status"
                     name="isFamilyHead"
                     checked={data.data.isFamilyHead}
+                    class="w-fit"
                 />
             {/if}
             {#if $errors.isFamilyHead}

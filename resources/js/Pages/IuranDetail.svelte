@@ -497,10 +497,10 @@
     <div class="flex justify-between flex-col lg:flex-row">
         <div>
             <div
-                class="bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md flex flex-col w-full lg:max-w-md"
+                class="bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md flex flex-col w-full lg:max-w-md p-4"
             >
                 <p
-                    class="p-5 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800 z-10"
+                    class="p-2 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800 z-10"
                 >
                     Informasi Warga
                 </p>
@@ -542,6 +542,7 @@
                             </TableBodyRow>
                         </TableBody>
                     </Table>
+                    <div class="text-end mt-2"><Button color="blue" href="/iuran">Kembali</Button></div>
                 {/if}
             </div>
         </div>

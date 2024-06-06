@@ -168,11 +168,11 @@
                                 <TableBodyCell>{item.address}</TableBodyCell>
                                 <TableBodyCell>{item.job}</TableBodyCell>
                                 {#if item.status == "Meninggal"}
-                                    <TableBodyCell>
+                                    <TableBodyCell class="text-center">
                                         <Badge color="red">{item.status}</Badge>
                                     </TableBodyCell>
                                 {:else if item.status == "Pindah"}
-                                    <TableBodyCell>
+                                    <TableBodyCell class="text-center">
                                         <Badge color="yellow"
                                             >{item.status}</Badge
                                         >
