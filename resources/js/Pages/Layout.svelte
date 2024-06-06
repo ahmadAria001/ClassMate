@@ -48,7 +48,7 @@
     const axios = axiosInstance.create({ withCredentials: true });
 
     // tempat rolenya disini
-    let role = "RW";
+    let role = $page.props.auth.user.role;
 
     interface MenuItem {
         name: string;
