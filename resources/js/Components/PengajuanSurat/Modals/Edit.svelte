@@ -174,7 +174,7 @@
                 {#if data.rt_stat != 2}
                     {#await getUser(data.responsed_by_rt) then data}
                         <div class="mb-4">
-                            <Label class="mb-2">Dijawab Oleh RT</Label>
+                            <Label class="mb-8">Divalidasi Oleh RT</Label>
                             <p
                                 class="block w-full disabled:cursor-not-allowed disabled:opacity-50 dark:text-white text-black rtl:text-right"
                             >
@@ -186,7 +186,7 @@
                 {#if data.rw_stat != 2}
                     {#await getUser(data.responsed_by_rw) then data}
                         <div class="mb-4">
-                            <Label class="mb-2">Dijawab Oleh RW</Label>
+                            <Label class="mb-8">Divalidasi Oleh RW</Label>
                             <p
                                 class="block w-full disabled:cursor-not-allowed disabled:opacity-50 dark:text-white text-black rtl:text-right"
                             >
