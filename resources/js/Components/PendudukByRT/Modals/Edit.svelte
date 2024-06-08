@@ -96,6 +96,15 @@
     ];
 
     // onMount(() => console.log(data));
+    let selectedReligion: string = data.data.religion;
+    let religion = [
+        { value: "Islam", name: "Islam" },
+        { value: "Protestan", name: "Protestan" },
+        { value: "Katolik", name: "Katolik" },
+        { value: "Hindu", name: "Hindu" },
+        { value: "Budha", name: "Budha" },
+        { value: "Khonghucu", name: "Khonghucu" },
+    ];
 </script>
 
 <Modal title="Edit Data Warga" bind:open={showState}>
@@ -141,11 +150,18 @@
         <div class="grid md:grid-cols-2 md:gap-6">
             <div class="mb-4">
                 <Label for="religion" class="mb-2">Agama</Label>
-                <Input
+                <!-- <Input
                     id="religion"
                     placeholder="Agama"
                     name="religion"
                     value={data.data.religion}
+                /> -->
+                <Select
+                    id="religion"
+                    items={religion}
+                    bind:value={selectedReligion}
+                    placeholder="Agama"
+                    name="religion"
                 />
                 {#if $errors.religion}
                     <span class="text-sm text-red-500">{$errors.religion}</span>

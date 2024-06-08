@@ -600,14 +600,12 @@
                     Informasi Warga
                 </p>
                 {#if civilianMdl}
-                    <Table
-                        striped={true}
-                        divClass="rounded-lg relative overflow-hidden"
-                    >
-                        <TableBody tableBodyClass="divide-y max-w-xs">
+                    <Table striped={true} divClass="rounded-lg overflow-hidden">
+                        <TableBody tableBodyClass="divide-y">
                             <TableBodyRow>
                                 <TableBodyCell>Nama</TableBodyCell>
-                                <TableBodyCell class="w-full truncate max-w-xs"
+                                <TableBodyCell
+                                    class="w-full truncate lg:max-w-xs lg:max-w-20"
                                     >{civilianMdl.fullName}</TableBodyCell
                                 >
                             </TableBodyRow>
@@ -637,7 +635,9 @@
                             </TableBodyRow>
                         </TableBody>
                     </Table>
-                    <div class="text-end mt-2"><Button color="blue" href="/iuran">Kembali</Button></div>
+                    <div class="text-end mt-2">
+                        <Button color="blue" href="/iuran">Kembali</Button>
+                    </div>
                 {/if}
             </div>
         </div>
@@ -819,7 +819,7 @@
                                         </TableBodyCell> -->
                                                         </TableBodyRow>
                                                     {/each}
-                                                {:else}
+                                                {:else if role != "Admin"}
                                                     <TableBodyRow>
                                                         <TableBodyCell
                                                             colspan="4"

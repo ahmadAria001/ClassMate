@@ -95,6 +95,26 @@
         { value: "Meninggal", name: "Meninggal" },
         { value: "Pindah", name: "Pindah" },
     ];
+
+    let selectedReligion: string;
+    let religion = [
+        { value: "Islam", name: "Islam" },
+        { value: "Protestan", name: "Protestan" },
+        { value: "Katolik", name: "Katolik" },
+        { value: "Hindu", name: "Hindu" },
+        { value: "Budha", name: "Budha" },
+        { value: "Khonghucu", name: "Khonghucu" },
+    ];
+
+    let selectedJob: string;
+    let jobs = [
+        { value: "Pengangguran", name: "Pengangguran" },
+        { value: "Pegawai Negeri", name: "Pegawai Negeri" },
+        { value: "Swasta", name: "Swasta" },
+        { value: "Wiraswasta", name: "Wiraswasta" },
+        { value: "Wirausaha", name: "Wirausaha" },
+        { value: "Pelajar", name: "Pelajar" },
+    ];
 </script>
 
 <Modal title="Tambah Warga" bind:open={showState}>
@@ -125,7 +145,14 @@
         <div class="grid md:grid-cols-2 md:gap-6">
             <div class="mb-4">
                 <Label for="religion" class="mb-2">Agama</Label>
-                <Input id="religion" placeholder="Agama" name="religion" />
+                <!-- <Input id="religion" placeholder="Agama" name="religion" /> -->
+                <Select
+                    id="religion"
+                    items={religion}
+                    bind:value={selectedReligion}
+                    placeholder="Agama"
+                    name="religion"
+                />
                 {#if $errors.religion}
                     <span class="text-sm text-red-500">{$errors.religion}</span>
                 {/if}
@@ -195,7 +222,6 @@
                     items={statusList}
                     class="my-2"
                     placeholder="Pilih Status Penduduk"
-                    size="sm"
                     name="residentstatus"
                     id="residentstatus"
                 />
@@ -209,7 +235,14 @@
             </div>
             <div class="mb-4">
                 <Label for="job" class="mb-2">Pekerjaan</Label>
-                <Input id="job" placeholder="Pekerjaan" name="job" />
+                <!-- <Input id="job" placeholder="Pekerjaan" name="job" /> -->
+                <Select
+                    id="job"
+                    items={jobs}
+                    bind:value={selectedJob}
+                    placeholder="Pekerjaan"
+                    name="job"
+                />
                 {#if $errors.job}
                     <span class="text-sm text-red-500">{$errors.job}</span>
                 {/if}
@@ -248,7 +281,6 @@
                 <Select
                     class="my-2"
                     items={civStat}
-                    size="sm"
                     id="status"
                     placeholder="Status"
                     name="status"
@@ -270,7 +302,12 @@
                     class="w-fit"
                 />
             {:else}
-                <Toggle id="famhead" placeholder="Status" name="isFamilyHead" class="w-fit"/>
+                <Toggle
+                    id="famhead"
+                    placeholder="Status"
+                    name="isFamilyHead"
+                    class="w-fit"
+                />
             {/if}
             {#if $errors.isFamilyHead}
                 <span class="text-sm text-red-500">{$errors.isFamilyHead}</span>
