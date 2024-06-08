@@ -259,7 +259,7 @@
                 {/if}
             </div>
         </div>
-        <div class="mb-4">
+        <div class="mb-4 w-fit">
             <Label for="famhead" class="mb-2">Kepala Keluarga</Label>
             {#if resstatval == "Kos" || !resstatval}
                 <Toggle
@@ -267,9 +267,10 @@
                     onclick="return false"
                     placeholder="Status"
                     name="isFamilyHead"
+                    class="w-fit"
                 />
             {:else}
-                <Toggle id="famhead" placeholder="Status" name="isFamilyHead" />
+                <Toggle id="famhead" placeholder="Status" name="isFamilyHead" class="w-fit"/>
             {/if}
             {#if $errors.isFamilyHead}
                 <span class="text-sm text-red-500">{$errors.isFamilyHead}</span>
