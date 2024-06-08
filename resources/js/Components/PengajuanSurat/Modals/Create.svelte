@@ -23,8 +23,11 @@
     } from "@R/Utils/Schema/RequestDoc/Create";
     import { createEventDispatcher, onMount } from "svelte";
     import { twMerge } from "tailwind-merge";
+    import { writable } from "svelte/store";
+    const errorsDesc = writable({ description: "" });
 
     export let showState = false;
+    let descriptionChange: string = "";
 
     const dispatch = createEventDispatcher();
     const axios = axiosInstance.create({ withCredentials: true });
@@ -83,16 +86,17 @@
         },
     });
 
-    const changeDesc = (reason: string) => {
-        const desc = document.getElementById("problems");
-
-        if (!desc) return;
-
-        desc.value = reason;
-        ddOpen = false;
-
-        desc.focus();
-    };
+    function setDescription(value: string) {
+        descriptionChange = value;
+        const descInput = document.getElementById(
+            "problems",
+        ) as HTMLInputElement;
+        if (descInput) {
+            descInput.value = value;
+            descInput.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+        ddOpen = false; // Close the dropdown when an item is selected
+    }
 
     const populateOption = async () => {
         const response = await getCivilis();
@@ -163,6 +167,7 @@
                     id="problems"
                     name="description"
                     placeholder="Keterangan Surat"
+                    bind:value={descriptionChange}
                     on:click={() => (ddOpen = true)}
                 />
                 {#if $errors.description}
@@ -173,21 +178,29 @@
 
                 <Dropdown bind:open={ddOpen}>
                     <DropdownItem
-                        on:click={() => changeDesc("Pengajuan Pembuatan KTP")}
-                        >Pengajuan Pembuatan KTP</DropdownItem
+                        on:click={() =>
+                            setDescription("Pengajuan Pembuatan KTP")}
                     >
+                        Pengajuan Pembuatan KTP
+                    </DropdownItem>
                     <DropdownItem
-                        on:click={() => changeDesc("Pengajuan Pembuatan KK")}
-                        >Pengajuan Pembuatan KK</DropdownItem
+                        on:click={() =>
+                            setDescription("Pengajuan Pembuatan KK")}
                     >
+                        Pengajuan Pembuatan KK
+                    </DropdownItem>
                     <DropdownItem
-                        on:click={() => changeDesc("Pengajuan Perubahan KTP")}
-                        >Pengajuan Perubahan KTP</DropdownItem
+                        on:click={() =>
+                            setDescription("Pengajuan Perubahan KTP")}
                     >
+                        Pengajuan Perubahan KTP
+                    </DropdownItem>
                     <DropdownItem
-                        on:click={() => changeDesc("Pengajuan Perubahan KK")}
-                        >Pengajuan Perubahan KK</DropdownItem
+                        on:click={() =>
+                            setDescription("Pengajuan Perubahan KK")}
                     >
+                        Pengajuan Perubahan KK
+                    </DropdownItem>
                 </Dropdown>
             </div>
             <div class="flex w-full justify-end">
