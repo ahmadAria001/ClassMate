@@ -384,10 +384,10 @@
     // End TOPSIS
     console.log(filteredData);
 
-    const handleSearch = (event) => {
+    const handleSearch = (event: any) => {
         const searchValue = event.detail.value.toLowerCase();
         console.log("Search value in handleSearch in use file:", searchValue);
-        filteredData = kombinasiHasil.filter((komb) =>
+        filteredData = kombinasiHasil.filter((komb: any) =>
             komb.nama.toLowerCase().includes(searchValue),
         );
         console.log(filteredData);

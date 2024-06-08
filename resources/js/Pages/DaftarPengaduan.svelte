@@ -4,6 +4,7 @@
     import {
         Badge,
         TableBody,
+        Table,
         TableBodyCell,
         TableBodyRow,
         TableHead,
@@ -157,7 +158,7 @@
     };
 
     const handleSearch = async (filterInput: string) => {
-        if (!filterInput) return;
+        // if (!filterInput) return;
 
         data = await getComplaints(filterInput);
         rebuild();
@@ -189,108 +190,111 @@
             slot="header"
             class="md:w-auto flex flex-row space-y-2 md:space-y-0 items-stretch md:items-center justify-end md:space-x-3 flex-shrink-0"
         ></div>
-        <TableHead>
-            <TableHeadCell>Nama</TableHeadCell>
-            <TableHeadCell>Alamat</TableHeadCell>
-            <TableHeadCell>No. HP</TableHeadCell>
-            <TableHeadCell>Permasalahan</TableHeadCell>
-            <TableHeadCell class="text-center">Status</TableHeadCell>
-            <TableHeadCell class="sr-only">Aksi</TableHeadCell>
-        </TableHead>
-        <TableBody tableBodyClass="overflow-scroll max-w-full">
-            {#key builder}
-                {#if data}
-                    {#if data.data.length > 0}
-                        {#each data.data as item}
-                            <TableBodyRow>
-                                <TableBodyCell>
-                                    <span
-                                        class="w-1/4 truncate
+        <Table>
+            <TableHead>
+                <TableHeadCell>Nama</TableHeadCell>
+                <TableHeadCell>Alamat</TableHeadCell>
+                <TableHeadCell>No. HP</TableHeadCell>
+                <TableHeadCell>Permasalahan</TableHeadCell>
+                <TableHeadCell class="text-center">Status</TableHeadCell>
+                <TableHeadCell class="sr-only">Aksi</TableHeadCell>
+            </TableHead>
+            <TableBody>
+                {#key builder}
+                    {#if data}
+                        {#if data.data.length > 0}
+                            {#each data.data as item}
+                                <TableBodyRow>
+                                    <TableBodyCell>
+                                        <span
+                                            class="w-1/4 truncate
 "
-                                    >
-                                        {item.created_by.civilian_id.fullName}
-                                    </span>
-                                </TableBodyCell>
-                                <TableBodyCell tdClass="max-w-52">
-                                    <div
-                                        class="flex justify-between align-middle gap-2"
-                                    >
-                                        <span class="w-full truncate">
+                                        >
                                             {item.created_by.civilian_id
-                                                .address}
+                                                .fullName}
                                         </span>
-                                        <QuestionCircleSolid
-                                            id={`address-${item.id}`}
-                                        />
-                                    </div>
-                                </TableBodyCell>
-                                <TableBodyCell
-                                    >{item.created_by.civilian_id
-                                        .phone}</TableBodyCell
+                                    </TableBodyCell>
+                                    <TableBodyCell tdClass="max-w-52">
+                                        <div
+                                            class="flex justify-between align-middle gap-2"
+                                        >
+                                            <span class="w-full truncate">
+                                                {item.created_by.civilian_id
+                                                    .address}
+                                            </span>
+                                            <QuestionCircleSolid
+                                                id={`address-${item.id}`}
+                                            />
+                                        </div>
+                                    </TableBodyCell>
+                                    <TableBodyCell
+                                        >{item.created_by.civilian_id
+                                            .phone}</TableBodyCell
+                                    >
+                                    <TableBodyCell class="w-20">
+                                        <div
+                                            class="flex justify-between max-w-52 align-middle gap-2"
+                                        >
+                                            <span class="w-full truncate">
+                                                {item.docs_id.description}
+                                            </span>
+                                            <QuestionCircleSolid
+                                                id={`desc-${item.id}`}
+                                            />
+                                        </div>
+                                    </TableBodyCell>
+                                    {#if item.complaintStatus == "Resolved"}
+                                        <TableBodyCell class="text-center">
+                                            <Badge color="green"
+                                                >{item.complaintStatus}</Badge
+                                            >
+                                        </TableBodyCell>
+                                    {:else if item.complaintStatus == "Open"}
+                                        <TableBodyCell class="text-center">
+                                            <Badge color="primary"
+                                                >{item.complaintStatus}</Badge
+                                            >
+                                        </TableBodyCell>
+                                    {:else}
+                                        <TableBodyCell class="text-center">
+                                            <Badge color="red"
+                                                >{item.complaintStatus}</Badge
+                                            >
+                                        </TableBodyCell>
+                                    {/if}
+
+                                    <TableBodyCell>
+                                        <Button
+                                            color="blue"
+                                            on:click={() => {
+                                                selected = item.id;
+                                                modalDetailPengaduan = true;
+                                            }}>Detail</Button
+                                        >
+                                    </TableBodyCell>
+                                </TableBodyRow>
+
+                                <Popover
+                                    class="w-64 text-sm text-black dark:text-white"
+                                    title="Alamat"
+                                    triggeredBy={`#address-${item.id}`}
                                 >
-                                <TableBodyCell class="w-20">
-                                    <div
-                                        class="flex justify-between max-w-52 align-middle gap-2"
-                                    >
-                                        <span class="w-full truncate">
-                                            {item.docs_id.description}
-                                        </span>
-                                        <QuestionCircleSolid
-                                            id={`desc-${item.id}`}
-                                        />
-                                    </div>
-                                </TableBodyCell>
-                                {#if item.complaintStatus == "Resolved"}
-                                    <TableBodyCell class="text-center">
-                                        <Badge color="green"
-                                            >{item.complaintStatus}</Badge
-                                        >
-                                    </TableBodyCell>
-                                {:else if item.complaintStatus == "Open"}
-                                    <TableBodyCell class="text-center">
-                                        <Badge color="primary"
-                                            >{item.complaintStatus}</Badge
-                                        >
-                                    </TableBodyCell>
-                                {:else}
-                                    <TableBodyCell class="text-center">
-                                        <Badge color="red"
-                                            >{item.complaintStatus}</Badge
-                                        >
-                                    </TableBodyCell>
-                                {/if}
+                                    {item.created_by.civilian_id.address}
+                                </Popover>
 
-                                <TableBodyCell>
-                                    <Button
-                                        color="blue"
-                                        on:click={() => {
-                                            selected = item.id;
-                                            modalDetailPengaduan = true;
-                                        }}>Detail</Button
-                                    >
-                                </TableBodyCell>
-                            </TableBodyRow>
-
-                            <Popover
-                                class="w-64 text-sm text-black dark:text-white"
-                                title="Alamat"
-                                triggeredBy={`#address-${item.id}`}
-                            >
-                                {item.created_by.civilian_id.address}
-                            </Popover>
-
-                            <Popover
-                                class="w-64 text-sm text-black dark:text-white"
-                                title="Masalah"
-                                triggeredBy={`#desc-${item.id}`}
-                            >
-                                {item.docs_id.description}
-                            </Popover>
-                        {/each}
+                                <Popover
+                                    class="w-64 text-sm text-black dark:text-white"
+                                    title="Masalah"
+                                    triggeredBy={`#desc-${item.id}`}
+                                >
+                                    {item.docs_id.description}
+                                </Popover>
+                            {/each}
+                        {/if}
                     {/if}
-                {/if}
-            {/key}
-        </TableBody>
+                {/key}
+            </TableBody>
+        </Table>
 
         <div
             slot="footer"

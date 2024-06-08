@@ -9,7 +9,6 @@
         TableBodyRow,
         TableHead,
         TableHeadCell,
-        TableSearch,
         Button,
         Modal,
         Label,
@@ -17,6 +16,7 @@
         ButtonGroup,
         type SizeType,
     } from "flowbite-svelte";
+    import TableSearch from "@C/General/TableSearch.svelte";
     import {
         ChevronLeftOutline,
         ChevronRightOutline,
@@ -117,11 +117,6 @@
     $: startRange = currentPosition + 1;
     $: endRange = Math.min(currentPosition + itemsPerPage, totalItems);
 
-    onMount(async () => {
-        // Call renderPagination when the component initially mounts
-        renderPagination(items.length);
-    });
-
     $: currentPageItems = items.slice(
         currentPosition,
         currentPosition + itemsPerPage,
@@ -131,6 +126,43 @@
             item.name.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1,
     );
 
+    let builder = {};
+    export const rebuild = async () => {
+        builder = {};
+    };
+
+    let data: any;
+    let role = $page.props.auth.user.role;
+    let roleType: boolean = false;
+    if (role === "RT") {
+        roleType = true;
+    }
+    onMount(async () => {
+        try {
+            // Call renderPagination when the component initially mounts
+            renderPagination(items.length);
+            data = await getCivilsArchive(null, roleType);
+            filteredData = data;
+            console.log(filteredData);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    });
+
+    let filteredData: any;
+    const handleSearch = (event: any) => {
+        const searchValue = event.detail.value.toLowerCase();
+        // console.log("Search value in handleSearch in use file:", searchValue);
+        if (searchValue == "") {
+            filteredData = [...data];
+        }
+        filteredData = data.filter((d: any) =>
+            d.fullName.toLowerCase().includes(searchValue),
+        );
+        // console.log(filteredData);
+        rebuild();
+    };
+
     const title = "Arsip Warga";
 </script>
 
@@ -138,35 +170,27 @@
     <title>{title}</title>
 </svelte:head>
 <Layout>
-    <TableSearch
-        placeholder="Cari Warga"
-        hoverable={true}
-        bind:inputValue={searchTerm}
-        divClass="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg overflow-hidden"
-        innerDivClass="flex items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4"
-        classInput="text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2  pl-10"
-    >
+    <TableSearch on:search={handleSearch}>
         <div
             slot="header"
             class="md:w-auto flex flex-row space-y-2 md:space-y-0 items-stretch md:items-center justify-end md:space-x-3 flex-shrink-0"
         ></div>
-
-        <TableHead>
-            <TableHeadCell>Nama Lengkap</TableHeadCell>
-            <TableHeadCell>Alamat</TableHeadCell>
-            <TableHeadCell>Pekerjaan</TableHeadCell>
-            <TableHeadCell class="text-center">Status</TableHeadCell>
-            <TableHeadCell class="sr-only">Aksi</TableHeadCell>
-        </TableHead>
-        <TableBody>
-            {#if $page.props.auth.user.role === "RT"}
-                {#await getCivilsArchive(null, true) then data}
-                    {#if Object.keys(data).length > 0}
-                        {#each data as item, idx}
+        <Table>
+            <TableHead>
+                <TableHeadCell>Nama Lengkap</TableHeadCell>
+                <TableHeadCell>Alamat</TableHeadCell>
+                <!-- <TableHeadCell>Pekerjaan</TableHeadCell> -->
+                <TableHeadCell class="text-center">Status</TableHeadCell>
+                <TableHeadCell class="sr-only">Aksi</TableHeadCell>
+            </TableHead>
+            <TableBody>
+                {#key builder}
+                    {#if filteredData}
+                        {#each filteredData as item, idx}
                             <TableBodyRow>
                                 <TableBodyCell>{item.fullName}</TableBodyCell>
                                 <TableBodyCell>{item.address}</TableBodyCell>
-                                <TableBodyCell>{item.job}</TableBodyCell>
+                                <!-- <TableBodyCell>{item.job}</TableBodyCell> -->
                                 {#if item.status == "Meninggal"}
                                     <TableBodyCell class="text-center">
                                         <Badge color="red">{item.status}</Badge>
@@ -191,41 +215,83 @@
                             </TableBodyRow>
                         {/each}
                     {/if}
-                {/await}
-            {:else}
-                {#await getCivilsArchive(null, false) then data}
-                    {#if Object.keys(data).length > 0}
-                        {#each data as item, idx}
-                            <TableBodyRow>
-                                <TableBodyCell>{item.fullName}</TableBodyCell>
-                                <TableBodyCell>{item.address}</TableBodyCell>
-                                <TableBodyCell>{item.job}</TableBodyCell>
-                                {#if item.status == "Meninggal"}
-                                    <TableBodyCell class="text-center">
-                                        <Badge color="red">{item.status}</Badge>
-                                    </TableBodyCell>
-                                {:else if item.status == "Pindah"}
-                                    <TableBodyCell class="text-center">
-                                        <Badge color="yellow"
-                                            >{item.status}</Badge
+                {/key}
+                <!-- {#if $page.props.auth.user.role === "RT"}
+                    {#await getCivilsArchive(null, true) then data}
+                        {#if Object.keys(data).length > 0}
+                            {#each data as item, idx}
+                                <TableBodyRow>
+                                    <TableBodyCell
+                                        >{item.fullName}</TableBodyCell
+                                    >
+                                    <TableBodyCell>{item.address}</TableBodyCell
+                                    >
+                                    {#if item.status == "Meninggal"}
+                                        <TableBodyCell>
+                                            <Badge color="red"
+                                                >{item.status}</Badge
+                                            >
+                                        </TableBodyCell>
+                                    {:else if item.status == "Pindah"}
+                                        <TableBodyCell>
+                                            <Badge color="yellow"
+                                                >{item.status}</Badge
+                                            >
+                                        </TableBodyCell>
+                                    {/if}
+                                    <TableBodyCell>
+                                        <Button
+                                            color="blue"
+                                            on:click={() => {
+                                                selected = item.id;
+                                                console.log(item);
+                                                modalDetailArchive = true;
+                                            }}>Detail</Button
                                         >
                                     </TableBodyCell>
-                                {/if}
-                                <TableBodyCell>
-                                    <Button
-                                        color="blue"
-                                        on:click={() => {
-                                            selected = item.id;
-                                            modalDetailArchive = true;
-                                        }}>Detail</Button
+                                </TableBodyRow>
+                            {/each}
+                        {/if}
+                    {/await}
+                {:else}
+                    {#await getCivilsArchive(null, false) then data}
+                        {#if Object.keys(data).length > 0}
+                            {#each data as item, idx}
+                                <TableBodyRow>
+                                    <TableBodyCell
+                                        >{item.fullName}</TableBodyCell
                                     >
-                                </TableBodyCell>
-                            </TableBodyRow>
-                        {/each}
-                    {/if}
-                {/await}
-            {/if}
-        </TableBody>
+                                    <TableBodyCell>{item.address}</TableBodyCell
+                                    >
+                                    {#if item.status == "Meninggal"}
+                                        <TableBodyCell class="text-center">
+                                            <Badge color="red"
+                                                >{item.status}</Badge
+                                            >
+                                        </TableBodyCell>
+                                    {:else if item.status == "Pindah"}
+                                        <TableBodyCell class="text-center">
+                                            <Badge color="yellow"
+                                                >{item.status}</Badge
+                                            >
+                                        </TableBodyCell>
+                                    {/if}
+                                    <TableBodyCell>
+                                        <Button
+                                            color="blue"
+                                            on:click={() => {
+                                                selected = item.id;
+                                                modalDetailArchive = true;
+                                            }}>Detail</Button
+                                        >
+                                    </TableBodyCell>
+                                </TableBodyRow>
+                            {/each}
+                        {/if}
+                    {/await}
+                {/if} -->
+            </TableBody>
+        </Table>
 
         <!-- modal detail -->
         {#if selected}

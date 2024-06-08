@@ -5,7 +5,7 @@ const ACCEPTED_IMAGE_TYPES: string[] = ["image/jpeg", "image/jpg", "image/png"];
 
 
 export const createSchema = z.object({
-    description: z.coerce.string().min(1),
+    description: z.coerce.string().min(1, "Keterangan tidak boleh kosong"),
     attachment: z.any().optional()
 
 }).superRefine(({ description, attachment }, ctx) => {
