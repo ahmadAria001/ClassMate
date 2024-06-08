@@ -13,8 +13,21 @@
     const dispatch = createEventDispatcher();
 
     function handleSearch() {
-        console.log("Search value in TableSearch:", searchValue);
+        // console.log("Search value in TableSearch:", searchValue);
         dispatch("search", { value: searchValue });
+    }
+
+    function handleInputChange(event) {
+        searchValue = event.target.value;
+        if (searchValue === "") {
+            dispatch("search", { value: searchValue });
+        }
+    }
+
+    function handleKeyDown(event) {
+        if (event.key === "Enter") {
+            handleSearch();
+        }
     }
 </script>
 
@@ -22,10 +35,18 @@
     class="flex flex-col bg-white dark:bg-gray-800 shadow-md sm:rounded-lg overflow-hidden w-full"
 >
     <div
-        class="flex flex-col lg:flex-row justify-between items-center space-y-3 md:space-y-0 md:space-x-4 p-4 w-full"
+        class="flex flex-col md:flex-row justify-between items-center space-y-3 md:space-y-0 md:space-x-4 p-4 w-full"
     >
         <div class="flex justify-between items-center">
-            <Search size="md" class="max-w-xs" bind:value={searchValue} />
+            <!-- Kalau mau tiap kata terscan pakai on:input
+                kalau ingin tiap lepas fokus pakai on:blur -->
+            <Search
+                size="md"
+                class="max-w-xs"
+                bind:value={searchValue}
+                on:input={handleInputChange}
+                on:keydown={handleKeyDown}
+            />
             <Button size="md" class="ml-2" on:click={handleSearch}>Cari</Button>
         </div>
         <slot name="header" />

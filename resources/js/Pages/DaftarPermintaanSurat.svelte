@@ -8,10 +8,11 @@
         TableBodyRow,
         TableHead,
         TableHeadCell,
-        TableSearch,
         Button,
         ButtonGroup,
+        Table,
     } from "flowbite-svelte";
+    import TableSearch from "@C/General/TableSearch.svelte";
     import {
         ChevronLeftOutline,
         ChevronRightOutline,
@@ -132,15 +133,6 @@
     $: startRange = currentPosition + 1;
     $: endRange = Math.min(currentPosition + itemsPerPage, totalItems);
 
-    onMount(async () => {
-        // Call renderPagination when the component initially mounts
-        renderPagination(items.length);
-
-        await initData();
-
-        console.log(data);
-    });
-
     $: currentPageItems = items.slice(
         currentPosition,
         currentPosition + itemsPerPage,
@@ -149,80 +141,103 @@
         (item) =>
             item.name.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1,
     );
+
+    onMount(async () => {
+        try {
+            // Call renderPagination when the component initially mounts
+            renderPagination(items.length);
+            await initData();
+            filteredData = data.data;
+            console.log(data);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    });
+
+    let filteredData: any;
+    const handleSearch = (event: any) => {
+        const searchValue = event.detail.value.toLowerCase();
+        // console.log("Search value in handleSearch in use file:", searchValue);
+        if (searchValue == "") {
+            filteredData = [...data.data];
+        }
+        filteredData = data.data.filter((d: any) =>
+            d.name.toLowerCase().includes(searchValue),
+        );
+        // console.log(filteredData);
+        rebuild();
+    };
 </script>
 
 <Layout>
-    <TableSearch
-        placeholder="Cari Pengajuan"
-        hoverable={true}
-        bind:inputValue={searchTerm}
-        divClass="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg overflow-hidden"
-        innerDivClass="flex items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4"
-        classInput="text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2  pl-10"
-    >
+    <TableSearch on:search={handleSearch}>
         <div
             slot="header"
             class="md:w-auto flex flex-row space-y-2 md:space-y-0 items-stretch md:items-center justify-end md:space-x-3 flex-shrink-0"
         ></div>
-        <TableHead>
-            <TableHeadCell>Nama</TableHeadCell>
-            <TableHeadCell>Alamat</TableHeadCell>
-            <TableHeadCell>No. HP</TableHeadCell>
-            <TableHeadCell>Keterangan</TableHeadCell>
-            <TableHeadCell class="text-center">Status</TableHeadCell>
-            <TableHeadCell class="sr-only">Aksi</TableHeadCell>
-        </TableHead>
-        <TableBody>
-            {#key builder}
-                {#if data}
-                    {#each data.data as item}
-                        <TableBodyRow>
-                            <TableBodyCell>
-                                {item.request_by.fullName}
-                            </TableBodyCell>
-                            <TableBodyCell
-                                >{item.request_by.address}</TableBodyCell
-                            >
-                            <TableBodyCell
-                                >{item.request_by.phone}</TableBodyCell
-                            >
-                            <TableBodyCell
-                                >{item.docs_id.description}</TableBodyCell
-                            >
-                            {#if item.requestStatus == "Resolved"}
-                                <TableBodyCell class="text-center">
-                                    <Badge color="green">Disetujui</Badge>
+        <Table>
+            <TableHead>
+                <TableHeadCell>Nama</TableHeadCell>
+                <!-- <TableHeadCell>Alamat</TableHeadCell> -->
+                <TableHeadCell>No. HP</TableHeadCell>
+                <TableHeadCell>Keterangan</TableHeadCell>
+                <TableHeadCell class="text-center">Status</TableHeadCell>
+                <TableHeadCell class="sr-only">Aksi</TableHeadCell>
+            </TableHead>
+            <TableBody>
+                {#key builder}
+                    {#if data}
+                        {#each data.data as item}
+                            <TableBodyRow>
+                                <TableBodyCell>
+                                    {item.request_by.fullName}
                                 </TableBodyCell>
-                            {:else if item.requestStatus == "Open"}
-                                <TableBodyCell class="text-center">
-                                    <Badge color="indigo">Dalam Proses</Badge>
-                                </TableBodyCell>
-                            {:else}
-                                <TableBodyCell class="text-center">
-                                    <Badge color="red">Ditolak</Badge>
-                                </TableBodyCell>
-                            {/if}
-                            <TableBodyCell>
-                                <Button
-                                    color="blue"
-                                    on:click={() => {
-                                        selected = item.id;
-                                        modalDetailSurat = true;
-                                    }}>Detail</Button
+                                <!-- <TableBodyCell
+                                    >{item.request_by.address}</TableBodyCell
+                                > -->
+                                <TableBodyCell
+                                    >{item.request_by.phone}</TableBodyCell
                                 >
-                            </TableBodyCell>
-                        </TableBodyRow>
-                    {/each}
-                {/if}
-            {/key}
-        </TableBody>
+                                <TableBodyCell
+                                    >{item.docs_id.description}</TableBodyCell
+                                >
+                                {#if item.requestStatus == "Resolved"}
+                                    <TableBodyCell class="text-center">
+                                        <Badge color="green">Disetujui</Badge>
+                                    </TableBodyCell>
+                                {:else if item.requestStatus == "Open"}
+                                    <TableBodyCell class="text-center">
+                                        <Badge color="indigo"
+                                            >Dalam Proses</Badge
+                                        >
+                                    </TableBodyCell>
+                                {:else}
+                                    <TableBodyCell class="text-center">
+                                        <Badge color="red">Ditolak</Badge>
+                                    </TableBodyCell>
+                                {/if}
+                                <TableBodyCell>
+                                    <Button
+                                        color="blue"
+                                        on:click={() => {
+                                            selected = item.id;
+                                            modalDetailSurat = true;
+                                        }}>Detail</Button
+                                    >
+                                </TableBodyCell>
+                            </TableBodyRow>
+                        {/each}
+                    {/if}
+                {/key}
+            </TableBody>
+        </Table>
 
         <div
             slot="footer"
             class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0 p-4"
             aria-label="Table navigation"
         >
-            {#if data}
+            {#if filteredData}
                 <span
                     class="text-sm font-normal text-gray-500 dark:text-gray-400"
                 >
@@ -230,13 +245,13 @@
                     <span class="font-semibold text-gray-900 dark:text-white">
                         {currentPage < 2
                             ? 1
-                            : data.data.length < 5
-                              ? data.length - data.data.length + 1
-                              : data.data.length + 1}
+                            : filteredData.length < 5
+                              ? data.length - filteredData.length + 1
+                              : filteredData.length + 1}
                         -
-                        {data.data.length < 5
+                        {filteredData.length < 5
                             ? data.length
-                            : data.data.length * currentPage}
+                            : filteredData.length * currentPage}
                     </span>
                     of
                     <span class="font-semibold text-gray-900 dark:text-white"

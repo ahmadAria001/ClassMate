@@ -9,14 +9,15 @@
         TableBodyRow,
         TableHead,
         TableHeadCell,
-        TableSearch,
         Button,
         ButtonGroup,
+        Table,
     } from "flowbite-svelte";
     import {
         ChevronLeftOutline,
         ChevronRightOutline,
     } from "flowbite-svelte-icons";
+    import TableSearch from "@C/General/TableSearch.svelte";
 
     import { page } from "@inertiajs/svelte";
     import axiosInstance from "axios";
@@ -119,7 +120,7 @@
 
     const initData = async () => {
         data = await getRequestDocs(currentPage);
-        console.log(data);
+        // console.log(data);
     };
 
     $: startRange = currentPosition + 1;
@@ -130,27 +131,31 @@
         renderPagination(items.length);
 
         await initData();
+        filteredData = data.data;
     });
 
     $: currentPageItems = items.slice(
         currentPosition,
         currentPosition + itemsPerPage,
     );
-    $: filteredItems = items.filter(
-        (item) =>
-            item.desc.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1,
-    );
+    // $: filteredItems = items.filter(
+    //     (item) =>
+    //         item.desc.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1,
+    // );
+    let filteredData: any;
+    const handleSearch = (event: any) => {
+        const searchValue = event.detail.value.toLowerCase();
+        // console.log("Search value in handleSearch in use file:", searchValue);
+        filteredData = data.data.filter((d: any) =>
+            d.docs_id.description.toLowerCase().includes(searchValue),
+        );
+        // console.log(filteredData);
+        rebuild();
+    };
 </script>
 
 <Layout>
-    <TableSearch
-        placeholder="Cari Pengajuan"
-        hoverable={true}
-        bind:inputValue={searchTerm}
-        divClass="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg overflow-hidden"
-        innerDivClass="flex items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4"
-        classInput="text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2  pl-10"
-    >
+    <TableSearch on:search={handleSearch}>
         <div
             slot="header"
             class="md:w-auto flex flex-row space-y-2 md:space-y-0 items-stretch md:items-center justify-end md:space-x-3 flex-shrink-0"
@@ -161,52 +166,58 @@
                 }}>+ Buat Pengajuan</Button
             >
         </div>
-        <TableHead>
-            <TableHeadCell>No.</TableHeadCell>
-            <TableHeadCell>Nama</TableHeadCell>
-            <TableHeadCell>Alamat</TableHeadCell>
-            <TableHeadCell>No. HP</TableHeadCell>
-            <TableHeadCell>Keterangan</TableHeadCell>
-            <TableHeadCell class="text-center">Status</TableHeadCell>
-        </TableHead>
-        <TableBody>
-            {#key builder}
-                {#if data}
-                    {#if data.length > 0}
-                        {#each data.data as item, idx}
-                            <TableBodyRow>
-                                <TableBodyCell>{idx + 1}</TableBodyCell>
+        <Table>
+            <TableHead>
+                <TableHeadCell>No.</TableHeadCell>
+                <TableHeadCell>Nama</TableHeadCell>
+                <!-- <TableHeadCell>Alamat</TableHeadCell>
+                <TableHeadCell>No. HP</TableHeadCell> -->
+                <TableHeadCell>Keterangan</TableHeadCell>
+                <TableHeadCell class="text-center">Status</TableHeadCell>
+            </TableHead>
+            <TableBody>
+                {#key builder}
+                    {#if filteredData}
+                        {#if filteredData.length > 0}
+                            {#each filteredData as item, idx}
+                                <TableBodyRow>
+                                    <TableBodyCell>{idx + 1}</TableBodyCell>
 
-                                <TableBodyCell
-                                    >{item.request_by.fullName}</TableBodyCell
-                                >
-                                <TableBodyCell
-                                    >{item.request_by.address}</TableBodyCell
-                                >
-                                <TableBodyCell
-                                    >{item.request_by.phone}</TableBodyCell
-                                >
-                                <TableBodyCell
-                                    >{item.docs_id.description}</TableBodyCell
-                                >
-                                {#if item.requestStatus == "Resolved"}
-                                    <TableBodyCell class="text-center">
-                                        <Badge color="green">Disetujui</Badge>
-                                    </TableBodyCell>
-                                {:else if item.requestStatus == "Open"}
-                                    <TableBodyCell class="text-center">
-                                        <Badge color="indigo"
-                                            >Dalam Proses</Badge
-                                        >
-                                    </TableBodyCell>
-                                {:else}
-                                    <TableBodyCell class="text-center">
-                                        <Badge color="red">Ditolak</Badge>
-                                    </TableBodyCell>
-                                {/if}
-                            </TableBodyRow>
-                        {/each}
-                        <!-- {:else}
+                                    <TableBodyCell
+                                        >{item.request_by
+                                            .fullName}</TableBodyCell
+                                    >
+                                    <!-- <TableBodyCell
+                                        >{item.request_by
+                                            .address}</TableBodyCell
+                                    >
+                                    <TableBodyCell
+                                        >{item.request_by.phone}</TableBodyCell
+                                    > -->
+                                    <TableBodyCell
+                                        >{item.docs_id
+                                            .description}</TableBodyCell
+                                    >
+                                    {#if item.requestStatus == "Resolved"}
+                                        <TableBodyCell class="text-center">
+                                            <Badge color="green"
+                                                >Disetujui</Badge
+                                            >
+                                        </TableBodyCell>
+                                    {:else if item.requestStatus == "Open"}
+                                        <TableBodyCell class="text-center">
+                                            <Badge color="indigo"
+                                                >Dalam Proses</Badge
+                                            >
+                                        </TableBodyCell>
+                                    {:else}
+                                        <TableBodyCell class="text-center">
+                                            <Badge color="red">Ditolak</Badge>
+                                        </TableBodyCell>
+                                    {/if}
+                                </TableBodyRow>
+                            {/each}
+                            <!-- {:else}
                         <TableBodyRow>
                             <TableBodyCell class="text-center">{idx + 1}</TableBodyCell>
 
@@ -236,33 +247,34 @@
                                 </TableBodyCell>
                             {/if}
                         </TableBodyRow> -->
+                        {/if}
                     {/if}
-                {/if}
-            {/key}
-        </TableBody>
+                {/key}
+            </TableBody>
+        </Table>
 
         <div
             slot="footer"
             class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0 p-4"
             aria-label="Table navigation"
         >
-            {#if data}
+            {#if filteredData}
                 <span
                     class="text-sm font-normal text-gray-500 dark:text-gray-400"
                 >
                     Showing
                     <span class="font-semibold text-gray-900 dark:text-white">
                         {currentPage < 2
-                            ? data.data.length == 0
+                            ? filteredData.length == 0
                                 ? 0
                                 : 1
-                            : data.data.length < 5
-                              ? data.length - data.data.length + 1
-                              : data.data.length + 1}
+                            : filteredData.length < 5
+                              ? data.length - filteredData.length + 1
+                              : filteredData.length + 1}
                         -
-                        {data.data.length < 5
+                        {filteredData.length < 5
                             ? data.length
-                            : data.data.length * currentPage}
+                            : filteredData.length * currentPage}
                     </span>
                     of
                     <span class="font-semibold text-gray-900 dark:text-white"

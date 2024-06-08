@@ -144,6 +144,7 @@
     }
 
     let data: Data | undefined;
+    let colorApex: string;
 
     const getData = async () => {
         try {
@@ -208,6 +209,16 @@
             // console.log(countDues);
             // console.log(countDocs);
 
+            colorApex = document
+                .getElementsByTagName("html")[0]
+                .className.includes("dark")
+                ? "white"
+                : "black";
+
+            options.legend.labels.colors = colorApex;
+
+            // console.log(colorApex);
+
             return {
                 civilianCount: countCivilian.data.length,
                 totalDues: totalDues,
@@ -262,11 +273,7 @@
             position: "bottom",
             fontFamily: "Inter, sans-serif",
             labels: {
-                colors: document
-                    .getElementsByTagName("html")[0]
-                    .className.includes("darl")
-                    ? "#fffffff"
-                    : "#0000000",
+                colors: "",
             },
         },
         yaxis: {
