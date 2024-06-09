@@ -64,13 +64,12 @@
         class="flex flex-col items-center justify-center px-6 pt-8 max-auto md:h-screen pt:mt-0"
     >
         <div class="md:w-1/3">
-            <a
-                href={site.link}
-                class="flex flex-col items-center justify-center mb-3"
-            >
-                <img src={site.img} alt={site.imgAlt} class="mb-3" />
-                <span class="text-2xl font-bold">{site.name}</span>
-            </a>
+            <div class="flex flex-col items-center justify-center mb-3">
+                <a href={site.link} class="flex flex-col">
+                    <img src={site.img} alt={site.imgAlt} class="mb-3" />
+                    <span class="text-2xl font-bold">{site.name}</span>
+                </a>
+            </div>
             <form use:form method="POST">
                 <Label class="space-y-2 mb-3">
                     <span class="dark:text-black">Username</span>

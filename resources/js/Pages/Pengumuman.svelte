@@ -58,9 +58,12 @@
     let data: any;
 
     let builder = {};
-    const rebuild = async () => {
+    export const rebuild = async () => {
+        console.log("rebuild called");
+
         await initData();
         builder = {};
+        filteredData = data.data;
     };
 
     const updateDataAndPagination = () => {
@@ -163,7 +166,7 @@
         const searchValue = event.detail.value.toLowerCase();
         // console.log("Search value in handleSearch in use file:", searchValue);
         if (searchValue == "") {
-            filteredData = [...data.data];
+            filteredData = [data.data];
         }
         filteredData = data.data.filter((d: any) =>
             d.title.toLowerCase().includes(searchValue),

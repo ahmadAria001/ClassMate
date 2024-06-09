@@ -201,12 +201,7 @@
             </div>
             <div class="mb-4">
                 <Label for="phone" class="mb-2">No. HP</Label>
-                <Input
-                    type="number"
-                    id="phone"
-                    placeholder="No. HP"
-                    name="phone"
-                />
+                <Input id="phone" placeholder="No. HP" name="phone" />
                 {#if $errors.phone}
                     <span class="text-sm text-red-500">{$errors.phone}</span>
                 {/if}
@@ -258,6 +253,7 @@
                 <Label for="rt" class="mb-2">RT</Label>
                 {#if $page.props.auth.user.role == "Admin"}
                     <Input
+                        type="number"
                         id="rt"
                         placeholder="RT"
                         name="rt_id"
@@ -265,6 +261,7 @@
                     />
                 {:else}
                     <Input
+                        type="number"
                         id="rt"
                         placeholder="RT"
                         name="rt_id"

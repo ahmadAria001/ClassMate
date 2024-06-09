@@ -23,6 +23,7 @@
     import { page } from "@inertiajs/svelte";
     import axiosInstance from "axios";
     import Edit from "@C/Pengaduan/Modals/Detail.svelte";
+    import Detail from "@C/Pengaduan/Modals/Detail.svelte";
 
     const axios = axiosInstance.create({ withCredentials: true });
     const itemsPerPage = 10;
@@ -333,7 +334,7 @@
 </Layout>
 
 {#if selected}
-    <Edit
+    <Detail
         bind:showState={modalDetailPengaduan}
         bind:target={selected}
         on:comp={rebuild}

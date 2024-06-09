@@ -204,8 +204,13 @@
                 </Dropdown>
             </div>
             <div class="flex w-full justify-end">
-                <Button type="submit" class="ml-auto" disabled={!isSubmitting}
-                    >Kirim Pengajuan</Button
+                <Button
+                    type="submit"
+                    class="ml-auto"
+                    disabled={!isSubmitting}
+                    on:click={() => {
+                        descriptionChange = "";
+                    }}>Kirim Pengajuan</Button
                 >
             </div>
         {/if}
