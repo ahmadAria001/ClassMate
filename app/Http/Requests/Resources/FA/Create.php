@@ -23,9 +23,11 @@ class Create extends FormRequest
     {
         return [
             'request_by' => 'required|integer|min:1',
-            'tanggungan' => 'required|string',
-            'alasan' => 'required|string',
-            'status' => 'string',
+            'childrens' => 'required|integer|min:1',
+            'salary' => 'required|integer|min:1',
+            'expenses' => 'required|integer|min:1',
+            'job_status' => 'required|integer|min:1',
+            'residence_status' => 'required|integer|min:1',
         ];
     }
 }

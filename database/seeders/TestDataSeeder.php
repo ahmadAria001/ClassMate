@@ -215,7 +215,12 @@ class TestDataSeeder extends Seeder
         for ($i = 1; $i <= 5; $i++) {
             FinancialAssistance::create([
                 'request_by' => $i,
-                'tanggungan' => $faker->sentence(),
+                'childrens' => $faker->numberBetween(1, 5),
+                'salary' => $faker->numberBetween(1, 5),
+                'expenses' => $faker->numberBetween(1, 5),
+                'job_status' => $faker->numberBetween(3, 5),
+                'residence_status' => $faker->numberBetween(3, 5),
+                'status' => 2,
                 'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
                 'created_by' => $i,
             ]);

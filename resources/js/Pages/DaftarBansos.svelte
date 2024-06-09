@@ -23,6 +23,14 @@
         ImageOutline,
     } from "flowbite-svelte-icons";
     import TableSearch from "@C/General/TableSearch.svelte";
+    import { page } from "@inertiajs/svelte";
+    import axiosInstance from "axios";
+
+    const axios = axiosInstance.create({ withCredentials: true });
+    const itemsPerPage = 10;
+    const showPage = 5;
+    const role = $page.props.auth.user.role;
+
     let items = [
         {
             id: 1,
@@ -37,13 +45,14 @@
     let calcModal = false;
     let searchTerm = "";
     let currentPosition = 0;
-    const itemsPerPage = 10;
-    const showPage = 5;
     let totalPages = 0;
     let pagesToShow: any[] = [];
     let totalItems: number = items.length;
     let startPage: number;
     let endPage: number;
+    let currentPage = 1;
+
+    let data: any;
 
     const updateDataAndPagination = () => {
         const currentPageItems = items.slice(
@@ -105,7 +114,7 @@
 
     // SPK
     // SAW
-    let alternatif = [
+    let alternatif: any[] = [
         {
             id: 1,
             nama: "Alternatif 1",
@@ -175,8 +184,8 @@
         { nama: "Kriteria 5", bobot: 0.2, type: "benefit" },
     ];
 
-    let normalisasi = [];
-    let hasilAkhir = [];
+    let normalisasi: any[] = [];
+    let hasilAkhir: any[] = [];
     let sawNotSorted = [];
 
     // async function fetchData() {
@@ -190,7 +199,7 @@
                 id: alt.id,
                 nama: alt.nama,
                 status: alt.status,
-                kriteria: alt.kriteria.map((nilai, index) => {
+                kriteria: alt.kriteria.map((nilai: any, index: number) => {
                     const max = Math.max(
                         ...alternatif.map((a) => a.kriteria[index]),
                     );
@@ -212,7 +221,7 @@
                 nama: alt.nama,
                 status: alt.status,
                 nilai: alt.kriteria.reduce(
-                    (total, nilai, index) =>
+                    (total: any, nilai: any, index: number) =>
                         total + nilai * kriteriaBobot[index].bobot,
                     0,
                 ),
@@ -227,13 +236,13 @@
     // End SAW
 
     // TOPSIS
-    let normalisasiTopsis = [];
-    let normalisasiBerbobot = [];
-    let solusiIdealPositif = [];
-    let solusiIdealNegatif = [];
-    let jarakPositif = [];
-    let jarakNegatif = [];
-    let preferensi = [];
+    let normalisasiTopsis: any[] = [];
+    let normalisasiBerbobot: any[] = [];
+    let solusiIdealPositif: any[] = [];
+    let solusiIdealNegatif: any[] = [];
+    let jarakPositif: any[] = [];
+    let jarakNegatif: any[] = [];
+    let preferensi: any[] = [];
     let topsisNotSorted = [];
 
     async function fetchData() {
@@ -253,7 +262,7 @@
                 id: alt.id,
                 nama: alt.nama,
                 status: alt.status,
-                kriteria: alt.kriteria.map((nilai, index) => {
+                kriteria: alt.kriteria.map((nilai: any, index: number) => {
                     const sumOfSquares = Math.sqrt(
                         alternatif.reduce(
                             (sum, a) => sum + Math.pow(a.kriteria[index], 2),
@@ -273,7 +282,8 @@
                 nama: alt.nama,
                 status: alt.status,
                 kriteria: alt.kriteria.map(
-                    (nilai, index) => nilai * kriteriaBobot[index].bobot,
+                    (nilai: any, index: number) =>
+                        nilai * kriteriaBobot[index].bobot,
                 ),
             };
         });
@@ -316,7 +326,7 @@
                 status: alt.status,
                 jarak: Math.sqrt(
                     alt.kriteria.reduce(
-                        (sum, nilai, index) =>
+                        (sum: any, nilai: any, index: number) =>
                             sum +
                             Math.pow(nilai - solusiIdealPositif[index], 2),
                         0,
@@ -332,7 +342,7 @@
                 status: alt.status,
                 jarak: Math.sqrt(
                     alt.kriteria.reduce(
-                        (sum, nilai, index) =>
+                        (sum: any, nilai: any, index: number) =>
                             sum +
                             Math.pow(nilai - solusiIdealNegatif[index], 2),
                         0,
@@ -374,15 +384,72 @@
             };
         });
         topsisNotSorted = kombinasiHasil;
-        kombinasiHasil.sort((a, b) => b.nilai - a.nilai);
+        kombinasiHasil.sort((a: any, b: any) => b.nilai - a.nilai);
     }
 
+    const getComplainPaged = async (page: number) => {
+        let url = "";
+
+        if (role == "Warga") return;
+
+        if (role == "RT") url = `/api/bansos/rt/${encodeURIComponent(page)}`;
+        if (role != "RT" || role != "Warga")
+            url = `/api/bansos/p/${encodeURIComponent(page)}`;
+
+        try {
+            const response = await axios.get(url, {
+                headers: {
+                    Accept: "*/*",
+                },
+            });
+            return response.data;
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const convertAlternative = (data: any[]) => {
+        const converted: {
+            id: number;
+            nama: string;
+            kriteria: number[];
+            status: string;
+        }[] = [];
+
+        data.map((item: any, index: number) => {
+            const criteria: number[] = [];
+            criteria.push(item.salary);
+            criteria.push(item.childrens);
+            criteria.push(item.job_status);
+            criteria.push(item.residence_status);
+            criteria.push(item.expenses);
+
+            converted.push({
+                id: item.id,
+                nama: item.request_by.civilian_id.fullName,
+                kriteria: criteria,
+                status: item.status,
+            });
+        });
+
+        return converted;
+    };
+
+    const initData = async () => {
+        data = await getComplainPaged(currentPage);
+        console.log(data.data);
+        console.log(alternatif);
+        console.log(kriteriaBobot);
+        alternatif = convertAlternative(data.data);
+        // alternatif = data?.data;
+        await fetchData(), (filteredData = kombinasiHasil);
+    };
+
     let filteredData: any;
-    onMount(() => {
-        fetchData(), (filteredData = kombinasiHasil);
+    onMount(async () => {
+        await initData();
     });
     // End TOPSIS
-    console.log(filteredData);
 
     const handleSearch = (event: any) => {
         const searchValue = event.detail.value.toLowerCase();
@@ -427,23 +494,22 @@
                             <TableBodyRow>
                                 <!-- <TableBodyCell>{komb.id}</TableBodyCell> -->
                                 <TableBodyCell>{komb.nama}</TableBodyCell>
-                                {#if komb.status == "Menunggu"}
+                                {#if komb.status == 2}
                                     <TableBodyCell class="text-center"
-                                        ><Badge color="yellow"
-                                            >{komb.status}</Badge
+                                        ><Badge color="yellow">Menunggu</Badge
                                         ></TableBodyCell
                                     >
                                 {/if}
-                                {#if komb.status == "Menerima"}
+                                {#if komb.status == 1}
                                     <TableBodyCell class="text-center"
-                                        ><Badge color="green"
-                                            >{komb.status}</Badge
+                                        ><Badge color="green">Menerima</Badge
                                         ></TableBodyCell
                                     >
                                 {/if}
-                                {#if komb.status == "Tidak Menerima"}
+                                {#if komb.status == 0}
                                     <TableBodyCell class="text-center"
-                                        ><Badge color="red">{komb.status}</Badge
+                                        ><Badge color="red"
+                                            >Tidak Menerima</Badge
                                         ></TableBodyCell
                                     >
                                 {/if}

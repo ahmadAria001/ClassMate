@@ -39,24 +39,20 @@
         }),
         onSubmit: async (values) => {
             try {
-                console.log(values);
                 let body;
 
                 body = {
-                    nama_lengkap: values.full,
-                    jumlah_tanggungan: values.jumlah_tanggungan,
-                    pendapatan_bulanan: values.pendapatan_bulanan,
-                    pengeluaran_bulanan: values.pengeluaran_bulanan,
-                    status_pekerjaan: values.status_pekerjaan,
-                    status_tempat_tinggal: values.status_tempat_tinggal,
+                    request_by: $page.props.auth.user.id,
+                    childrens: values.jumlah_tanggungan,
+                    salary: values.pendapatan_bulanan,
+                    expenses: values.pengeluaran_bulanan,
+                    job_status: values.status_pekerjaan,
+                    residence_status: values.status_tempat_tinggal,
+                    _token: $page.props.csrf_token,
                 };
 
                 // masih dummy
-                const response = await axios.post(
-                    "/api/pengajuan-bantuan",
-                    body,
-                );
-                console.log(response.data);
+                const response = await axios.post("/api/bansos", body);
 
                 err = response.data;
                 showState = false;
@@ -97,16 +93,14 @@
         },
     });
 
-    let fullName: string = $page.props.auth.user.fullName;
-    // let resident: string = $page.props.auth.user.;
-    console.log($page.props.auth.user);
+    const fullName = $page.props.auth.user.fullName;
 
     // benefit
     let tanggunganOptions = [
         { value: 1, label: "0 Anak" },
         { value: 2, label: "1 Anak" },
         { value: 3, label: "2 Anak" },
-        { value: 4, label: "2 Anak" },
+        { value: 4, label: "3 Anak" },
         { value: 5, label: ">3 Anak" },
     ];
 
@@ -155,12 +149,8 @@
                     name="full_name"
                     placeholder="Masukan Nama"
                     value={fullName}
-                    disabled
+                    readonly
                 />
-                {#if $errors.full_name}
-                    <span class="text-sm text-red-500">{$errors.full_name}</span
-                    >
-                {/if}
             </div>
             <div class="mb-4">
                 <Label class="mb-2">Jumlah Tanggungan</Label>
@@ -299,6 +289,6 @@
             {/if}
         </div>
         <div class="ml-3 text-sm font-normal">{err.message}</div>
-        <Toast.Toggle />
+        <Toast />
     </Toast>
 {/if}

@@ -21,6 +21,15 @@
         ChevronRightOutline,
     } from "flowbite-svelte-icons";
     import Create from "@C/StatusBansos/Modals/Create.svelte";
+
+    import { page } from "@inertiajs/svelte";
+    import axiosInstance from "axios";
+
+    const axios = axiosInstance.create({ withCredentials: true });
+    const itemsPerPage = 10;
+    const showPage = 5;
+    const role = $page.props.auth.user.role;
+
     let items = [
         {
             id: 1,
@@ -42,13 +51,14 @@
     let addComplaintModal = false;
     let searchTerm = "";
     let currentPosition = 0;
-    const itemsPerPage = 10;
-    const showPage = 5;
     let totalPages = 0;
     let pagesToShow: any[] = [];
     let totalItems: number = items.length;
     let startPage: number;
     let endPage: number;
+    let currentPage = 1;
+
+    let data: any;
 
     const updateDataAndPagination = () => {
         const currentPageItems = items.slice(
@@ -91,10 +101,35 @@
         updateDataAndPagination();
     };
 
+    const getComplainPaged = async (page: number) => {
+        let url = "";
+
+        if (role == "RT") url = `/api/bansos/rt/${encodeURIComponent(page)}`;
+        if (role == "Warga")
+            url = `/api/bansos/warga/${encodeURIComponent(page)}`;
+        if (role != "RT" || role != "Warga")
+            url = `/api/bansos/p/${encodeURIComponent(page)}`;
+
+        try {
+            const response = await axios.get(url, {
+                headers: {
+                    Accept: "*/*",
+                },
+            });
+            return response.data;
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const initPage = async () => {
+        data = await getComplainPaged(currentPage);
+    };
+
     $: startRange = currentPosition + 1;
     $: endRange = Math.min(currentPosition + itemsPerPage, totalItems);
 
-    onMount(() => {
+    onMount(async () => {
         // Call renderPagination when the component initially mounts
         renderPagination(items.length);
     });
@@ -110,14 +145,15 @@
 
     let builder = {};
 
-    const rebuild = () => {
+    const rebuild = async () => {
         builder = {};
+        await initPage();
     };
 
     // onmount dummy
     onMount(async () => {
         try {
-            filteredData = items;
+            await initPage();
         } catch (error) {
             console.error("Error fetching data: ", error);
         }
@@ -139,7 +175,6 @@
 </script>
 
 <Layout>
-    <Badge>Masih Dummy</Badge>
     <TableSearch on:search={handleSearch}>
         <div
             slot="header"
@@ -156,28 +191,38 @@
                 <TableHeadCell>Nama</TableHeadCell>
                 <TableHeadCell>Alamat</TableHeadCell>
                 <TableHeadCell>No. HP</TableHeadCell>
-                <TableHeadCell>Permasalahan</TableHeadCell>
+                <!-- <TableHeadCell>Permasalahan</TableHeadCell> -->
                 <TableHeadCell class="text-center">Status</TableHeadCell>
             </TableHead>
             <TableBody>
                 {#key builder}
-                    {#if filteredData}
-                        {#each filteredData as item}
+                    {#if data}
+                        {#each data.data as item}
                             <TableBodyRow>
-                                <TableBodyCell>{item.name}</TableBodyCell>
-                                <TableBodyCell>{item.address}</TableBodyCell>
-                                <TableBodyCell>{item.noHp}</TableBodyCell>
-                                <TableBodyCell>{item.problem}</TableBodyCell>
-                                {#if item.status == "Selesai"}
+                                <TableBodyCell
+                                    >{item.request_by.civilian_id
+                                        .fullName}</TableBodyCell
+                                >
+                                <TableBodyCell
+                                    >{item.request_by.civilian_id
+                                        .address}</TableBodyCell
+                                >
+                                <TableBodyCell
+                                    >+{item.request_by.civilian_id
+                                        .phone}</TableBodyCell
+                                >
+                                {#if item.status == 1}
                                     <TableBodyCell class="text-center">
-                                        <Badge color="green"
-                                            >{item.status}</Badge
-                                        >
+                                        <Badge color="green">Disetujui</Badge>
                                     </TableBodyCell>
-                                {:else if item.status == "Dalam Proses"}
+                                {:else if item.status == 0}
+                                    <TableBodyCell class="text-center">
+                                        <Badge color="indigo">Ditolak</Badge>
+                                    </TableBodyCell>
+                                {:else}
                                     <TableBodyCell class="text-center">
                                         <Badge color="indigo"
-                                            >{item.status}</Badge
+                                            >Dalam Proses</Badge
                                         >
                                     </TableBodyCell>
                                 {/if}
@@ -193,35 +238,53 @@
             class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0 p-4"
             aria-label="Table navigation"
         >
-            <span class="text-sm font-normal text-gray-500 dark:text-gray-400">
-                Showing
-                <span class="font-semibold text-gray-900 dark:text-white"
-                    >{startRange}-{endRange}</span
+            {#if data}
+                <span
+                    class="text-sm font-normal text-gray-500 dark:text-gray-400"
                 >
-                of
-                <span class="font-semibold text-gray-900 dark:text-white"
-                    >{totalItems}</span
-                >
-            </span>
-            <ButtonGroup>
-                <Button
-                    on:click={loadPreviousPage}
-                    disabled={currentPosition === 0}
-                    ><ChevronLeftOutline /></Button
-                >
-                {#each pagesToShow as pageNumber}
-                    <Button on:click={() => goToPage(pageNumber)}
-                        >{pageNumber}</Button
+                    Showing
+                    <span class="font-semibold text-gray-900 dark:text-white">
+                        {currentPage < 2
+                            ? data.length == 0
+                                ? 0
+                                : 1
+                            : data.length < 5
+                              ? data.length - data.length + 1
+                              : data.length + 1}
+                        -
+                        {data.length < 5
+                            ? data.length
+                            : data.length * currentPage}
+                    </span>
+                    of
+                    <span class="font-semibold text-gray-900 dark:text-white"
+                        >{data.length}</span
                     >
-                {/each}
-                <Button
-                    on:click={loadNextPage}
-                    disabled={totalPages === endPage}
-                    ><ChevronRightOutline /></Button
-                >
-            </ButtonGroup>
+                </span>
+                <ButtonGroup>
+                    <Button
+                        disabled={currentPage < 2}
+                        on:click={async () => {
+                            currentPage--;
+                            await rebuild();
+                        }}><ChevronLeftOutline /></Button
+                    >
+                    <!-- {#each data.length as pageNumber} -->
+                    <Button disabled>{currentPage}</Button>
+                    <!-- {/each} -->
+                    <Button
+                        disabled={currentPage >= data.length / 5}
+                        on:click={async () => {
+                            currentPage++;
+                            await rebuild();
+                        }}><ChevronRightOutline /></Button
+                    >
+                </ButtonGroup>
+            {/if}
         </div>
     </TableSearch>
 </Layout>
 
-<Create bind:showState={addComplaintModal} on:comp={rebuild} />
+{#if addComplaintModal}
+    <Create bind:showState={addComplaintModal} on:comp={rebuild} />
+{/if}
