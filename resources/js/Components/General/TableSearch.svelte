@@ -32,7 +32,7 @@
 </script>
 
 <div
-    class="flex flex-col bg-white dark:bg-gray-800 shadow-md sm:rounded-lg overflow-hidden w-full"
+    class="flex flex-col bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden w-full"
 >
     <div
         class="flex flex-col md:flex-row justify-between items-center space-y-3 md:space-y-0 md:space-x-4 p-4 w-full"

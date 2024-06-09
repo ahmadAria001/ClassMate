@@ -13,6 +13,7 @@ use App\Models\Docs;
 use App\Models\Documentation;
 use App\Models\FinancialAssistance;
 use App\Models\News;
+use App\Models\Spending;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -276,6 +277,18 @@ class TestDataSeeder extends Seeder
             'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
             'created_by' => 1,
         ]);
+
+        $spendingCategory = ['Event', 'Administration', 'Infrastructure'];
+        for ($i = 0; $i < 3; $i++) {
+            Spending::create([
+                'category' => $spendingCategory[$i],
+                'desc' => implode($faker->sentences(5)),
+                'amount' => $faker->numberBetween(100000, 1000000),
+                'created_at' => Carbon::createFromDate($faker->dateTime('-1 year'))->getTimestamp(),
+                'created_by' => 9,
+            ]);
+        }
+
         if (!(DB::unprepared($this->duesQuery))) error_log('Something went wrong with Dues Query');
         if (!(DB::unprepared($this->duesMemberQuery))) error_log('Something went wrong with Member Query');
         if (!(DB::unprepared($this->duesPaymentLogQuery))) error_log('Something went wrong with DPL Query');

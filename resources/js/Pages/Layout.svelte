@@ -24,6 +24,8 @@
         ListgroupItem,
         Footer,
         FooterCopyright,
+        Breadcrumb,
+        BreadcrumbItem,
     } from "flowbite-svelte";
     import {
         ChartPieSolid,
@@ -80,6 +82,7 @@
                     Iuran: ["/iuran", "/iuran/detail"],
                     // Pengeluaran: "/pengeluaran",
                     "Catatan Pembayaran": ["/log-pembayaran"],
+                    "Pengambilan Dana": ["/spending"],
                 },
             },
             {
@@ -131,6 +134,7 @@
                     Iuran: ["/iuran"],
                     // Pengeluaran: "/pengeluaran",
                     "Catatan Pembayaran": ["/log-pembayaran"],
+                    "Pengambilan Dana": ["/spending"],
                 },
             },
             {
@@ -181,6 +185,7 @@
                     Iuran: ["/iuran", "/iuran/detail"],
                     // Pengeluaran: "/pengeluaran",
                     "Catatan Pembayaran": ["/log-pembayaran"],
+                    "Pengambilan Dana": ["/spending"],
                 },
             },
             {
@@ -266,8 +271,8 @@
     //     );
     // }
     function isActiveChild(children: string, currentUrl: string) {
-        return Object.values(children).some((urlArray) =>
-            urlArray.some((url) => currentUrl.startsWith(url)),
+        return Object.values(children).some((urlArray: any) =>
+            urlArray.some((url: any) => currentUrl.startsWith(url)),
         );
     }
 
@@ -571,6 +576,28 @@
     class="bg-white dark:bg-gray-900 flex px-4 mx-auto w-full min-h-screen pb-14"
 >
     <main class="h-full lg:ml-64 mt-4 w-full mx-auto" style="margin-top: 5rem">
+        <Breadcrumb aria-label="Default breadcrumb example" class="mb-2">
+            <BreadcrumbItem href="/beranda" home>Beranda</BreadcrumbItem>
+            {#if $url.replaceAll("/", "") != "beranda"}
+                {#if $url.split("/").length > 2}
+                    <BreadcrumbItem href={"/" + $url.split("/")[1]}
+                        >{$url.split("/")[1].toUpperCase()}</BreadcrumbItem
+                    >
+                {:else}
+                    <BreadcrumbItem
+                        >{$url
+                            .replace("/", "")
+                            .replaceAll("-", " ")
+                            .toUpperCase()}</BreadcrumbItem
+                    >
+                {/if}
+                {#if $url.split("/").length > 2}
+                    <BreadcrumbItem
+                        >{$url.split("/")[2].toUpperCase()}</BreadcrumbItem
+                    >
+                {/if}
+            {/if}
+        </Breadcrumb>
         <slot />
     </main>
 </div>
