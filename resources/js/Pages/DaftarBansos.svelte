@@ -388,8 +388,8 @@
                 id: sawAlt.id,
                 nama: sawAlt.nama,
                 status: sawAlt.status,
-                saw: sawAlt.nilai * bobotSAW,
-                topsis: topsisAlt.nilai * bobotTOPSIS,
+                saw: sawAlt.nilai,
+                topsis: topsisAlt.nilai,
                 nilai: sawAlt.nilai * bobotSAW + topsisAlt.nilai * bobotTOPSIS,
             };
         });
