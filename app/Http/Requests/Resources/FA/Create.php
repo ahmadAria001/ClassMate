@@ -27,7 +27,7 @@ class Create extends FormRequest
             'salary' => 'required|integer|min:1',
             'expenses' => 'required|integer|min:1',
             'job_status' => 'required|integer|min:1',
-            'residence_status' => 'required|integer|min:1',
+            'residence_status' => 'required|integer',
         ];
     }
 }

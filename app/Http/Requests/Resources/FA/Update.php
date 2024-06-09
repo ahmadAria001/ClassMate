@@ -29,7 +29,7 @@ class Update extends FormRequest
             'expenses' => 'integer|min:1',
             'job_status' => 'integer|min:1',
             'residence_status' => 'integer|min:1',
-            'status' => 'integer|min:1',
+            'status' => 'integer',
         ];
     }
 }

@@ -16,10 +16,13 @@
         ButtonGroup,
         Tabs,
         TabItem,
+        Toast,
     } from "flowbite-svelte";
     import {
+        CheckCircleSolid,
         ChevronLeftOutline,
         ChevronRightOutline,
+        CloseCircleSolid,
         ImageOutline,
     } from "flowbite-svelte-icons";
     import TableSearch from "@C/General/TableSearch.svelte";
@@ -30,6 +33,11 @@
     const itemsPerPage = 10;
     const showPage = 5;
     const role = $page.props.auth.user.role;
+
+    let err: { status: null | boolean; message: null | string } = {
+        status: null,
+        message: null,
+    };
 
     let items = [
         {
@@ -177,11 +185,11 @@
         },
     ];
     let kriteriaBobot = [
-        { nama: "Kriteria 1", bobot: 0.3, type: "cost" },
-        { nama: "Kriteria 2", bobot: 0.25, type: "benefit" },
-        { nama: "Kriteria 3", bobot: 0.15, type: "benefit" },
-        { nama: "Kriteria 4", bobot: 0.1, type: "benefit" },
-        { nama: "Kriteria 5", bobot: 0.2, type: "benefit" },
+        { nama: "Pendapatan Bulanan", bobot: 0.3, type: "cost" },
+        { nama: "Jumlah Tanggungan Anak", bobot: 0.25, type: "benefit" },
+        { nama: "Status Pekerjaan", bobot: 0.15, type: "benefit" },
+        { nama: "Status Tempat Tinggal", bobot: 0.1, type: "benefit" },
+        { nama: "Pengeluaran Bulanan", bobot: 0.2, type: "benefit" },
     ];
 
     let normalisasi: any[] = [];
@@ -380,6 +388,8 @@
                 id: sawAlt.id,
                 nama: sawAlt.nama,
                 status: sawAlt.status,
+                saw: sawAlt.nilai * bobotSAW,
+                topsis: topsisAlt.nilai * bobotTOPSIS,
                 nilai: sawAlt.nilai * bobotSAW + topsisAlt.nilai * bobotTOPSIS,
             };
         });
@@ -437,9 +447,6 @@
 
     const initData = async () => {
         data = await getComplainPaged(currentPage);
-        console.log(data.data);
-        console.log(alternatif);
-        console.log(kriteriaBobot);
         alternatif = convertAlternative(data.data);
         // alternatif = data?.data;
         await fetchData(), (filteredData = kombinasiHasil);
@@ -461,8 +468,67 @@
     };
     let builder = {};
 
-    const rebuild = () => {
+    const rebuild = async () => {
+        await initData();
         builder = {};
+    };
+
+    const handleSubmit = async (stat: number, id: number) => {
+        try {
+            let body = {
+                id: id,
+                status: stat,
+                _token: $page.props.csrf_token,
+            };
+
+            if (stat == 3) {
+                const response = await axios.delete("/api/bansos", {
+                    data: {
+                        id: id,
+                        _token: $page.props.csrf_token,
+                    },
+                });
+
+                err = response.data;
+                await rebuild();
+
+                setTimeout(() => {
+                    err = { status: null, message: null };
+                }, 5000);
+
+                return;
+            }
+            const response = await axios.put("/api/bansos", body);
+
+            err = response.data;
+
+            await rebuild();
+            setTimeout(() => {
+                err = { status: null, message: null };
+            }, 5000);
+        } catch (error: any) {
+            err = {
+                message: error?.response?.data?.message,
+                status: error?.response?.data?.status,
+            };
+            setTimeout(() => {
+                err = { status: null, message: null };
+            }, 5000);
+
+            console.error(error);
+
+            if (error?.response?.status == 401) {
+                err = {
+                    message: "Anda tidak memiliki izin",
+                    status: false,
+                };
+                setTimeout(() => {
+                    err = { status: null, message: null };
+                }, 5000);
+            }
+
+            return;
+        }
     };
 </script>
 
@@ -517,9 +583,26 @@
                                     >{komb.nilai.toFixed(4)}</TableBodyCell
                                 >
                                 <TableBodyCell class="text-end">
-                                    <Button color="green">Terima</Button>
-                                    <Button color="yellow">Tolak</Button>
-                                    <Button color="red">Hapus</Button>
+                                    {#if komb.status === 2}
+                                        <Button
+                                            color="green"
+                                            on:click={async () =>
+                                                await handleSubmit(1, komb.id)}
+                                            >Terima</Button
+                                        >
+                                        <Button
+                                            color="yellow"
+                                            on:click={async () =>
+                                                await handleSubmit(0, komb.id)}
+                                            >Tolak</Button
+                                        >
+                                        <Button
+                                            color="red"
+                                            on:click={async () =>
+                                                await handleSubmit(3, komb.id)}
+                                            >Hapus</Button
+                                        >
+                                    {/if}
                                 </TableBodyCell>
                             </TableBodyRow>
                         {/each}
@@ -532,33 +615,49 @@
             class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0 p-4"
             aria-label="Table navigation"
         >
-            <span class="text-sm font-normal text-gray-500 dark:text-gray-400">
-                Showing
-                <span class="font-semibold text-gray-900 dark:text-white"
-                    >{startRange}-{endRange}</span
+            {#if data}
+                <span
+                    class="text-sm font-normal text-gray-500 dark:text-gray-400"
                 >
-                of
-                <span class="font-semibold text-gray-900 dark:text-white"
-                    >{totalItems}</span
-                >
-            </span>
-            <ButtonGroup>
-                <Button
-                    on:click={loadPreviousPage}
-                    disabled={currentPosition === 0}
-                    ><ChevronLeftOutline size="xs" class="m-1.5" /></Button
-                >
-                {#each pagesToShow as pageNumber}
-                    <Button on:click={() => goToPage(pageNumber)}
-                        >{pageNumber}</Button
+                    Showing
+                    <span class="font-semibold text-gray-900 dark:text-white">
+                        {currentPage < 2
+                            ? data.length == 0
+                                ? 0
+                                : 1
+                            : data.length < 5
+                              ? data.length - data.length + 1
+                              : data.length + 1}
+                        -
+                        {data.length < 5
+                            ? data.length
+                            : data.length * currentPage}
+                    </span>
+                    of
+                    <span class="font-semibold text-gray-900 dark:text-white"
+                        >{data.length}</span
                     >
-                {/each}
-                <Button
-                    on:click={loadNextPage}
-                    disabled={totalPages === endPage}
-                    ><ChevronRightOutline size="xs" class="m-1.5" /></Button
-                >
-            </ButtonGroup>
+                </span>
+                <ButtonGroup>
+                    <Button
+                        disabled={currentPage < 2}
+                        on:click={async () => {
+                            currentPage--;
+                            await rebuild();
+                        }}><ChevronLeftOutline /></Button
+                    >
+                    <!-- {#each data.length as pageNumber} -->
+                    <Button disabled>{currentPage}</Button>
+                    <!-- {/each} -->
+                    <Button
+                        disabled={currentPage >= data.length / 5}
+                        on:click={async () => {
+                            currentPage++;
+                            await rebuild();
+                        }}><ChevronRightOutline /></Button
+                    >
+                </ButtonGroup>
+            {/if}
         </div>
     </TableSearch>
 
@@ -1101,14 +1200,16 @@
             <Table>
                 <TableHead>
                     <TableHeadCell>Alternatif</TableHeadCell>
-                    <TableHeadCell>Nilai Preferensi (V)</TableHeadCell>
+                    <TableHeadCell class="text-center"
+                        >Nilai Preferensi (V)</TableHeadCell
+                    >
                 </TableHead>
                 <TableBody>
-                    {#each kombinasiHasil as komb}
+                    {#each preferensi as pref, idx}
                         <TableBodyRow>
-                            <TableBodyCell>{komb.nama}</TableBodyCell>
-                            <TableBodyCell
-                                >{komb.nilai.toFixed(4)}</TableBodyCell
+                            <TableBodyCell>{pref.nama}</TableBodyCell>
+                            <TableBodyCell class="text-center">
+                                {idx + 1}</TableBodyCell
                             >
                         </TableBodyRow>
                     {/each}
@@ -1125,13 +1226,45 @@
                 <TableHead>
                     <TableHeadCell>Alternatif</TableHeadCell>
                     <TableHeadCell>SAW</TableHeadCell>
-                    <TableHeadCell colspan="1"></TableHeadCell>
                     <TableHeadCell>TOPSIS</TableHeadCell>
+                    <TableHeadCell>Hasil</TableHeadCell>
                 </TableHead>
                 <TableBody>
-                    <TableBodyRow></TableBodyRow>
+                    {#each kombinasiHasil as komb}
+                        <TableBodyRow>
+                            <TableBodyCell>{komb.nama}</TableBodyCell>
+                            <TableBodyCell>
+                                {komb.saw.toFixed(4)}
+                            </TableBodyCell>
+                            <TableBodyCell>
+                                {komb.topsis.toFixed(4)}
+                            </TableBodyCell>
+                            <TableBodyCell>
+                                {komb.nilai.toFixed(4)}
+                            </TableBodyCell>
+                        </TableBodyRow>
+                    {/each}
                 </TableBody>
             </Table>
         </TabItem>
     </Tabs>
 </Modal>
+
+{#if err.status != null && err.status == true}
+    <Toast color="green" class="fixed top-3 right-1 z-[50000]">
+        <svelte:fragment slot="icon">
+            <CheckCircleSolid class="w-5 h-5" />
+            <span class="sr-only">Check icon</span>
+        </svelte:fragment>
+        {err.message}
+    </Toast>
+{/if}
+{#if err.status != null && err.status == false}
+    <Toast color="red" class="fixed top-3 right-1 z-[50000]">
+        <svelte:fragment slot="icon">
+            <CloseCircleSolid class="w-5 h-5" />
+            <span class="sr-only">Error icon</span>
+        </svelte:fragment>
+        {err.message}
+    </Toast>
+{/if}
