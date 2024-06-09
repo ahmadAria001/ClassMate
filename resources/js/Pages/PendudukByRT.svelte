@@ -420,6 +420,12 @@
                                 </TableBodyRow>
                             {/each}
                         {/if}
+                    {:else}
+                        <TableBodyRow>
+                            <TableBodyCell class="text-center"
+                                >Data tidak ditemukan</TableBodyCell
+                            >
+                        </TableBodyRow>
                     {/if}
                 {/key}
             </TableBody>

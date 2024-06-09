@@ -148,7 +148,7 @@
             renderPagination(items.length);
             await initData();
             filteredData = data.data;
-            console.log(data);
+            // console.log(data);
         } catch (error) {
             console.error("Error fetching data:", error);
         }
@@ -158,13 +158,30 @@
     const handleSearch = (event: any) => {
         const searchValue = event.detail.value.toLowerCase();
         // console.log("Search value in handleSearch in use file:", searchValue);
-        if (searchValue == "") {
-            filteredData = [...data.data];
+        if (searchValue === "") {
+            filteredData = data.data;
+        } else {
+            filteredData = data.data.filter((d: any) => {
+                // Pastikan objek docs_id dan request_by tidak undefined
+                return (
+                    (d.docs_id &&
+                        d.docs_id.description &&
+                        d.docs_id.description
+                            .toLowerCase()
+                            .includes(searchValue)) ||
+                    (d.request_by &&
+                        d.request_by.fullName &&
+                        d.request_by.fullName
+                            .toLowerCase()
+                            .includes(searchValue))
+                );
+            });
         }
-        filteredData = data.data.filter((d: any) =>
-            d.name.toLowerCase().includes(searchValue),
-        );
         // console.log(filteredData);
+        // Loop through filteredData to access each item's fullName
+        // filteredData.forEach((item: any) => {
+        //     console.log(item.request_by.fullName);
+        // });
         rebuild();
     };
 </script>
@@ -186,8 +203,8 @@
             </TableHead>
             <TableBody>
                 {#key builder}
-                    {#if data}
-                        {#each data.data as item}
+                    {#if filteredData}
+                        {#each filteredData as item}
                             <TableBodyRow>
                                 <TableBodyCell>
                                     {item.request_by.fullName}

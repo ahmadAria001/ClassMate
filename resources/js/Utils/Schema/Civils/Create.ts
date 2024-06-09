@@ -1,73 +1,40 @@
 import { z } from "zod";
 
 export const createSchema = z.object({
-    nik: z.coerce
-        .string({
-            required_error: "NIK Tidak Boleh Kosong",
-        })
-        .min(1)
+    nik: z.string()
+        .min(1, { message: "NIK Tidak Boleh Kosong" })
         .max(16),
-    fullName: z.coerce
-        .string({
-            required_error: "Nama Lengkap Tidak Boleeh Kosong",
-        })
-        .min(1),
-    birthplace: z.coerce
-        .string({
-            required_error: "Tempat Lahir Tidak Boleeh Kosong",
-        })
-        .min(1),
-    birthdate: z.coerce
-        .string({
-            required_error: "Tanggal Lahir Tidak Boleeh Kosong",
-        })
-        .min(1)
+    fullName: z.string()
+        .min(1, { message: "Nama Lengkap Tidak Boleh Kosong" }),
+    birthplace: z.string()
+        .min(1, { message: "Tempat Lahir Tidak Boleh Kosong" }),
+    birthdate: z.string()
+        .min(1, { message: "Tanggal Lahir Tidak Boleh Kosong" })
         .transform((str) => {
             const formatted = str.replace("-", "/");
             return new Date(formatted).getSeconds();
         }),
-    nkk: z.coerce
-        .string({
-            required_error: "NKK Tidak Boleeh Kosong",
-        })
-        .min(1),
-    residentstatus: z.coerce
-        .string({
-            required_error: "Status Penduduk Tidak Boleeh Kosong",
-        })
-        .min(1),
-    rt_id: z.coerce
-        .number({
-            required_error: "RT Tidak Boleeh Kosong",
-        })
-        .min(1),
-    address: z.coerce
-        .string({
-            required_error: "Alamat Tidak Boleeh Kosong",
-        })
-        .min(1),
-    status: z.coerce
-        .string({
-            required_error: "Status Tidak Boleeh Kosong",
-        })
-        .min(1),
-    phone: z.coerce
-        .string({
-            required_error: "Nomor HP Tidak Boleeh Kosong",
-        })
-        .min(1)
-        .max(20),
-    religion: z.coerce
-        .string({
-            required_error: "Agama Tidak Boleeh Kosong",
-        })
-        .min(1),
-    job: z.coerce
-        .string({
-            required_error: "Pekerjaan Tidak Boleeh Kosong",
-        })
-        .min(1),
-    isFamilyHead: z.coerce.boolean(),
+    nkk: z.string()
+        .min(1, { message: "NKK Tidak Boleh Kosong" }),
+    residentstatus: z.string()
+        .min(1, { message: "Status Penduduk Tidak Boleh Kosong" }),
+    rt_id: z.number()
+        .min(1, { message: "RT Tidak Boleh Kosong" }),
+    address: z.string()
+        .min(1, { message: "Alamat Tidak Boleh Kosong" }),
+    status: z.string()
+        .min(1, { message: "Status Tidak Boleh Kosong" }),
+    phone: z.string()
+        .min(1, { message: "Nomor HP Tidak Boleh Kosong" })
+        .transform((str) => {
+            if (!str) throw new Error("Nomor HP Tidak Boleh Kosong");
+            return str;
+        }),
+    religion: z.string()
+        .min(1, { message: "Agama Tidak Boleh Kosong" }),
+    job: z.string()
+        .min(1, { message: "Pekerjaan Tidak Boleh Kosong" }),
+    isFamilyHead: z.boolean(),
 });
 
 export type CreateSchema = z.infer<typeof createSchema>;

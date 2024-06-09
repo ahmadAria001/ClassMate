@@ -27,8 +27,9 @@
     let builder = {};
 
     const rebuild = async () => {
-        await initData();
         builder = {};
+        await initData();
+        filteredData = data.data;
     };
 
     let data: any | null = null;

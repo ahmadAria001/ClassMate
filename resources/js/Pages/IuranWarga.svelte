@@ -155,6 +155,7 @@
     onMount(async () => {
         try {
             await initData();
+            filteredData = data.data;
             // console.log(dataRT);
             // console.log(data);
         } catch (error) {
@@ -169,6 +170,32 @@
         duesRt = await getDuesTypes(value);
         data = response;
     };
+
+    let filteredData: any;
+    const handleSearch = (event: KeyboardEvent) => {
+        if (event.key === "Enter") {
+            const inputElement = document.getElementById(
+                "nama_warga",
+            ) as HTMLInputElement;
+            const searchValue = inputElement.value.toLowerCase();
+            if (!searchValue) {
+                filteredData = [...data.data];
+            } else {
+                filteredData = data.data.filter((d: any) =>
+                    d.fullName.toLowerCase().includes(searchValue),
+                );
+            }
+            rebuild();
+        }
+    };
+    let searchValue: any;
+    function handleInputChange(event: any) {
+        searchValue = event.target.value.toLowerCase();
+        if (searchValue === "") {
+            filteredData = data.data;
+            rebuild(); // Rebuild filteredData when searchValue is empty
+        }
+    }
 </script>
 
 <Layout>
@@ -212,10 +239,12 @@
                         type="text"
                         id="nama_warga"
                         placeholder="Cari Nama Warga"
+                        on:input={handleInputChange}
+                        on:keydown={handleSearch}
                     />
                 </div>
                 <div class="text-end">
-                    <Button class="mt-2">Cari</Button>
+                    <Button class="mt-2" on:click={handleSearch}>Cari</Button>
                 </div>
             </div>
         </div>
@@ -307,8 +336,8 @@
                 </TableHeadCell>
             </TableHead>
             <TableBody tableBodyClass="divide-y">
-                {#if data}
-                    {#each data.data as item, idx}
+                {#if filteredData}
+                    {#each filteredData as item, idx}
                         <TableBodyRow>
                             <TableBodyCell>{item?.fullName}</TableBodyCell>
                             <TableBodyCell>{item.address}</TableBodyCell>

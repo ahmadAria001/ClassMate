@@ -319,7 +319,7 @@
         </Card>
         <Card class="mt-3 max-w-full">
             <h5
-                class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white z-20"
+                class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
             >
                 Agenda Kegiatan Masyarakat
             </h5>

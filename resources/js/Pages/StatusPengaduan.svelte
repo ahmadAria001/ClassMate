@@ -59,8 +59,10 @@
 
     let builder = {};
 
-    const rebuild = () => {
+    const rebuild = async () => {
         builder = {};
+        await initPage();
+        filteredData = data.data;
     };
 
     const updateDataAndPagination = () => {
