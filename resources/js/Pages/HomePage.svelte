@@ -144,6 +144,7 @@
     }
 
     let data: Data | undefined;
+    let colorApex: string;
 
     const getData = async () => {
         try {
@@ -159,7 +160,7 @@
                 await Promise.all([
                     axios.get(civilianUrl),
                     axios.get(paymentUrl),
-                    axios.get(`/api/docs/complaint`),
+                    axios.get(`/api/docs/complaint/rt/1`),
                 ]);
 
             const countCivilian = responseCivilian.data;
@@ -207,6 +208,16 @@
             // console.log(countCivilian);
             // console.log(countDues);
             // console.log(countDocs);
+
+            colorApex = document
+                .getElementsByTagName("html")[0]
+                .className.includes("dark")
+                ? "white"
+                : "black";
+
+            options.legend.labels.colors = colorApex;
+
+            // console.log(colorApex);
 
             return {
                 civilianCount: countCivilian.data.length,
@@ -262,11 +273,7 @@
             position: "bottom",
             fontFamily: "Inter, sans-serif",
             labels: {
-                colors: document
-                    .getElementsByTagName("html")[0]
-                    .className.includes("darl")
-                    ? "#fffffff"
-                    : "#0000000",
+                colors: "",
             },
         },
         yaxis: {
@@ -312,7 +319,7 @@
         </Card>
         <Card class="mt-3 max-w-full">
             <h5
-                class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white z-20"
+                class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
             >
                 Agenda Kegiatan Masyarakat
             </h5>

@@ -8,6 +8,7 @@ use App\Http\Requests\Resources\FA\Update;
 use App\Models\FinancialAssistance;
 use App\Models\RT;
 use App\Models\User;
+use App\Utils\AccessToken;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -37,6 +38,9 @@ class FinancialAssistanceController extends Controller
         }
 
         $pat = PersonalAccessToken::findToken($token);
+
+        if (!$pat)
+            return abort(404);
 
         if ($pat->cant((new ReflectionClass($this))->getShortName() . ':__invoke')) {
             return abort(404);
@@ -87,6 +91,75 @@ class FinancialAssistanceController extends Controller
         return Response()->json(['data' => $data], 200);
     }
 
+    public function getPaged($page = 1)
+    {
+        $take = 5;
+
+        $data = FinancialAssistance::withoutTrashed()
+            ->with('request_by.civilian_id.rt_id', 'created_by.civilian_id', 'updated_by')
+            ->skip($page > 1 ? ($page - 1) * $take : 0)
+            ->take($take)
+            ->get();
+
+        $length = FinancialAssistance::withoutTrashed()->count();
+
+        return response()->json(['data' => $data, 'length' => $length]);
+    }
+
+    public function getByWarga(Request $req, $page = 1)
+    {
+        $data = null;
+        $take = 5;
+        $identity = AccessToken::getToken($req);
+
+        if (!$req) abort(401);
+        $model = $identity->tokenable();
+        $user = User::withoutTrashed()->with('civilian_id.rt_id')->where('id', $model->get('id')[0]->id)->get()->first();
+
+        $data = FinancialAssistance::withoutTrashed()
+            ->with('request_by.civilian_id.rt_id', 'created_by.civilian_id', 'updated_by')
+            ->whereHas('created_by', function ($q) use ($user) {
+                $q->where(
+                    'id',
+                    $user->id
+                );
+            })
+            ->skip($page > 1 ? ($page - 1) * $take : 0)
+            ->take($take)
+            ->get();
+
+        $length = $data->count();
+
+        return response()->json(['data' => $data, 'length' => $length]);
+    }
+
+    public function getByRT(Request $req, $page = 1)
+    {
+        $data = null;
+        $take = 5;
+        $identity = AccessToken::getToken($req);
+
+        if (!$identity) abort(401);
+        $model = $identity->tokenable();
+        $user = User::withoutTrashed()->with('civilian_id.rt_id')->where('id', $model->get('id')[0]->id)->get()->first();
+
+        $data = FinancialAssistance::withoutTrashed()
+            ->with('request_by.civilian_id.rt_id', 'created_by.civilian_id', 'updated_by')
+            ->whereHas('request_by.civilian_id', function ($q) use ($user) {
+                $q->where(
+                    'id',
+                    $user->getRelation('civilian_id')->rt_id
+                );
+            })
+            ->skip($page > 1 ? ($page - 1) * $take : 0)
+            ->take($take)
+            ->get();
+
+        $length = FinancialAssistance::withoutTrashed()->count();
+
+        return response()->json(['data' => $data, 'length' => $length]);
+    }
+
     // #POST
     public function create(Create $req)
     {
@@ -95,9 +168,12 @@ class FinancialAssistanceController extends Controller
         try {
             $data = FinancialAssistance::firstOrCreate([
                 'request_by' => $payload->get('request_by'),
-                'tanggungan' => $payload->get('tanggungan'),
-                'alasan' => $payload->get('alasan'),
-                'status' => $payload->get('status'),
+                'childrens' => $payload->get('childrens'),
+                'salary' => $payload->get('salary'),
+                'expenses' => $payload->get('expenses'),
+                'job_status' => $payload->get('job_status'),
+                'residence_status' => $payload->get('residence_status'),
+                'status' => 2,
             ]);
 
             if ($data->wasRecentlyCreated) {
@@ -153,10 +229,13 @@ class FinancialAssistanceController extends Controller
             if ($data) {
                 if (Auth::guard('web')->check()) {
                     $data->update([
-                        'request_by' => $payload->get('request_by'),
-                        'tanggungan' => $payload->get('tanggungan'),
-                        'alasan' => $payload->get('alasan'),
-                        'status' => $payload->get('status'),
+                        'request_by' => $payload->has('request_by') ? $payload->get('request_by') : $data->request_by,
+                        'childrens' => $payload->has('childrens') ? $payload->get('childrens') : $data->childrens,
+                        'salary' => $payload->has('salary') ? $payload->get('salary') : $data->salary,
+                        'expenses' => $payload->has('expenses') ? $payload->get('expenses') : $data->expenses,
+                        'job_status' => $payload->has('job_status') ? $payload->get('job_status') : $data->job_status,
+                        'residence_status' => $payload->has('residence_status') ? $payload->get('residence_status') : $data->residence_status,
+                        'status' => $payload->has('status') ? $payload->get('status') : $data->status,
                         'updated_by' => Auth::id(),
                     ]);
                 } else {
@@ -172,10 +251,13 @@ class FinancialAssistanceController extends Controller
                     $model = $pat->tokenable();
 
                     $data->update([
-                        'request_by' => $payload->get('request_by'),
-                        'tanggungan' => $payload->get('tanggungan'),
-                        'alasan' => $payload->get('alasan'),
-                        'status' => $payload->get('status'),
+                        'request_by' => $payload->has('request_by') ? $payload->get('request_by') : $data->request_by,
+                        'childrens' => $payload->has('childrens') ? $payload->get('childrens') : $data->childrens,
+                        'salary' => $payload->has('salary') ? $payload->get('salary') : $data->salary,
+                        'expenses' => $payload->has('expenses') ? $payload->get('expenses') : $data->expenses,
+                        'job_status' => $payload->has('job_status') ? $payload->get('job_status') : $data->job_status,
+                        'residence_status' => $payload->has('residence_status') ? $payload->get('residence_status') : $data->residence_status,
+                        'status' => $payload->has('status') ? $payload->get('status') : $data->status,
                         'updated_by' => $model->get('id')[0]->id,
                     ]);
                 }

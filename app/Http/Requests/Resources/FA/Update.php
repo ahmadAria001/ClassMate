@@ -23,10 +23,13 @@ class Update extends FormRequest
     {
         return [
             'id' => 'required|integer|min:1',
-            'request_by' => 'required|integer|min:1',
-            'tanggungan' => 'required|integer|min:1',
-            'alasan' => 'required|string',
-            'status' => 'string',
+            'request_by' => 'integer|min:1',
+            'childrens' => 'integer|min:1',
+            'salary' => 'integer|min:1',
+            'expenses' => 'integer|min:1',
+            'job_status' => 'integer|min:1',
+            'residence_status' => 'integer|min:1',
+            'status' => 'integer',
         ];
     }
 }

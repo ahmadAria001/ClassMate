@@ -97,7 +97,7 @@ class UserController extends Controller
             }
 
             $username = preg_replace('/\s+/', '', strtolower($existingCivils->fullName));
-            $existingName = User::where('username', '=', $username)->get();
+            $existingName = User::where('username', 'like', "$username%")->get();
 
             if (count($existingName) > 0) {
                 $username = $username . count($existingName);

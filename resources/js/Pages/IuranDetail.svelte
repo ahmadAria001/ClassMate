@@ -1,6 +1,6 @@
 <script lang="ts">
     import Layout from "./Layout.svelte";
-    import { onMount } from "svelte";
+    import { createEventDispatcher, onMount } from "svelte";
     import axiosInstance from "axios";
     import {
         Button,
@@ -18,13 +18,22 @@
         Tabs,
         Checkbox,
         Modal,
+        A,
+        Toast,
     } from "flowbite-svelte";
     import { writable } from "svelte/store";
     import Payment from "@C/DetailIuran/Modals/Payment.svelte";
     import { twMerge } from "tailwind-merge";
+    import { CheckCircleSolid, CloseCircleSolid } from "flowbite-svelte-icons";
+    import { page } from "@inertiajs/svelte";
 
     const axios = axiosInstance.create();
+    const dispatch = createEventDispatcher();
 
+    let err: { status: null | boolean; message: null | string } = {
+        status: null,
+        message: null,
+    };
     let clickOutsideModal = false;
     let checkedAll = false;
     let checkedItems: any[] = [];
@@ -37,6 +46,12 @@
     let paymentLog: any;
     let selected: any[] = [];
     let amountPay: number;
+    let hiddenAction: string;
+    let role: string = $page.props.auth.user.role;
+    if (role === "RT") {
+    } else {
+        hiddenAction = "hidden";
+    }
 
     let unpaidData: any[] = [];
 
@@ -217,6 +232,28 @@
             containedDate.push({ paidDate: paidDate, item: val });
         });
 
+        if (contained.length < 1) {
+            const paidMont = new Date(data.member.created_at).getMonth();
+            const paidYear = new Date(data.member.created_at).getFullYear();
+
+            const paidDate = `${paidYear}-${paidMont}-1`;
+
+            let generatedDate = new Date();
+            generatedDate = new Date(generatedDate.setMonth(paidMont));
+            generatedDate = new Date(generatedDate.setFullYear(paidYear));
+
+            containedDate.push({
+                paidDate: paidDate,
+                item: {
+                    paid_for: Number.parseInt(
+                        (generatedDate.getTime() / 1000).toString(),
+                    ),
+                    amount_paid: amountPay,
+                    dues_member: data.member.id,
+                },
+            });
+        }
+
         const member_id =
             containedDate[containedDate.length - 1].item.dues_member.id;
 
@@ -392,12 +429,10 @@
     ) => {
         const duesDatas = await getDuesMember(target, dues);
         paymentLog = duesDatas;
-
+      
         if (!stat) return;
 
-        // console.log(new Date(duesDatas.data[0].paid_for * 1000).getMonth());
-
-        if (duesDatas.data.length > 0) {
+        if (duesDatas.isMember > 0) {
             const dummy = generateUnpaid(
                 duesDatas,
                 // duesDatas.data[0].paid_for,
@@ -471,15 +506,12 @@
         });
 
         contained = contained.sort();
-        console.log(contained);
 
         const filtered = localUpaid.filter(
             (value) => !contained.includes(localUpaid.indexOf(value)),
         );
 
         filtered.map((val) => missing.push(localUpaid.indexOf(val)));
-
-        console.log(missing);
 
         if (contained[0] == 0) return true;
 
@@ -488,7 +520,42 @@
         return false;
     };
 
-    const handleSelected = () => {};
+    const registerMember = async (dues: string) => {
+        const body = {
+            dues: dues,
+            member: Number.parseInt(civilian),
+        };
+
+        try {
+            const response = await axios.post("/api/dues/member", body, {
+                headers: {
+                    Accept: "application/json",
+                },
+            });
+
+            err = response.data;
+        } catch (error) {
+            err = {
+                message: error?.response?.data?.message,
+                status: error?.response?.data?.status,
+            };
+            setTimeout(() => {
+                err = { status: null, message: null };
+            }, 5000);
+
+            console.error(error);
+
+            if (error?.response?.status == 401) {
+                err = {
+                    message: "Anda tidak memiliki izin",
+                    status: false,
+                };
+                setTimeout(() => {
+                    err = { status: null, message: null };
+                }, 5000);
+            }
+        }
+    };
 
     $: isAnyChecked.set(checkedItems.some(Boolean));
 </script>
@@ -497,22 +564,20 @@
     <div class="flex justify-between flex-col lg:flex-row">
         <div>
             <div
-                class="bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md flex flex-col w-full lg:max-w-md"
+                class="bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md flex flex-col w-full lg:max-w-md p-4"
             >
                 <p
-                    class="p-5 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800 z-10"
+                    class="p-2 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800 z-10"
                 >
                     Informasi Warga
                 </p>
                 {#if civilianMdl}
-                    <Table
-                        striped={true}
-                        divClass="rounded-lg relative overflow-hidden"
-                    >
-                        <TableBody tableBodyClass="divide-y max-w-xs">
+                    <Table striped={true} divClass="rounded-lg overflow-hidden">
+                        <TableBody tableBodyClass="divide-y">
                             <TableBodyRow>
                                 <TableBodyCell>Nama</TableBodyCell>
-                                <TableBodyCell class="w-full truncate max-w-xs"
+                                <TableBodyCell
+                                    class="w-full truncate lg:max-w-xs lg:max-w-20"
                                     >{civilianMdl.fullName}</TableBodyCell
                                 >
                             </TableBodyRow>
@@ -542,6 +607,9 @@
                             </TableBodyRow>
                         </TableBody>
                     </Table>
+                    <div class="text-end mt-2">
+                        <Button color="blue" href="/iuran">Kembali</Button>
+                    </div>
                 {/if}
             </div>
         </div>
@@ -561,6 +629,7 @@
                     {/if}
                     {/if} -->
                 <Button
+                    class={hiddenAction}
                     on:click={() => {
                         clickOutsideModal = true;
                     }}
@@ -582,9 +651,6 @@
                                             d.id,
                                             d.status,
                                         );
-
-                                        console.log(selected);
-                                        console.log(amountPay);
 
                                         offAll();
                                     }}
@@ -609,7 +675,9 @@
                                                     <Checkbox
                                                         bind:checked={checkedAll}
                                                         on:change={toggleAll}
-                                                        disabled={!d.status}
+                                                        disabled={role === "RT"
+                                                            ? !d.status
+                                                            : true}
                                                     />
                                                 {/if}
                                             </TableHeadCell>
@@ -627,93 +695,97 @@
                                         </TableHead>
                                         <TableBody tableBodyClass="divide-y">
                                             {#if paymentLog}
-                                                {#each paymentLog.data as item, idx}
+                                                {#if paymentLog.isMember}
+                                                    {#each paymentLog.data as item, idx}
+                                                        <TableBodyRow>
+                                                            <TableBodyCell
+                                                                class="!p-4"
+                                                            >
+                                                                {#if d.status && !item.id}
+                                                                    <Checkbox
+                                                                        bind:checked={checkedItems[
+                                                                            idx
+                                                                        ]}
+                                                                        on:change={toggleItem(
+                                                                            idx,
+                                                                            item.amount_paid >=
+                                                                                d.amt_dues,
+                                                                        )}
+                                                                        disabled={role ===
+                                                                        "RT"
+                                                                            ? !d.status
+                                                                            : true}
+                                                                    />
+                                                                {/if}
+                                                            </TableBodyCell>
+                                                            <TableBodyCell
+                                                                >{dateFormatter(
+                                                                    item.paid_for *
+                                                                        1000,
+                                                                )}</TableBodyCell
+                                                            >
+                                                            <TableBodyCell
+                                                                >Rp. {item.amount_paid}</TableBodyCell
+                                                            >
+                                                            <TableBodyCell
+                                                                class="text-center"
+                                                            >
+                                                                {#if item.id}
+                                                                    <Badge
+                                                                        color="green"
+                                                                    >
+                                                                        Lunas
+                                                                    </Badge>
+                                                                {:else}
+                                                                    <Badge
+                                                                        color="red"
+                                                                    >
+                                                                        Belum
+                                                                        Lunas
+                                                                    </Badge>
+                                                                {/if}
+                                                            </TableBodyCell>
+                                                        </TableBodyRow>
+                                                    {/each}
+                                                {:else if role != "Admin"}
                                                     <TableBodyRow>
                                                         <TableBodyCell
-                                                            class="!p-4"
+                                                            colspan="4"
                                                         >
-                                                            {#if d.status && !item.id}
-                                                                <Checkbox
-                                                                    bind:checked={checkedItems[
-                                                                        idx
-                                                                    ]}
-                                                                    on:change={toggleItem(
-                                                                        idx,
-                                                                        item.amount_paid >=
-                                                                            d.amt_dues,
-                                                                    )}
-                                                                />
-                                                            {/if}
-                                                        </TableBodyCell>
-                                                        <TableBodyCell
-                                                            >{dateFormatter(
-                                                                item.paid_for *
-                                                                    1000,
-                                                            )}</TableBodyCell
-                                                        >
-                                                        <TableBodyCell
-                                                            >Rp. {item.amount_paid}</TableBodyCell
-                                                        >
-
-                                                        <!-- {#if item.residentstatus == "PermanentResident"}
-                                            <TableBodyCell class="text-center">
-                                                <Badge color="green"
-                                                    >Tetap</Badge
-                                                >
-                                            </TableBodyCell>
-                                        {:else if item.residentstatus == "ContractResident"}
-                                            <TableBodyCell class="text-center">
-                                                <Badge color="indigo"
-                                                    >Kontrak</Badge
-                                                >
-                                            </TableBodyCell>
-                                        {:else if item.residentstatus == "Kos"}
-                                            <TableBodyCell class="text-center">
-                                                <Badge color="yellow">Kos</Badge
-                                                >
-                                            </TableBodyCell>
-                                        {/if} -->
-                                                        <TableBodyCell
-                                                            class="text-center"
-                                                        >
-                                                            <!-- {console.log(
-                                                                Number.parseInt(
-                                                                    item.amount_paid,
-                                                                ) <
-                                                                    Number.parseInt(
-                                                                        d.amt_dues,
-                                                                    ),
-                                                                Number.parseInt(
-                                                                    item.amount_paid,
-                                                                ),
-                                                                Number.parseInt(
-                                                                    d.amt_dues,
-                                                                ),
-                                                            )} -->
-                                                            {#if item.id}
-                                                                <Badge
-                                                                    color="green"
+                                                            <div
+                                                                class="flex justify-center"
+                                                            >
+                                                                <div
+                                                                    class="block"
                                                                 >
-                                                                    Lunas
-                                                                </Badge>
-                                                            {:else}
-                                                                <Badge
-                                                                    color="red"
-                                                                >
-                                                                    Belum Lunas
-                                                                </Badge>
-                                                            {/if}
+                                                                    <span
+                                                                        class="flex justify-center text-gray-400 text-lg"
+                                                                        >Tidak
+                                                                        terdaftar
+                                                                        dalam
+                                                                        anggota
+                                                                        iuran</span
+                                                                    >
+                                                                    <div
+                                                                        class="w-full flex justify-center text-center"
+                                                                    >
+                                                                        <A
+                                                                            class="text-sky-400"
+                                                                            on:click={async () => {
+                                                                                await registerMember(
+                                                                                    d.id,
+                                                                                );
+                                                                            }}
+                                                                        >
+                                                                            Daftarkan
+                                                                            Sekarang
+                                                                        </A>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
                                                         </TableBodyCell>
-
-                                                        <!-- <TableBodyCell class="text-center">
-                                            <Button
-                                                on:click={() =>
-                                                    (clickOutsideModal = true)}
-                                                >Bayar</Button
-                                            >
-                                        </TableBodyCell> -->
                                                     </TableBodyRow>
-                                                {/each}
+                                                {/if}
                                             {/if}
                                         </TableBody>
                                     </Table>
@@ -734,4 +806,22 @@
         bind:selected
         bind:amountPay
     />
+{/if}
+{#if err.status != null && err.status == true}
+    <Toast color="green" class="fixed top-10 right-1 z-[50000]">
+        <svelte:fragment slot="icon">
+            <CheckCircleSolid class="w-5 h-5" />
+            <span class="sr-only">Check icon</span>
+        </svelte:fragment>
+        {err.message}
+    </Toast>
+{/if}
+{#if err.status != null && err.status == false}
+    <Toast color="red" class="fixed top-10 right-1 z-[50000]">
+        <svelte:fragment slot="icon">
+            <CloseCircleSolid class="w-5 h-5" />
+            <span class="sr-only">Error icon</span>
+        </svelte:fragment>
+        {err.message}
+    </Toast>
 {/if}

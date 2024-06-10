@@ -16,13 +16,28 @@
         ButtonGroup,
         Tabs,
         TabItem,
+        Toast,
     } from "flowbite-svelte";
     import {
+        CheckCircleSolid,
         ChevronLeftOutline,
         ChevronRightOutline,
+        CloseCircleSolid,
         ImageOutline,
     } from "flowbite-svelte-icons";
     import TableSearch from "@C/General/TableSearch.svelte";
+    import { page } from "@inertiajs/svelte";
+    import axiosInstance from "axios";
+
+    const axios = axiosInstance.create({ withCredentials: true });
+    const itemsPerPage = 10;
+    const showPage = 5;
+    const role = $page.props.auth.user.role;
+
+    let err: { status: null | boolean; message: null | string } = {
+        status: null,
+        message: null,
+    };
     let items = [
         {
             id: 1,
@@ -37,13 +52,14 @@
     let calcModal = false;
     let searchTerm = "";
     let currentPosition = 0;
-    const itemsPerPage = 10;
-    const showPage = 5;
     let totalPages = 0;
     let pagesToShow: any[] = [];
     let totalItems: number = items.length;
     let startPage: number;
     let endPage: number;
+    let currentPage = 1;
+
+    let data: any;
 
     const updateDataAndPagination = () => {
         const currentPageItems = items.slice(
@@ -105,7 +121,7 @@
 
     // SPK
     // SAW
-    let alternatif = [
+    let alternatif: any[] = [
         {
             id: 1,
             nama: "Alternatif 1",
@@ -168,15 +184,15 @@
         },
     ];
     let kriteriaBobot = [
-        { nama: "Kriteria 1", bobot: 0.3, type: "cost" },
-        { nama: "Kriteria 2", bobot: 0.25, type: "benefit" },
-        { nama: "Kriteria 3", bobot: 0.15, type: "benefit" },
-        { nama: "Kriteria 4", bobot: 0.1, type: "benefit" },
-        { nama: "Kriteria 5", bobot: 0.2, type: "benefit" },
+        { nama: "Pendapatan Bulanan", bobot: 0.3, type: "cost" },
+        { nama: "Jumlah Tanggungan Anak", bobot: 0.25, type: "benefit" },
+        { nama: "Status Pekerjaan", bobot: 0.15, type: "benefit" },
+        { nama: "Status Tempat Tinggal", bobot: 0.1, type: "benefit" },
+        { nama: "Pengeluaran Bulanan", bobot: 0.2, type: "benefit" },
     ];
 
-    let normalisasi = [];
-    let hasilAkhir = [];
+    let normalisasi: any[] = [];
+    let hasilAkhir: any[] = [];
     let sawNotSorted = [];
 
     // async function fetchData() {
@@ -190,7 +206,7 @@
                 id: alt.id,
                 nama: alt.nama,
                 status: alt.status,
-                kriteria: alt.kriteria.map((nilai, index) => {
+                kriteria: alt.kriteria.map((nilai: any, index: number) => {
                     const max = Math.max(
                         ...alternatif.map((a) => a.kriteria[index]),
                     );
@@ -212,7 +228,7 @@
                 nama: alt.nama,
                 status: alt.status,
                 nilai: alt.kriteria.reduce(
-                    (total, nilai, index) =>
+                    (total: any, nilai: any, index: number) =>
                         total + nilai * kriteriaBobot[index].bobot,
                     0,
                 ),
@@ -227,13 +243,13 @@
     // End SAW
 
     // TOPSIS
-    let normalisasiTopsis = [];
-    let normalisasiBerbobot = [];
-    let solusiIdealPositif = [];
-    let solusiIdealNegatif = [];
-    let jarakPositif = [];
-    let jarakNegatif = [];
-    let preferensi = [];
+    let normalisasiTopsis: any[] = [];
+    let normalisasiBerbobot: any[] = [];
+    let solusiIdealPositif: any[] = [];
+    let solusiIdealNegatif: any[] = [];
+    let jarakPositif: any[] = [];
+    let jarakNegatif: any[] = [];
+    let preferensi: any[] = [];
     let topsisNotSorted = [];
 
     async function fetchData() {
@@ -253,7 +269,7 @@
                 id: alt.id,
                 nama: alt.nama,
                 status: alt.status,
-                kriteria: alt.kriteria.map((nilai, index) => {
+                kriteria: alt.kriteria.map((nilai: any, index: number) => {
                     const sumOfSquares = Math.sqrt(
                         alternatif.reduce(
                             (sum, a) => sum + Math.pow(a.kriteria[index], 2),
@@ -273,7 +289,8 @@
                 nama: alt.nama,
                 status: alt.status,
                 kriteria: alt.kriteria.map(
-                    (nilai, index) => nilai * kriteriaBobot[index].bobot,
+                    (nilai: any, index: number) =>
+                        nilai * kriteriaBobot[index].bobot,
                 ),
             };
         });
@@ -316,7 +333,7 @@
                 status: alt.status,
                 jarak: Math.sqrt(
                     alt.kriteria.reduce(
-                        (sum, nilai, index) =>
+                        (sum: any, nilai: any, index: number) =>
                             sum +
                             Math.pow(nilai - solusiIdealPositif[index], 2),
                         0,
@@ -332,7 +349,7 @@
                 status: alt.status,
                 jarak: Math.sqrt(
                     alt.kriteria.reduce(
-                        (sum, nilai, index) =>
+                        (sum: any, nilai: any, index: number) =>
                             sum +
                             Math.pow(nilai - solusiIdealNegatif[index], 2),
                         0,
@@ -370,32 +387,148 @@
                 id: sawAlt.id,
                 nama: sawAlt.nama,
                 status: sawAlt.status,
+                saw: sawAlt.nilai,
+                topsis: topsisAlt.nilai,
                 nilai: sawAlt.nilai * bobotSAW + topsisAlt.nilai * bobotTOPSIS,
             };
         });
-        topsisNotSorted = kombinasiHasil;
-        kombinasiHasil.sort((a, b) => b.nilai - a.nilai);
+      
+        topsisNotSorted = kombinasiHasil;\
+        kombinasiHasil.sort((a: any, b: any) => b.nilai - a.nilai);
     }
 
+    const getComplainPaged = async (page: number) => {
+        let url = "";
+
+        if (role == "Warga") return;
+
+        if (role == "RT") url = `/api/bansos/rt/${encodeURIComponent(page)}`;
+        if (role != "RT" || role != "Warga")
+            url = `/api/bansos/p/${encodeURIComponent(page)}`;
+
+        try {
+            const response = await axios.get(url, {
+                headers: {
+                    Accept: "*/*",
+                },
+            });
+            return response.data;
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const convertAlternative = (data: any[]) => {
+        const converted: {
+            id: number;
+            nama: string;
+            kriteria: number[];
+            status: string;
+        }[] = [];
+
+        data.map((item: any, index: number) => {
+            const criteria: number[] = [];
+            criteria.push(item.salary);
+            criteria.push(item.childrens);
+            criteria.push(item.job_status);
+            criteria.push(item.residence_status);
+            criteria.push(item.expenses);
+
+            converted.push({
+                id: item.id,
+                nama: item.request_by.civilian_id.fullName,
+                kriteria: criteria,
+                status: item.status,
+            });
+        });
+
+        return converted;
+    };
+
+    const initData = async () => {
+        data = await getComplainPaged(currentPage);
+        alternatif = convertAlternative(data.data);
+        // alternatif = data?.data;
+        await fetchData(), (filteredData = kombinasiHasil);
+    };
+
     let filteredData: any;
-    onMount(() => {
-        fetchData(), (filteredData = kombinasiHasil);
+    onMount(async () => {
+        await initData();
     });
     // End TOPSIS
-    console.log(filteredData);
 
-    const handleSearch = (event) => {
+    const handleSearch = (event: any) => {
         const searchValue = event.detail.value.toLowerCase();
         console.log("Search value in handleSearch in use file:", searchValue);
-        filteredData = kombinasiHasil.filter((komb) =>
+        filteredData = kombinasiHasil.filter((komb: any) =>
             komb.nama.toLowerCase().includes(searchValue),
         );
         console.log(filteredData);
     };
     let builder = {};
 
-    const rebuild = () => {
+    const rebuild = async () => {
+        await initData();
         builder = {};
+    };
+
+    const handleSubmit = async (stat: number, id: number) => {
+        try {
+            let body = {
+                id: id,
+                status: stat,
+                _token: $page.props.csrf_token,
+            };
+
+            if (stat == 3) {
+                const response = await axios.delete("/api/bansos", {
+                    data: {
+                        id: id,
+                        _token: $page.props.csrf_token,
+                    },
+                });
+
+                err = response.data;
+                await rebuild();
+
+                setTimeout(() => {
+                    err = { status: null, message: null };
+                }, 5000);
+
+                return;
+            }
+            const response = await axios.put("/api/bansos", body);
+
+            err = response.data;
+
+            await rebuild();
+            setTimeout(() => {
+                err = { status: null, message: null };
+            }, 5000);
+        } catch (error: any) {
+            err = {
+                message: error?.response?.data?.message,
+                status: error?.response?.data?.status,
+            };
+            setTimeout(() => {
+                err = { status: null, message: null };
+            }, 5000);
+
+            console.error(error);
+
+            if (error?.response?.status == 401) {
+                err = {
+                    message: "Anda tidak memiliki izin",
+                    status: false,
+                };
+                setTimeout(() => {
+                    err = { status: null, message: null };
+                }, 5000);
+            }
+
+            return;
+        }
     };
 </script>
 
@@ -427,23 +560,22 @@
                             <TableBodyRow>
                                 <!-- <TableBodyCell>{komb.id}</TableBodyCell> -->
                                 <TableBodyCell>{komb.nama}</TableBodyCell>
-                                {#if komb.status == "Menunggu"}
+                                {#if komb.status == 2}
                                     <TableBodyCell class="text-center"
-                                        ><Badge color="yellow"
-                                            >{komb.status}</Badge
+                                        ><Badge color="yellow">Menunggu</Badge
                                         ></TableBodyCell
                                     >
                                 {/if}
-                                {#if komb.status == "Menerima"}
+                                {#if komb.status == 1}
                                     <TableBodyCell class="text-center"
-                                        ><Badge color="green"
-                                            >{komb.status}</Badge
+                                        ><Badge color="green">Menerima</Badge
                                         ></TableBodyCell
                                     >
                                 {/if}
-                                {#if komb.status == "Tidak Menerima"}
+                                {#if komb.status == 0}
                                     <TableBodyCell class="text-center"
-                                        ><Badge color="red">{komb.status}</Badge
+                                        ><Badge color="red"
+                                            >Tidak Menerima</Badge
                                         ></TableBodyCell
                                     >
                                 {/if}
@@ -451,9 +583,26 @@
                                     >{komb.nilai.toFixed(4)}</TableBodyCell
                                 >
                                 <TableBodyCell class="text-end">
-                                    <Button color="green">Terima</Button>
-                                    <Button color="yellow">Tolak</Button>
-                                    <Button color="red">Hapus</Button>
+                                    {#if komb.status === 2}
+                                        <Button
+                                            color="green"
+                                            on:click={async () =>
+                                                await handleSubmit(1, komb.id)}
+                                            >Terima</Button
+                                        >
+                                        <Button
+                                            color="yellow"
+                                            on:click={async () =>
+                                                await handleSubmit(0, komb.id)}
+                                            >Tolak</Button
+                                        >
+                                        <Button
+                                            color="red"
+                                            on:click={async () =>
+                                                await handleSubmit(3, komb.id)}
+                                            >Hapus</Button
+                                        >
+                                    {/if}
                                 </TableBodyCell>
                             </TableBodyRow>
                         {/each}
@@ -466,33 +615,49 @@
             class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0 p-4"
             aria-label="Table navigation"
         >
-            <span class="text-sm font-normal text-gray-500 dark:text-gray-400">
-                Showing
-                <span class="font-semibold text-gray-900 dark:text-white"
-                    >{startRange}-{endRange}</span
+            {#if data}
+                <span
+                    class="text-sm font-normal text-gray-500 dark:text-gray-400"
                 >
-                of
-                <span class="font-semibold text-gray-900 dark:text-white"
-                    >{totalItems}</span
-                >
-            </span>
-            <ButtonGroup>
-                <Button
-                    on:click={loadPreviousPage}
-                    disabled={currentPosition === 0}
-                    ><ChevronLeftOutline size="xs" class="m-1.5" /></Button
-                >
-                {#each pagesToShow as pageNumber}
-                    <Button on:click={() => goToPage(pageNumber)}
-                        >{pageNumber}</Button
+                    Showing
+                    <span class="font-semibold text-gray-900 dark:text-white">
+                        {currentPage < 2
+                            ? data.length == 0
+                                ? 0
+                                : 1
+                            : data.length < 5
+                              ? data.length - data.length + 1
+                              : data.length + 1}
+                        -
+                        {data.length < 5
+                            ? data.length
+                            : data.length * currentPage}
+                    </span>
+                    of
+                    <span class="font-semibold text-gray-900 dark:text-white"
+                        >{data.length}</span
                     >
-                {/each}
-                <Button
-                    on:click={loadNextPage}
-                    disabled={totalPages === endPage}
-                    ><ChevronRightOutline size="xs" class="m-1.5" /></Button
-                >
-            </ButtonGroup>
+                </span>
+                <ButtonGroup>
+                    <Button
+                        disabled={currentPage < 2}
+                        on:click={async () => {
+                            currentPage--;
+                            await rebuild();
+                        }}><ChevronLeftOutline /></Button
+                    >
+                    <!-- {#each data.length as pageNumber} -->
+                    <Button disabled>{currentPage}</Button>
+                    <!-- {/each} -->
+                    <Button
+                        disabled={currentPage >= data.length / 5}
+                        on:click={async () => {
+                            currentPage++;
+                            await rebuild();
+                        }}><ChevronRightOutline /></Button
+                    >
+                </ButtonGroup>
+            {/if}
         </div>
     </TableSearch>
 
@@ -1035,14 +1200,16 @@
             <Table>
                 <TableHead>
                     <TableHeadCell>Alternatif</TableHeadCell>
-                    <TableHeadCell>Nilai Preferensi (V)</TableHeadCell>
+                    <TableHeadCell class="text-center"
+                        >Nilai Preferensi (V)</TableHeadCell
+                    >
                 </TableHead>
                 <TableBody>
-                    {#each kombinasiHasil as komb}
+                    {#each preferensi as pref, idx}
                         <TableBodyRow>
-                            <TableBodyCell>{komb.nama}</TableBodyCell>
-                            <TableBodyCell
-                                >{komb.nilai.toFixed(4)}</TableBodyCell
+                            <TableBodyCell>{pref.nama}</TableBodyCell>
+                            <TableBodyCell class="text-center">
+                                {idx + 1}</TableBodyCell
                             >
                         </TableBodyRow>
                     {/each}
@@ -1059,13 +1226,46 @@
                 <TableHead>
                     <TableHeadCell>Alternatif</TableHeadCell>
                     <TableHeadCell>SAW</TableHeadCell>
-                    <TableHeadCell colspan="1"></TableHeadCell>
                     <TableHeadCell>TOPSIS</TableHeadCell>
+                    <TableHeadCell>Hasil</TableHeadCell>
                 </TableHead>
                 <TableBody>
-                    <TableBodyRow></TableBodyRow>
+                    {#each kombinasiHasil as komb}
+                        <TableBodyRow>
+                            <TableBodyCell>{komb.nama}</TableBodyCell>
+
+                            <TableBodyCell>
+                                {komb.saw.toFixed(4)}
+                            </TableBodyCell>
+                            <TableBodyCell>
+                                {komb.topsis.toFixed(4)}
+                            </TableBodyCell>
+                            <TableBodyCell>
+                                {komb.nilai.toFixed(4)}
+                            </TableBodyCell>
+                        </TableBodyRow>
+                    {/each}
                 </TableBody>
             </Table>
         </TabItem>
     </Tabs>
 </Modal>
+
+{#if err.status != null && err.status == true}
+    <Toast color="green" class="fixed top-3 right-1 z-[50000]">
+        <svelte:fragment slot="icon">
+            <CheckCircleSolid class="w-5 h-5" />
+            <span class="sr-only">Check icon</span>
+        </svelte:fragment>
+        {err.message}
+    </Toast>
+{/if}
+{#if err.status != null && err.status == false}
+    <Toast color="red" class="fixed top-3 right-1 z-[50000]">
+        <svelte:fragment slot="icon">
+            <CloseCircleSolid class="w-5 h-5" />
+            <span class="sr-only">Error icon</span>
+        </svelte:fragment>
+        {err.message}
+    </Toast>
+{/if}

@@ -8,11 +8,11 @@
         TableBodyRow,
         TableHead,
         TableHeadCell,
-        TableSearch,
+        Table,
         Button,
         ButtonGroup,
     } from "flowbite-svelte";
-
+    import TableSearch from "@C/General/TableSearch.svelte";
     import {
         ChevronLeftOutline,
         ChevronRightOutline,
@@ -59,8 +59,10 @@
 
     let builder = {};
 
-    const rebuild = () => {
+    const rebuild = async () => {
         builder = {};
+        await initPage();
+        filteredData = data.data;
     };
 
     const updateDataAndPagination = () => {
@@ -148,14 +150,6 @@
 
     $: startRange = currentPosition + 1;
     $: endRange = Math.min(currentPosition + itemsPerPage, totalItems);
-
-    onMount(async () => {
-        // Call renderPagination when the component initially mounts
-        renderPagination(items.length);
-
-        await initPage();
-    });
-
     $: currentPageItems = items.slice(
         // currentPosition,
         currentPosition + itemsPerPage,
@@ -164,17 +158,35 @@
         (item) =>
             item.problem.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1,
     );
+    onMount(async () => {
+        // Call renderPagination when the component initially mounts
+        try {
+            renderPagination(items.length);
+
+            await initPage();
+            filteredData = data.data;
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    });
+
+    let filteredData: any;
+    const handleSearch = (event: any) => {
+        const searchValue = event.detail.value.toLowerCase();
+        // console.log("Search value in handleSearch in use file:", searchValue);
+        if (searchValue == "") {
+            filteredData = [...data.data];
+        }
+        filteredData = data.data.filter((d: any) =>
+            d.docs_id.description.toLowerCase().includes(searchValue),
+        );
+        console.log(filteredData);
+        rebuild();
+    };
 </script>
 
 <Layout>
-    <TableSearch
-        placeholder="Cari Pengaduan"
-        hoverable={true}
-        bind:inputValue={searchTerm}
-        divClass="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg overflow-hidden"
-        innerDivClass="flex items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4"
-        classInput="text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2  pl-10"
-    >
+    <TableSearch on:search={handleSearch}>
         <div
             slot="header"
             class="md:w-auto flex flex-row space-y-2 md:space-y-0 items-stretch md:items-center justify-end md:space-x-3 flex-shrink-0"
@@ -185,58 +197,59 @@
                 }}>+ Buat Pengaduan</Button
             >
         </div>
-        <TableHead>
-            <TableHeadCell>Nama</TableHeadCell>
-            <!-- <TableHeadCell>Alamat</TableHeadCell> -->
-            <TableHeadCell>No. HP</TableHeadCell>
-            <TableHeadCell>Permasalahan</TableHeadCell>
-            <TableHeadCell class="text-center">Status</TableHeadCell>
-        </TableHead>
-        <TableBody>
-            {#key builder}
-                {#if data}
-                    {#each data.data as item}
-                        <TableBodyRow>
-                            <TableBodyCell
-                                >{item?.created_by.civilian_id
-                                    .fullName}</TableBodyCell
-                            >
-                            <!-- <TableBodyCell
+        <Table>
+            <TableHead>
+                <TableHeadCell>Nama</TableHeadCell>
+                <!-- <TableHeadCell>Alamat</TableHeadCell> -->
+                <TableHeadCell>No. HP</TableHeadCell>
+                <TableHeadCell>Permasalahan</TableHeadCell>
+                <TableHeadCell class="text-center">Status</TableHeadCell>
+            </TableHead>
+            <TableBody>
+                {#key builder}
+                    {#if filteredData}
+                        {#each filteredData as item}
+                            <TableBodyRow>
+                                <TableBodyCell
+                                    >{item?.created_by.civilian_id
+                                        .fullName}</TableBodyCell
+                                >
+                                <!-- <TableBodyCell
                                 >{item.created_by.civilian_id
                                     .address}</TableBodyCell
                             > -->
-                            <TableBodyCell
-                                >{item?.created_by.civilian_id
-                                    .phone}</TableBodyCell
-                            >
-                            <TableBodyCell
-                                >{item.docs_id.description}</TableBodyCell
-                            >
-                            {#if item.complaintStatus == "Resolved"}
-                                <TableBodyCell class="text-center">
-                                    <Badge color="green"
-                                        >{item.complaintStatus}</Badge
-                                    >
-                                </TableBodyCell>
-                            {:else if item.complaintStatus == "Open"}
-                                <TableBodyCell class="text-center">
-                                    <Badge color="primary"
-                                        >{item.complaintStatus}</Badge
-                                    >
-                                </TableBodyCell>
-                            {:else}
-                                <TableBodyCell class="text-center">
-                                    <Badge color="red"
-                                        >{item.complaintStatus}</Badge
-                                    >
-                                </TableBodyCell>
-                            {/if}
-                        </TableBodyRow>
-                    {/each}
-                {/if}
-            {/key}
-        </TableBody>
-
+                                <TableBodyCell
+                                    >{item?.created_by.civilian_id
+                                        .phone}</TableBodyCell
+                                >
+                                <TableBodyCell
+                                    >{item.docs_id.description}</TableBodyCell
+                                >
+                                {#if item.complaintStatus == "Resolved"}
+                                    <TableBodyCell class="text-center">
+                                        <Badge color="green"
+                                            >{item.complaintStatus}</Badge
+                                        >
+                                    </TableBodyCell>
+                                {:else if item.complaintStatus == "Open"}
+                                    <TableBodyCell class="text-center">
+                                        <Badge color="primary"
+                                            >{item.complaintStatus}</Badge
+                                        >
+                                    </TableBodyCell>
+                                {:else}
+                                    <TableBodyCell class="text-center">
+                                        <Badge color="red"
+                                            >{item.complaintStatus}</Badge
+                                        >
+                                    </TableBodyCell>
+                                {/if}
+                            </TableBodyRow>
+                        {/each}
+                    {/if}
+                {/key}
+            </TableBody>
+        </Table>
         <div
             slot="footer"
             class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0 p-4"

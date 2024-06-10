@@ -7,14 +7,15 @@
         TableBodyRow,
         TableHead,
         TableHeadCell,
-        TableSearch,
         Button,
         Modal,
         Label,
         Input,
         ButtonGroup,
         Popover,
+        Table,
     } from "flowbite-svelte";
+    import TableSearch from "@C/General/TableSearch.svelte";
     import {
         ChevronLeftOutline,
         ChevronRightOutline,
@@ -122,13 +123,6 @@
     $: startRange = currentPosition + 1;
     $: endRange = Math.min(currentPosition + itemsPerPage, totalItems);
 
-    onMount(async () => {
-        // Call renderPagination when the component initially mounts
-        renderPagination(items.length);
-
-        await initData();
-    });
-
     $: currentPageItems = items.slice(
         currentPosition,
         currentPosition + itemsPerPage,
@@ -165,17 +159,36 @@
 
         return `${day} ${monthName} ${year}`;
     };
+
+    onMount(async () => {
+        try {
+            // Call renderPagination when the component initially mounts
+            renderPagination(items.length);
+            await initData();
+            filteredData = data.data;
+            // console.log(filteredData);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    });
+
+    let filteredData: any;
+    const handleSearch = (event: any) => {
+        const searchValue = event.detail.value.toLowerCase();
+        // console.log("Search value in handleSearch in use file:", searchValue);
+        if (searchValue == "") {
+            filteredData = [data.data];
+        }
+        filteredData = data.data.filter((d: any) =>
+            d.name.toLowerCase().includes(searchValue),
+        );
+        // console.log(filteredData);
+        rebuild();
+    };
 </script>
 
 <Layout>
-    <TableSearch
-        placeholder="Cari Kegiatan"
-        hoverable={true}
-        bind:inputValue={searchTerm}
-        divClass="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg overflow-hidden"
-        innerDivClass="flex items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4"
-        classInput="text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2  pl-10"
-    >
+    <TableSearch on:search={handleSearch}>
         <div
             slot="header"
             class="md:w-auto flex flex-row space-y-2 md:space-y-0 items-stretch md:items-center justify-end md:space-x-3 flex-shrink-0"
@@ -186,84 +199,85 @@
                 }}>+ Tambah Kegiatan</Button
             >
         </div>
-
-        <TableHead>
-            <TableHeadCell>Nama Kegiatan</TableHeadCell>
-            <TableHeadCell>Lokasi</TableHeadCell>
-            <TableHeadCell class="text-center">Waktu</TableHeadCell>
-            <!-- <TableHeadCell class="text-center">Tanggal</TableHeadCell> -->
-            <TableHeadCell class="sr-only">Aksi</TableHeadCell>
-        </TableHead>
-        <TableBody>
-            {#key builder}
-                {#if data}
-                    {#each data.data as item, idx}
-                        <TableBodyRow>
-                            <TableBodyCell>
-                                <div
-                                    class="flex justify-between align-middle gap-2"
+        <Table>
+            <TableHead>
+                <TableHeadCell>Nama Kegiatan</TableHeadCell>
+                <TableHeadCell>Lokasi</TableHeadCell>
+                <TableHeadCell class="text-center">Waktu</TableHeadCell>
+                <!-- <TableHeadCell class="text-center">Tanggal</TableHeadCell> -->
+                <TableHeadCell class="sr-only">Aksi</TableHeadCell>
+            </TableHead>
+            <TableBody>
+                {#key builder}
+                    {#if filteredData}
+                        {#each filteredData as item, idx}
+                            <TableBodyRow>
+                                <TableBodyCell>
+                                    <div
+                                        class="flex justify-between align-middle gap-2"
+                                    >
+                                        <span class="w-full truncate">
+                                            {item.name}
+                                        </span>
+                                        <QuestionCircleSolid
+                                            id={`title-${item.id}`}
+                                        />
+                                    </div>
+                                </TableBodyCell>
+                                <TableBodyCell>
+                                    {item.location}
+                                </TableBodyCell>
+                                <TableBodyCell
+                                    class="text-center uppercase flex justify-center"
                                 >
-                                    <span class="w-full truncate">
-                                        {item.name}
+                                    <span class="text-center">
+                                        {dateFormatter(item.startDate * 1000)}
+                                        <br />
+                                        {new Date(
+                                            item.startDate * 1000,
+                                        ).toLocaleTimeString(undefined, {
+                                            hour12: false,
+                                        })}
                                     </span>
-                                    <QuestionCircleSolid
-                                        id={`title-${item.id}`}
-                                    />
-                                </div>
-                            </TableBodyCell>
-                            <TableBodyCell>
-                                {item.location}
-                            </TableBodyCell>
-                            <TableBodyCell
-                                class="text-center uppercase flex justify-center"
-                            >
-                                <span class="text-center">
-                                    {dateFormatter(item.startDate * 1000)}
-                                    <br />
-                                    {new Date(
-                                        item.startDate * 1000,
-                                    ).toLocaleTimeString(undefined, {
-                                        hour12: false,
-                                    })}
-                                </span>
-                                <span class="ms-5 text-center">
-                                    {dateFormatter(item.endDate * 1000)}
-                                    <br />
-                                    {new Date(
-                                        item.endDate * 1000,
-                                    ).toLocaleTimeString(undefined, {
-                                        hour12: false,
-                                    })}
-                                </span>
-                            </TableBodyCell>
-                            <TableBodyCell>
-                                <Button
-                                    color="blue"
-                                    on:click={() => {
-                                        selected = item.id;
-                                        modalEdit = true;
-                                    }}>Edit Data</Button
-                                >
-                            </TableBodyCell>
-                        </TableBodyRow>
+                                    <span class="ms-5 text-center">
+                                        {dateFormatter(item.endDate * 1000)}
+                                        <br />
+                                        {new Date(
+                                            item.endDate * 1000,
+                                        ).toLocaleTimeString(undefined, {
+                                            hour12: false,
+                                        })}
+                                    </span>
+                                </TableBodyCell>
+                                <TableBodyCell>
+                                    <Button
+                                        color="blue"
+                                        on:click={() => {
+                                            selected = item.id;
+                                            modalEdit = true;
+                                        }}>Edit Data</Button
+                                    >
+                                </TableBodyCell>
+                            </TableBodyRow>
 
-                        <Popover
-                            class="w-64 text-sm text-white"
-                            title="Deskripsi"
-                            triggeredBy={`#title-${item.id}`}
-                        >
-                            {item.docs_id.description}
-                        </Popover>
-                    {/each}
-                {/if}
-            {/key}
-        </TableBody>
+                            <Popover
+                                class="w-64 text-sm text-black dark:text-white"
+                                title="Deskripsi"
+                                triggeredBy={`#title-${item.id}`}
+                            >
+                                {item.docs_id.description}
+                            </Popover>
+                        {/each}
+                    {/if}
+                {/key}
+            </TableBody>
+        </Table>
         <div
             slot="footer"
             class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0 p-4"
             aria-label="Table navigation"
         >
-            {#if data}
+            {#if filteredData}
                 <span
                     class="text-sm font-normal text-gray-500 dark:text-gray-400"
                 >
@@ -271,13 +285,13 @@
                     <span class="font-semibold text-gray-900 dark:text-white">
                         {currentPage < 2
                             ? 1
-                            : data.data.length < 5
-                              ? data.length - data.data.length + 1
-                              : data.data.length + 1}
+                            : filteredData.length < 5
+                              ? data.length - filteredData.length + 1
+                              : filteredData.length + 1}
                         -
-                        {data.data.length < 5
+                        {filteredData.length < 5
                             ? data.length
-                            : data.data.length * currentPage}
+                            : filteredData.length * currentPage}
                     </span>
                     of
                     <span class="font-semibold text-gray-900 dark:text-white"

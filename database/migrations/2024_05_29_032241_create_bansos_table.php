@@ -14,10 +14,12 @@ return new class extends Migration
         Schema::create('bansos', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('request_by')->index('fk_bansos_civilian');
-            $table->text('tanggungan')->nullable();
-            $table->text('alasan')->nullable();
-            $table->enum('status', ['Open', 'Approved', 'Rejected'])->default('Open');
-            $table->text('attachment')->nullable();
+            $table->integer('childrens')->nullable();
+            $table->integer('salary')->nullable();
+            $table->integer('expenses')->nullable();
+            $table->integer('job_status')->nullable();
+            $table->integer('residence_status')->nullable();
+            $table->tinyInteger('status');
             $table->bigInteger('created_at');
             $table->unsignedBigInteger('created_by')->nullable()->index('fk_docs_user');
             $table->bigInteger('updated_at')->nullable();

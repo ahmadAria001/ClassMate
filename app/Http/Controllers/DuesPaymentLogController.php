@@ -56,6 +56,7 @@ class DuesPaymentLogController extends Controller
     {
         $take = 10;
 
+        $isMember = DuesMember::withoutTrashed()->where('member', '=', $member)->where('dues', '=', $dues)->first();
         $data =
             DuesPaymentLog::withoutTrashed()
             ->with('dues_member.dues')
@@ -74,14 +75,17 @@ class DuesPaymentLogController extends Controller
         $length = $data->count();
 
         return Response()->json([
-            'data' => $data->toArray(), 'length' => $length
+            'data' => $data->toArray(), 'length' => $length, 'isMember' => $isMember ? true : false, 'member' => $isMember,
         ], 200);
     }
 
     public function getDuesRT($rt_id): JsonResponse
     {
         $data = DuesPaymentLog::withoutTrashed()
-            ->where('paid_by', $rt_id)
+            ->with('dues_member.dues')
+            ->whereHas('dues_member.dues', function ($q) use ($rt_id) {
+                $q->where('rt_id', '=', $rt_id);
+            })
             ->get();
 
         $length = $data->count();

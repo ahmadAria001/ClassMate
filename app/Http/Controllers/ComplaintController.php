@@ -173,7 +173,7 @@ class ComplaintController extends Controller
         $take = 5;
         $identity = AccessToken::getToken($req);
 
-        if (!$req) abort(401);
+        if (!$identity) abort(401);
         $model = $identity->tokenable();
         $user = User::withoutTrashed()->with('civilian_id.rt_id')->where('id', $model->get('id')[0]->id)->get()->first();
 
@@ -188,8 +188,8 @@ class ComplaintController extends Controller
             ->skip($page > 1 ? ($page - 1) * $take : 0)
             ->take($take)
             ->get();
-
-        $length = $data->count();
+      
+        $length = Complaint::withoutTrashed()->count();
 
         return response()->json(['data' => $data, 'length' => $length]);
     }

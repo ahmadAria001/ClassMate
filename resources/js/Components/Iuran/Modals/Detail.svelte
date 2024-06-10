@@ -18,18 +18,32 @@
         createSchema,
     } from "@R/Utils/Schema/Dues/Create";
     import { CheckCircleSolid, CloseCircleSolid } from "flowbite-svelte-icons";
-    import { onMount } from "svelte";
+    import { createEventDispatcher, onMount } from "svelte";
 
     export let showState = false;
     export let items: string;
+    // console.log(items);
+    const dispatch = createEventDispatcher();
+    let rt_id: string = $page.props.auth.user.rt_id;
+    let submitType: string;
 
-    let initialData: { duesName: string; duesAmount: string } = {
+    let initialData: {
+        duesName: string;
+        duesAmount: string;
+        duesStatus: string;
+    } = {
         duesName: "",
         duesAmount: "",
+        duesStatus: "",
     };
-    let currentData: { duesName: string; duesAmount: string } = {
+    let currentData: {
+        duesName: string;
+        duesAmount: string;
+        duesStatus: string;
+    } = {
         duesName: "",
         duesAmount: "",
+        duesStatus: "",
     };
 
     const axios = axiosInstance.create({ withCredentials: true });
@@ -43,21 +57,62 @@
             schema: createSchema,
         }),
         onSubmit: async (values) => {
-            console.log(values);
-            let body: any;
-            body = {
-                duesName: values.duesName,
-                duesAmount: values.duesAmount,
-                _token: $page.props.csrf_token,
-            };
-            const response = await axios.post("/api/dues", body);
-            console.log(response.data);
-
-            err = response.data;
-            showState = false;
-            setTimeout(() => {
-                err = { status: null, message: null };
-            }, 5000);
+            if (submitType == "ubah") {
+                console.log("Masuk Ubah");
+                let body: any;
+                body = {
+                    id: items,
+                    rt_id: rt_id,
+                    typeDues: values.duesName,
+                    amt_dues: parseInt(values.duesAmount),
+                    status: duesCategoryData.status,
+                    _token: $page.props.csrf_token,
+                };
+                const response = await axios.put("/api/dues", body);
+                console.log(response.data);
+                dispatch("comp");
+                err = response.data;
+                showState = false;
+                setTimeout(() => {
+                    err = { status: null, message: null };
+                }, 5000);
+                submitType = "";
+                console.log(isactived);
+            } else if (submitType == "hapus") {
+                const response = await axios.delete("/api/dues", {
+                    data: {
+                        id: items,
+                        _token: $page.props.csrf_token,
+                    },
+                });
+                err = response.data;
+                showState = false;
+                dispatch("comp");
+                setTimeout(() => {
+                    err = { status: null, message: null };
+                }, 5000);
+            } else if (submitType == "actived") {
+                console.log("Masuk aktif nonaktif");
+                let body: any;
+                body = {
+                    id: items,
+                    rt_id: rt_id,
+                    typeDues: values.duesName,
+                    amt_dues: parseInt(initialData.duesAmount),
+                    status: isactived,
+                    _token: $page.props.csrf_token,
+                };
+                const response = await axios.put("/api/dues", body);
+                console.log(response.data);
+                dispatch("comp");
+                err = response.data;
+                showState = false;
+                setTimeout(() => {
+                    err = { status: null, message: null };
+                }, 5000);
+                submitType = "";
+                console.log(isactived);
+            }
         },
         onError: (values: unknown) => {
             err = {
@@ -92,19 +147,25 @@
     };
 
     let duesCategoryData: any;
+    let isactived: string;
+    let translate: string;
     onMount(async () => {
         const response = await getDuesCategoryData(items);
-        duesCategoryData = await response.data;
-
-        // console.log(duesCategoryData);
+        duesCategoryData = response.data;
+        // console.log("awal : " + duesCategoryData.status);
+        isactived = duesCategoryData.status;
+        // console.log("awal : " + isactived);
         initialData = {
             duesName: duesCategoryData.typeDues,
             duesAmount: duesCategoryData.amt_dues,
+            duesStatus: duesCategoryData.status,
         };
         // console.log(
         //     "initial: " + initialData.duesAmount + " " + initialData.duesName,
         // );
         currentData = { ...initialData };
+        if (duesCategoryData) {
+        }
     });
 
     $: formChanged =
@@ -112,6 +173,15 @@
         initialData.duesAmount !== currentData.duesAmount;
 
     $: isDisabled = !formChanged;
+    const turnActived = () => {
+        console.log("Masuk turnActived state awal: " + isactived);
+        if (parseInt(isactived) == 1 || isactived == null) {
+            isactived = "0";
+        } else {
+            isactived = "1";
+        }
+        console.log("Masuk turnActived state akhir: " + isactived);
+    };
 </script>
 
 <Modal
@@ -130,6 +200,7 @@
                     placeholder="Masukan nama kategori"
                     value={duesCategoryData?.typeDues}
                     on:input={(e) => (currentData.duesName = e.target.value)}
+                    readonly
                 />
                 {#if $errors.duesName}
                     <span class="text-sm text-red-500">{$errors.duesName}</span>
@@ -152,18 +223,42 @@
                 {/if}
             </div>
             <div class="text-end">
-                <Button type="submit" class="mr-2" color="red">Hapus</Button>
+                <Button
+                    type="submit"
+                    class="mr-2"
+                    color="red"
+                    on:click={() => {
+                        submitType = "hapus";
+                    }}>Hapus</Button
+                >
                 {#if duesCategoryData?.status}
-                    <Button type="submit" class="mr-2" color="yellow"
-                        >Nonaktifkan</Button
+                    <Button
+                        type="submit"
+                        class="mr-2"
+                        color="yellow"
+                        on:click={() => {
+                            submitType = "actived";
+                            turnActived();
+                        }}>Nonaktifkan</Button
                     >
                 {:else}
-                    <Button type="submit" class="mr-2" color="yellow"
-                        >Aktifkan</Button
+                    <Button
+                        type="submit"
+                        class="mr-2"
+                        color="yellow"
+                        on:click={() => {
+                            submitType = "actived";
+                            turnActived();
+                        }}>Aktifkan</Button
                     >
                 {/if}
-                <Button type="submit" class="" bind:disabled={isDisabled}
-                    >Ubah</Button
+                <Button
+                    type="submit"
+                    class=""
+                    bind:disabled={isDisabled}
+                    on:click={() => {
+                        submitType = "ubah";
+                    }}>Ubah</Button
                 >
             </div>
         </form>

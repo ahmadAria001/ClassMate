@@ -13,6 +13,7 @@
 
     import { createForm } from "felte";
     import { validator } from "@felte/validator-zod";
+    import { createEventDispatcher, onMount } from "svelte";
     import {
         type CreateSchema,
         createSchema,
@@ -21,6 +22,9 @@
 
     export let showState = false;
 
+    let rt_id: string = $page.props.auth.user.rt_id;
+
+    const dispatch = createEventDispatcher();
     const axios = axiosInstance.create({ withCredentials: true });
     let err: { status: null | boolean; message: null | string } = {
         status: null,
@@ -35,14 +39,16 @@
             console.log(values);
             let body: any;
             body = {
-                duesName: values.duesName,
-                duesAmount: values.duesAmount,
+                rt_id: rt_id,
+                typeDues: values.duesName,
+                amt_dues: values.duesAmount,
+                status: 1,
                 _token: $page.props.csrf_token,
             };
             const response = await axios.post("/api/dues", body);
-            console.log(response.data);
-
             err = response.data;
+            dispatch("comp");
+          
             showState = false;
             setTimeout(() => {
                 err = { status: null, message: null };

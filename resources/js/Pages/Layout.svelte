@@ -24,6 +24,8 @@
         ListgroupItem,
         Footer,
         FooterCopyright,
+        Breadcrumb,
+        BreadcrumbItem,
     } from "flowbite-svelte";
     import {
         ChartPieSolid,
@@ -55,7 +57,7 @@
         icon: any;
         href?: string;
         isOpenItems?: boolean;
-        children?: { [key: string]: string };
+        children?: { [key: string]: string[] };
     }
 
     let filtermenu: MenuItem[] = [];
@@ -68,8 +70,19 @@
                 icon: UsersGroupSolid,
                 isOpenItems: false,
                 children: {
-                    "Lihat Data Warga": "/warga-rt",
-                    "Arsip Warga": "/arsip-penduduk",
+                    "Lihat Data Warga": ["/warga-rt"],
+                    "Arsip Warga": ["/arsip-penduduk"],
+                },
+            },
+            {
+                name: "Keuangan",
+                icon: ChartMixedDollarOutline,
+                isOpenItems: false,
+                children: {
+                    Iuran: ["/iuran", "/iuran/detail"],
+                    // Pengeluaran: "/pengeluaran",
+                    "Catatan Pembayaran": ["/log-pembayaran"],
+                    "Pengambilan Dana": ["/spending"],
                 },
             },
             {
@@ -87,7 +100,7 @@
                 icon: FileSolid,
                 isOpenItems: false,
                 children: {
-                    "Daftar Pengaduan": "/daftar-pengaduan",
+                    "Daftar Pengaduan": ["/daftar-pengaduan"],
                 },
             },
             {
@@ -95,9 +108,8 @@
                 icon: ClipboardSolid,
                 isOpenItems: false,
                 children: {
-                    "Surat Keterangan": "/daftar-pengajuan-surat",
-                    // "Laporan Keuangan": "/keuangan",
-                    "Bantuan Sosial": "/daftar-bansos",
+                    "Surat Keterangan": ["/daftar-pengajuan-surat"],
+                    "Bantuan Sosial": ["/daftar-bansos"],
                 },
             },
             {
@@ -105,8 +117,8 @@
                 icon: VolumeUpSolid,
                 isOpenItems: false,
                 children: {
-                    Pengumuman: "/pengumuman",
-                    "Kegiatan Warga": "/kegiatan-warga",
+                    Pengumuman: ["/pengumuman"],
+                    "Kegiatan Warga": ["/kegiatan-warga"],
                 },
             },
         ];
@@ -118,8 +130,20 @@
                 icon: UsersGroupSolid,
                 isOpenItems: false,
                 children: {
-                    "Lihat Data Warga": "/daftar-rt",
-                    "Arsip Warga": "/arsip-penduduk",
+                    "Lihat Data RT": ["/daftar-rt"],
+                    "Lihat Data Warga": ["/warga-rt"],
+                    "Arsip Warga": ["/arsip-penduduk"],
+                },
+            },
+            {
+                name: "Keuangan",
+                icon: ChartMixedDollarOutline,
+                isOpenItems: false,
+                children: {
+                    Iuran: ["/iuran"],
+                    // Pengeluaran: "/pengeluaran",
+                    "Catatan Pembayaran": ["/log-pembayaran"],
+                    "Pengambilan Dana": ["/spending"],
                 },
             },
             {
@@ -137,7 +161,7 @@
                 icon: FileSolid,
                 isOpenItems: false,
                 children: {
-                    "Daftar Pengaduan": "/daftar-pengaduan",
+                    "Daftar Pengaduan": ["/daftar-pengaduan"],
                 },
             },
             {
@@ -145,8 +169,8 @@
                 icon: ClipboardSolid,
                 isOpenItems: false,
                 children: {
-                    "Surat Keterangan": "/daftar-pengajuan-surat",
-                    "Bantuan Sosial": "/daftar-bansos",
+                    "Surat Keterangan": ["/daftar-pengajuan-surat"],
+                    "Bantuan Sosial": ["/daftar-bansos"],
                 },
             },
             {
@@ -154,8 +178,8 @@
                 icon: VolumeUpSolid,
                 isOpenItems: false,
                 children: {
-                    Pengumuman: "/pengumuman",
-                    "Kegiatan Warga": "/kegiatan-warga",
+                    Pengumuman: ["/pengumuman"],
+                    "Kegiatan Warga": ["/kegiatan-warga"],
                 },
             },
         ];
@@ -167,9 +191,20 @@
                 icon: UsersGroupSolid,
                 isOpenItems: false,
                 children: {
-                    "Lihat Data Warga": "/warga-rt",
-                    "Lihat Data Warga RT": "/daftar-rt",
-                    "Arsip Warga": "/arsip-penduduk",
+                    "Lihat Data Warga": ["/warga-rt"],
+                    "Lihat Data Warga RT": ["/daftar-rt"],
+                    "Arsip Warga": ["/arsip-penduduk"],
+                },
+            },
+            {
+                name: "Keuangan",
+                icon: ChartMixedDollarOutline,
+                isOpenItems: false,
+                children: {
+                    Iuran: ["/iuran", "/iuran/detail"],
+                    // Pengeluaran: "/pengeluaran",
+                    "Catatan Pembayaran": ["/log-pembayaran"],
+                    "Pengambilan Dana": ["/spending"],
                 },
             },
             {
@@ -187,8 +222,8 @@
                 icon: FileSolid,
                 isOpenItems: false,
                 children: {
-                    "Daftar Pengaduan": "/daftar-pengaduan",
-                    "Status Pengaduan Warga": "/status-pengaduan",
+                    "Daftar Pengaduan": ["/daftar-pengaduan"],
+                    "Status Pengaduan Warga": ["/status-pengaduan"],
                 },
             },
             {
@@ -196,8 +231,8 @@
                 icon: ClipboardSolid,
                 isOpenItems: false,
                 children: {
-                    "Surat Keterangan": "/daftar-pengajuan-surat",
-                    "Bantuan Sosial": "/daftar-bansos",
+                    "Surat Keterangan": ["/daftar-pengajuan-surat"],
+                    "Bantuan Sosial": ["/daftar-bansos"],
                 },
             },
             {
@@ -205,7 +240,7 @@
                 icon: FileDocOutline,
                 isOpenItems: false,
                 children: {
-                    "Status Surat": "/status-pengajuan",
+                    "Status Surat": ["/status-pengajuan"],
                 },
             },
             {
@@ -213,8 +248,8 @@
                 icon: VolumeUpSolid,
                 isOpenItems: false,
                 children: {
-                    Pengumuman: "/pengumuman",
-                    "Kegiatan Warga": "/kegiatan-warga",
+                    Pengumuman: ["/pengumuman"],
+                    "Kegiatan Warga": ["/kegiatan-warga"],
                 },
             },
             {
@@ -222,7 +257,7 @@
                 icon: VolumeUpSolid,
                 isOpenItems: false,
                 children: {
-                    "Status Bantuan Sosial": "/status-bansos",
+                    "Status Bantuan Sosial": ["/status-bansos"],
                 },
             },
         ];
@@ -234,7 +269,7 @@
                 icon: FileSolid,
                 isOpenItems: false,
                 children: {
-                    "Status Pengaduan": "/status-pengaduan",
+                    "Status Pengaduan": ["/status-pengaduan"],
                 },
             },
             {
@@ -242,7 +277,7 @@
                 icon: ClipboardSolid,
                 isOpenItems: false,
                 children: {
-                    "Status Pengajuan": "/status-pengajuan",
+                    "Status Pengajuan": ["/status-pengajuan"],
                 },
             },
             {
@@ -250,17 +285,24 @@
                 icon: VolumeUpSolid,
                 isOpenItems: false,
                 children: {
-                    "Status Bantuan Sosial": "/status-bansos",
+                    "Status Bantuan Sosial": ["/status-bansos"],
                 },
             },
         ];
     }
 
-    function isActiveChild(
-        children: { [key: string]: string },
-        currentUrl: string,
-    ): boolean {
-        return Object.values(children).includes(currentUrl);
+    // function isActiveChild(
+    //     children: { [key: string]: string[] },
+    //     currentUrl: string,
+    // ): boolean {
+    //     return Object.values(children).some((urlArray) =>
+    //         urlArray.includes(currentUrl),
+    //     );
+    // }
+    function isActiveChild(children: string, currentUrl: string) {
+        return Object.values(children).some((urlArray: any) =>
+            urlArray.some((url: any) => currentUrl.startsWith(url)),
+        );
     }
 
     let site = {
@@ -524,14 +566,14 @@
                                 : false}
                         >
                             <svelte:component this={icon} slot="icon" />
-                            {#each Object.entries(children) as [title, href]}
+                            {#each Object.entries(children) as [title, hrefs]}
                                 <SidebarItem
                                     label={title}
-                                    {href}
+                                    href={hrefs[0]}
                                     spanClass="ml-9"
                                     class={twMerge(
                                         itemClass,
-                                        $url == href
+                                        $url.includes(hrefs[0])
                                             ? "bg-gray-100 dark:bg-gray-900"
                                             : "",
                                     )}
@@ -563,6 +605,28 @@
     class="bg-white dark:bg-gray-900 flex px-4 mx-auto w-full min-h-screen pb-14"
 >
     <main class="h-full lg:ml-64 mt-4 w-full mx-auto" style="margin-top: 5rem">
+        <Breadcrumb aria-label="Default breadcrumb example" class="mb-2">
+            <BreadcrumbItem href="/beranda" home>Beranda</BreadcrumbItem>
+            {#if $url.replaceAll("/", "") != "beranda"}
+                {#if $url.split("/").length > 2}
+                    <BreadcrumbItem href={"/" + $url.split("/")[1]}
+                        >{$url.split("/")[1].toUpperCase()}</BreadcrumbItem
+                    >
+                {:else}
+                    <BreadcrumbItem
+                        >{$url
+                            .replace("/", "")
+                            .replaceAll("-", " ")
+                            .toUpperCase()}</BreadcrumbItem
+                    >
+                {/if}
+                {#if $url.split("/").length > 2}
+                    <BreadcrumbItem
+                        >{$url.split("/")[2].toUpperCase()}</BreadcrumbItem
+                    >
+                {/if}
+            {/if}
+        </Breadcrumb>
         <slot />
     </main>
 </div>
