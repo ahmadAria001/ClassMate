@@ -30,7 +30,7 @@ class GetLatest
         if (!$pat) abort(401, 'Unauthorized');;
 
         if ($pat->cant('NewsController:get') && !($pat->can('*'))) {
-         abort(401, 'Unauthorized');
+            abort(401, 'Unauthorized');
         }
 
         return $next($request);

@@ -392,7 +392,7 @@
                 nilai: sawAlt.nilai * bobotSAW + topsisAlt.nilai * bobotTOPSIS,
             };
         });
-      
+
         topsisNotSorted = kombinasiHasil;\
         kombinasiHasil.sort((a: any, b: any) => b.nilai - a.nilai);
     }

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Middleware\Resources\Environment;
 
 use App\Http\Controllers\NewsController;

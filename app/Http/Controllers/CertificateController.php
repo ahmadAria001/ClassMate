@@ -48,7 +48,7 @@ class CertificateController extends Controller
                     if (!$token) {
                         $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
                         if (!$token) {
-                            return Response()->json(['message'=>'Unauthorized'],401);
+                            return Response()->json(['message' => 'Unauthorized'], 401);
                         }
                     }
 
@@ -105,7 +105,7 @@ class CertificateController extends Controller
                     if (!$token) {
                         $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
                         if (!$token) {
-                            return Response()->json(['message'=>'Unauthorized'],401);
+                            return Response()->json(['message' => 'Unauthorized'], 401);
                         }
                     }
 
@@ -162,7 +162,7 @@ class CertificateController extends Controller
                     if (!$token) {
                         $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
                         if (!$token) {
-                            return Response()->json(['message'=>'Unauthorized'],401);
+                            return Response()->json(['message' => 'Unauthorized'], 401);
                         }
                     }
 
