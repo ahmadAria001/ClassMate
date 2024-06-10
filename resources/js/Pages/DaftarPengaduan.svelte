@@ -159,7 +159,6 @@
     };
 
     const handleSearch = async (filterInput: string) => {
-        // if (!filterInput) return;
 
         data = await getComplaints(filterInput);
         rebuild();

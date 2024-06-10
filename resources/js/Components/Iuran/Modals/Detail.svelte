@@ -173,7 +173,6 @@
         initialData.duesAmount !== currentData.duesAmount;
 
     $: isDisabled = !formChanged;
-
     const turnActived = () => {
         console.log("Masuk turnActived state awal: " + isactived);
         if (parseInt(isactived) == 1 || isactived == null) {

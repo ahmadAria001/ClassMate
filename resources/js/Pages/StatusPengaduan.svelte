@@ -146,12 +146,10 @@
 
     const initPage = async () => {
         data = await getComplainPaged(currentPage);
-        // console.log(data.data);
     };
 
     $: startRange = currentPosition + 1;
     $: endRange = Math.min(currentPosition + itemsPerPage, totalItems);
-
     $: currentPageItems = items.slice(
         // currentPosition,
         currentPosition + itemsPerPage,
@@ -160,7 +158,6 @@
         (item) =>
             item.problem.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1,
     );
-
     onMount(async () => {
         // Call renderPagination when the component initially mounts
         try {
@@ -253,7 +250,6 @@
                 {/key}
             </TableBody>
         </Table>
-
         <div
             slot="footer"
             class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0 p-4"

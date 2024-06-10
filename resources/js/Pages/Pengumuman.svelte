@@ -237,7 +237,6 @@
                 {/key}
             </TableBody>
         </Table>
-
         <div
             slot="footer"
             class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0 p-4"

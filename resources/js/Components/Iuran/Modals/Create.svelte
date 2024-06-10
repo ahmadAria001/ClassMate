@@ -46,9 +46,9 @@
                 _token: $page.props.csrf_token,
             };
             const response = await axios.post("/api/dues", body);
-            console.log(response.data);
-            dispatch("comp");
             err = response.data;
+            dispatch("comp");
+          
             showState = false;
             setTimeout(() => {
                 err = { status: null, message: null };

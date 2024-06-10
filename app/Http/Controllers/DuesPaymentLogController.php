@@ -57,7 +57,6 @@ class DuesPaymentLogController extends Controller
         $take = 10;
 
         $isMember = DuesMember::withoutTrashed()->where('member', '=', $member)->where('dues', '=', $dues)->first();
-
         $data =
             DuesPaymentLog::withoutTrashed()
             ->with('dues_member.dues')

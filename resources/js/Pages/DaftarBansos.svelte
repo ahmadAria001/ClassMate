@@ -38,7 +38,6 @@
         status: null,
         message: null,
     };
-
     let items = [
         {
             id: 1,
@@ -393,7 +392,8 @@
                 nilai: sawAlt.nilai * bobotSAW + topsisAlt.nilai * bobotTOPSIS,
             };
         });
-        topsisNotSorted = kombinasiHasil;
+      
+        topsisNotSorted = kombinasiHasil;\
         kombinasiHasil.sort((a: any, b: any) => b.nilai - a.nilai);
     }
 
@@ -1233,6 +1233,7 @@
                     {#each kombinasiHasil as komb}
                         <TableBodyRow>
                             <TableBodyCell>{komb.nama}</TableBodyCell>
+
                             <TableBodyCell>
                                 {komb.saw.toFixed(4)}
                             </TableBodyCell>

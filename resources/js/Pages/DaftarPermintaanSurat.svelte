@@ -132,7 +132,6 @@
 
     $: startRange = currentPosition + 1;
     $: endRange = Math.min(currentPosition + itemsPerPage, totalItems);
-
     $: currentPageItems = items.slice(
         currentPosition,
         currentPosition + itemsPerPage,

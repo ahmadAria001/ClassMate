@@ -254,27 +254,6 @@
             });
         }
 
-        console.log(containedDate);
-
-        // if (containedDate.length < 1) {
-        //     let generatedDate = new Date();
-        //     generatedDate = new Date(generatedDate.setMonth(currentMont));
-        //     generatedDate = new Date(generatedDate.setFullYear(currentYear));
-
-        //     return [
-        //         {
-        //             paidDate: `${currentYear}-${currentMont}-1`,
-        //             item: {
-        //                 paid_for: Number.parseInt(
-        //                     (generatedDate.getTime() / 1000).toString(),
-        //                 ),
-        //                 amount_paid: amountPay,
-        //                 dues_member: data.member.id,
-        //             },
-        //         },
-        //     ];
-        // }
-
         const member_id =
             containedDate[containedDate.length - 1].item.dues_member.id;
 
@@ -450,12 +429,8 @@
     ) => {
         const duesDatas = await getDuesMember(target, dues);
         paymentLog = duesDatas;
-
-        console.log("DATA: ", duesDatas);
-
+      
         if (!stat) return;
-
-        // console.log(new Date(duesDatas.data[0].paid_for * 1000).getMonth());
 
         if (duesDatas.isMember > 0) {
             const dummy = generateUnpaid(
@@ -531,15 +506,12 @@
         });
 
         contained = contained.sort();
-        console.log("Contained: ", contained);
 
         const filtered = localUpaid.filter(
             (value) => !contained.includes(localUpaid.indexOf(value)),
         );
 
         filtered.map((val) => missing.push(localUpaid.indexOf(val)));
-
-        console.log("Missing: ", missing);
 
         if (contained[0] == 0) return true;
 
@@ -680,9 +652,6 @@
                                             d.status,
                                         );
 
-                                        console.log("Selected: ", selected);
-                                        console.log("AMNT PAY: ", amountPay);
-
                                         offAll();
                                     }}
                                     title={d.typeDues == "Security"
@@ -758,42 +727,9 @@
                                                             <TableBodyCell
                                                                 >Rp. {item.amount_paid}</TableBodyCell
                                                             >
-
-                                                            <!-- {#if item.residentstatus == "PermanentResident"}
-                                            <TableBodyCell class="text-center">
-                                                <Badge color="green"
-                                                    >Tetap</Badge
-                                                >
-                                            </TableBodyCell>
-                                        {:else if item.residentstatus == "ContractResident"}
-                                            <TableBodyCell class="text-center">
-                                                <Badge color="indigo"
-                                                    >Kontrak</Badge
-                                                >
-                                            </TableBodyCell>
-                                        {:else if item.residentstatus == "Kos"}
-                                            <TableBodyCell class="text-center">
-                                                <Badge color="yellow">Kos</Badge
-                                                >
-                                            </TableBodyCell>
-                                        {/if} -->
                                                             <TableBodyCell
                                                                 class="text-center"
                                                             >
-                                                                <!-- {console.log(
-                                                                Number.parseInt(
-                                                                    item.amount_paid,
-                                                                ) <
-                                                                    Number.parseInt(
-                                                                        d.amt_dues,
-                                                                    ),
-                                                                Number.parseInt(
-                                                                    item.amount_paid,
-                                                                ),
-                                                                Number.parseInt(
-                                                                    d.amt_dues,
-                                                                ),
-                                                            )} -->
                                                                 {#if item.id}
                                                                     <Badge
                                                                         color="green"
@@ -809,14 +745,6 @@
                                                                     </Badge>
                                                                 {/if}
                                                             </TableBodyCell>
-
-                                                            <!-- <TableBodyCell class="text-center">
-                                            <Button
-                                                on:click={() =>
-                                                    (clickOutsideModal = true)}
-                                                >Bayar</Button
-                                            >
-                                        </TableBodyCell> -->
                                                         </TableBodyRow>
                                                     {/each}
                                                 {:else if role != "Admin"}
@@ -879,7 +807,6 @@
         bind:amountPay
     />
 {/if}
-
 {#if err.status != null && err.status == true}
     <Toast color="green" class="fixed top-10 right-1 z-[50000]">
         <svelte:fragment slot="icon">

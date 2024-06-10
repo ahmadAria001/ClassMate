@@ -86,6 +86,16 @@
                 },
             },
             {
+                name: "Keuangan",
+                icon: ChartMixedDollarOutline,
+                isOpenItems: false,
+                children: {
+                    Iuran: "/iuran",
+                    // Pengeluaran: "/pengeluaran",
+                    "Catatan Pembayaran": "/log-pembayaran",
+                },
+            },
+            {
                 name: "Pengaduan",
                 icon: FileSolid,
                 isOpenItems: false,
@@ -99,7 +109,6 @@
                 isOpenItems: false,
                 children: {
                     "Surat Keterangan": ["/daftar-pengajuan-surat"],
-                    // "Laporan Keuangan": "/keuangan",
                     "Bantuan Sosial": ["/daftar-bansos"],
                 },
             },
@@ -135,6 +144,16 @@
                     // Pengeluaran: "/pengeluaran",
                     "Catatan Pembayaran": ["/log-pembayaran"],
                     "Pengambilan Dana": ["/spending"],
+                },
+            },
+            {
+                name: "Keuangan",
+                icon: ChartMixedDollarOutline,
+                isOpenItems: false,
+                children: {
+                    Iuran: "/iuran",
+                    // Pengeluaran: "/pengeluaran",
+                    "Catatan Pembayaran": "/log-pembayaran",
                 },
             },
             {
@@ -186,6 +205,16 @@
                     // Pengeluaran: "/pengeluaran",
                     "Catatan Pembayaran": ["/log-pembayaran"],
                     "Pengambilan Dana": ["/spending"],
+                },
+            },
+            {
+                name: "Keuangan",
+                icon: ChartMixedDollarOutline,
+                isOpenItems: false,
+                children: {
+                    Iuran: "/iuran",
+                    // Pengeluaran: "/pengeluaran",
+                    "Catatan Pembayaran": "/log-pembayaran",
                 },
             },
             {
