@@ -45,12 +45,12 @@
     let selectedDues: string;
     let selectedMethod: string;
     let dues = [
-        { value: "sampah", name: "sampah" },
-        { value: "keamanan", name: "keamanan" },
+        { value: "sampah", name: "Sampah" },
+        { value: "keamanan", name: "Keamanan" },
     ];
     let methodpayment = [
-        { value: "cash", name: "cash" },
-        { value: "transfer", name: "transfer" },
+        { value: "cash", name: "Cash" },
+        { value: "transfer", name: "Transfer" },
     ];
     let currentPosition = 0;
     const itemsPerPage = 10;
@@ -122,7 +122,7 @@
 
 <Layout>
     <TableSearch
-        placeholder="Cari warga"
+        placeholder="Cari Warga"
         hoverable={true}
         bind:inputValue={searchTerm}
         divClass="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg overflow-hidden"

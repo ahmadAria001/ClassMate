@@ -3,27 +3,29 @@
     import Layout from "./Layout.svelte";
     import {
         Badge,
-        Table,
         TableBody,
         TableBodyCell,
         TableBodyRow,
         TableHead,
         TableHeadCell,
-        TableSearch,
+        Table,
         Button,
-        Modal,
-        Label,
-        Input,
         ButtonGroup,
     } from "flowbite-svelte";
-
+    import TableSearch from "@C/General/TableSearch.svelte";
     import {
         ChevronLeftOutline,
         ChevronRightOutline,
     } from "flowbite-svelte-icons";
-        import { setCookie, getCookie } from "../Utils/Cokies";
+    import Create from "@C/Pengaduan/Modals/Create.svelte";
 
-    import axios from 'axios'
+    import { page } from "@inertiajs/svelte";
+    import axiosInstance from "axios";
+
+    const axios = axiosInstance.create({ withCredentials: true });
+    const itemsPerPage = 10;
+    const showPage = 5;
+    const role = $page.props.auth.user.role;
 
     let items = [
         {
@@ -43,16 +45,25 @@
             status: "Dalam Proses",
         },
     ];
+
+    let data: any;
     let addComplaintModal = false;
     let searchTerm = "";
     let currentPosition = 0;
-    const itemsPerPage = 10;
-    const showPage = 5;
     let totalPages = 0;
     let pagesToShow: any[] = [];
     let totalItems: number = items.length;
     let startPage: number;
     let endPage: number;
+    let currentPage = 1;
+
+    let builder = {};
+
+    const rebuild = async () => {
+        builder = {};
+        await initPage();
+        filteredData = data.data;
+    };
 
     const updateDataAndPagination = () => {
         const currentPageItems = items.slice(
@@ -95,45 +106,87 @@
         updateDataAndPagination();
     };
 
+    const getComplainPaged = async (page: number) => {
+        let url = "";
+
+        if (role == "RT")
+            url = `/api/docs/complaint/rt/${encodeURIComponent(page)}`;
+        if (role == "Warga")
+            url = `/api/docs/complaint/warga/${encodeURIComponent(page)}`;
+        if (role != "RT" || role != "Warga")
+            url = `/api/docs/complaint/warga/${encodeURIComponent(page)}`;
+
+        try {
+            const response = await axios.get(url, {
+                headers: {
+                    Accept: "*/*",
+                },
+            });
+            return response.data;
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const getComplaints = async (id: string = "") => {
+        try {
+            const response = await axios.get(
+                `/api/docs/complaint/${encodeURIComponent(id)}`,
+                {
+                    headers: {
+                        Accept: "*/*",
+                    },
+                },
+            );
+            return response.data;
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const initPage = async () => {
+        data = await getComplainPaged(currentPage);
+    };
+
     $: startRange = currentPosition + 1;
     $: endRange = Math.min(currentPosition + itemsPerPage, totalItems);
-
-    onMount(() => {
-        // Call renderPagination when the component initially mounts
-        renderPagination(items.length);
-    });
-
     $: currentPageItems = items.slice(
-        currentPosition,
+        // currentPosition,
         currentPosition + itemsPerPage,
     );
     $: filteredItems = items.filter(
         (item) =>
             item.problem.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1,
     );
+    onMount(async () => {
+        // Call renderPagination when the component initially mounts
+        try {
+            renderPagination(items.length);
 
-    const getData = async (id: string | null = null) => {
-        const response = await axios.get(`/api/civiliant/${id}`, {
-            headers: {
-                Accept: "*/*",
-                Authorization: `Bearer ${getCookie("token")}`,
-            },
-        });
+            await initPage();
+            filteredData = data.data;
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    });
 
-        return response.data;
+    let filteredData: any;
+    const handleSearch = (event: any) => {
+        const searchValue = event.detail.value.toLowerCase();
+        // console.log("Search value in handleSearch in use file:", searchValue);
+        if (searchValue == "") {
+            filteredData = [...data.data];
+        }
+        filteredData = data.data.filter((d: any) =>
+            d.docs_id.description.toLowerCase().includes(searchValue),
+        );
+        console.log(filteredData);
+        rebuild();
     };
-
 </script>
 
 <Layout>
-    <TableSearch
-        placeholder="Cari pengaduan"
-        hoverable={true}
-        bind:inputValue={searchTerm}
-        divClass="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg overflow-hidden"
-        innerDivClass="flex items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4"
-        classInput="text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2  pl-10"
-    >
+    <TableSearch on:search={handleSearch}>
         <div
             slot="header"
             class="md:w-auto flex flex-row space-y-2 md:space-y-0 items-stretch md:items-center justify-end md:space-x-3 flex-shrink-0"
@@ -144,105 +197,59 @@
                 }}>+ Buat Pengaduan</Button
             >
         </div>
-        <Modal
-            title="Buat Pengaduan Masalah"
-            bind:open={addComplaintModal}
-            autoclose
-        >
-            <form method="POST">
-                <div class="mb-4">
-                    <Label for="full_name" class="mb-2">Nama Lengkap</Label>
-                    <Input id="full_name" placeholder="Nama Lengkap" />
-                </div>
-                <div class="grid md:grid-cols-2 md:gap-6">
-                    <div class="mb-4">
-                        <Label for="no_hp" class="mb-2">No HP</Label>
-                        <Input id="no_hp" placeholder="No HP" />
-                    </div>
-                    <div class="mb-4">
-                        <Label for="address" class="mb-2">Alamat</Label>
-                        <Input id="address" placeholder="Alamat" />
-                    </div>
-                </div>
-                <div class="mb-4">
-                    <Label for="problems" class="mb-2">Permasalahan</Label>
-                    <Input id="problems" placeholder="Permasalahan" />
-                </div>
-                <div class="mb-4">
-                    <div class="flex items-center justify-center w-full">
-                        <label
-                            for="dropzone-file"
-                            class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
-                        >
-                            <div
-                                class="flex flex-col items-center justify-center pt-5 pb-6"
-                            >
-                                <svg
-                                    class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400"
-                                    aria-hidden="true"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 20 16"
+        <Table>
+            <TableHead>
+                <TableHeadCell>Nama</TableHeadCell>
+                <!-- <TableHeadCell>Alamat</TableHeadCell> -->
+                <TableHeadCell>No. HP</TableHeadCell>
+                <TableHeadCell>Permasalahan</TableHeadCell>
+                <TableHeadCell class="text-center">Status</TableHeadCell>
+            </TableHead>
+            <TableBody>
+                {#key builder}
+                    {#if filteredData}
+                        {#each filteredData as item}
+                            <TableBodyRow>
+                                <TableBodyCell
+                                    >{item?.created_by.civilian_id
+                                        .fullName}</TableBodyCell
                                 >
-                                    <path
-                                        stroke="currentColor"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
-                                    />
-                                </svg>
-                                <p
-                                    class="mb-2 text-sm text-gray-500 dark:text-gray-400 font-semibold"
+                                <!-- <TableBodyCell
+                                >{item.created_by.civilian_id
+                                    .address}</TableBodyCell
+                            > -->
+                                <TableBodyCell
+                                    >{item?.created_by.civilian_id
+                                        .phone}</TableBodyCell
                                 >
-                                    Upload Gambar
-                                </p>
-                            </div>
-                            <input
-                                id="dropzone-file"
-                                type="file"
-                                class="hidden"
-                            />
-                        </label>
-                    </div>
-                </div>
-                <div class="block flex">
-                    <Button type="submit" class="ml-auto"
-                        >Kirim Pengaduan</Button
-                    >
-                </div>
-            </form>
-        </Modal>
-        <TableHead>
-            <TableHeadCell>Nama</TableHeadCell>
-            <TableHeadCell>Alamat</TableHeadCell>
-            <TableHeadCell>No. HP</TableHeadCell>
-            <TableHeadCell>Permasalahan</TableHeadCell>
-            <TableHeadCell class="text-center">Status</TableHeadCell>
-        </TableHead>
-        <TableBody>
-            {#await getData() then data}
-                {#each filteredItems as item}
-                    <TableBodyRow>
-                        <TableBodyCell>{item.name}</TableBodyCell>
-                        <TableBodyCell>{item.address}</TableBodyCell>
-                        <TableBodyCell>{item.noHp}</TableBodyCell>
-                        <TableBodyCell>{item.problem}</TableBodyCell>
-                        {#if item.status == "Selesai"}
-                            <TableBodyCell class="text-center">
-                                <Badge color="green">{item.status}</Badge>
-                            </TableBodyCell>
-                        {:else if item.status == "Dalam Proses"}
-                            <TableBodyCell class="text-center">
-                                <Badge color="indigo">{item.status}</Badge>
-                            </TableBodyCell>
-                        {/if}
-                </TableBodyRow>
-            {/each}
-
-            {/await}
-        </TableBody>
-
+                                <TableBodyCell
+                                    >{item.docs_id.description}</TableBodyCell
+                                >
+                                {#if item.complaintStatus == "Resolved"}
+                                    <TableBodyCell class="text-center">
+                                        <Badge color="green"
+                                            >{item.complaintStatus}</Badge
+                                        >
+                                    </TableBodyCell>
+                                {:else if item.complaintStatus == "Open"}
+                                    <TableBodyCell class="text-center">
+                                        <Badge color="primary"
+                                            >{item.complaintStatus}</Badge
+                                        >
+                                    </TableBodyCell>
+                                {:else}
+                                    <TableBodyCell class="text-center">
+                                        <Badge color="red"
+                                            >{item.complaintStatus}</Badge
+                                        >
+                                    </TableBodyCell>
+                                {/if}
+                            </TableBodyRow>
+                        {/each}
+                    {/if}
+                {/key}
+            </TableBody>
+        </Table>
         <div
             slot="footer"
             class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0 p-4"
@@ -278,3 +285,5 @@
         </div>
     </TableSearch>
 </Layout>
+
+<Create bind:showState={addComplaintModal} on:comp={rebuild} />

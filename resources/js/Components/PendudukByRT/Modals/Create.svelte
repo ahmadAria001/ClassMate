@@ -22,9 +22,11 @@
         createSchema,
     } from "./../../../Utils/Schema/Civils/Create";
     import { twMerge } from "tailwind-merge";
+    import { createEventDispatcher } from "svelte";
 
     export let showState = false;
 
+    const dispatch = createEventDispatcher();
     const axios = axiosInstance.create({ withCredentials: true });
     let err: { status: null | boolean; message: null | string } = {
         status: null,
@@ -60,6 +62,8 @@
 
             err = response.data;
             showState = false;
+            dispatch("comp");
+
             setTimeout(() => {
                 err = { status: null, message: null };
             }, 5000);
@@ -91,18 +95,33 @@
         { value: "Meninggal", name: "Meninggal" },
         { value: "Pindah", name: "Pindah" },
     ];
+
+    let selectedReligion: string;
+    let religion = [
+        { value: "Islam", name: "Islam" },
+        { value: "Protestan", name: "Protestan" },
+        { value: "Katolik", name: "Katolik" },
+        { value: "Hindu", name: "Hindu" },
+        { value: "Budha", name: "Budha" },
+        { value: "Khonghucu", name: "Khonghucu" },
+    ];
+
+    let selectedJob: string;
+    let jobs = [
+        { value: "Pengangguran", name: "Pengangguran" },
+        { value: "Pegawai Negeri", name: "Pegawai Negeri" },
+        { value: "Swasta", name: "Swasta" },
+        { value: "Wiraswasta", name: "Wiraswasta" },
+        { value: "Wirausaha", name: "Wirausaha" },
+        { value: "Pelajar", name: "Pelajar" },
+    ];
 </script>
 
-<Modal title="Tambah RT" bind:open={showState}>
+<Modal title="Tambah Warga" bind:open={showState}>
     <form method="POST" use:form>
         <div class="mb-4">
             <Label for="full_name" class="mb-2">Nama Lengkap</Label>
-            <Input
-                id="full_name"
-                name="fullName"
-                placeholder="Nama Lengkap"
-                value="Susanto"
-            />
+            <Input id="full_name" name="fullName" placeholder="Nama Lengkap" />
             {#if $errors.fullName}
                 <span class="text-sm text-red-500">{$errors.fullName}</span>
             {/if}
@@ -110,14 +129,14 @@
         <div class="grid md:grid-cols-2 md:gap-6">
             <div class="mb-4">
                 <Label for="kk" class="mb-2">No KK</Label>
-                <Input id="kk" name="nkk" placeholder="No KK" value="6" />
+                <Input id="kk" name="nkk" placeholder="No KK" />
                 {#if $errors.nik}
                     <span class="text-sm text-red-500">{$errors.nik}</span>
                 {/if}
             </div>
             <div class="mb-4">
                 <Label for="nik" class="mb-2">NIK</Label>
-                <Input id="nik" placeholder="NIK" name="nik" value="312412" />
+                <Input id="nik" placeholder="NIK" name="nik" />
                 {#if $errors.nik}
                     <span class="text-sm text-red-500">{$errors.nik}</span>
                 {/if}
@@ -126,11 +145,13 @@
         <div class="grid md:grid-cols-2 md:gap-6">
             <div class="mb-4">
                 <Label for="religion" class="mb-2">Agama</Label>
-                <Input
+                <!-- <Input id="religion" placeholder="Agama" name="religion" /> -->
+                <Select
                     id="religion"
+                    items={religion}
+                    bind:value={selectedReligion}
                     placeholder="Agama"
                     name="religion"
-                    value="Konghuan"
                 />
                 {#if $errors.religion}
                     <span class="text-sm text-red-500">{$errors.religion}</span>
@@ -146,7 +167,6 @@
                             id="birthplace"
                             placeholder="Tempat Lahir"
                             name="birthplace"
-                            value="Malang"
                         />
                         {#if $errors.birthplace}
                             <span class="text-sm text-red-500"
@@ -174,25 +194,14 @@
         <div class="grid md:grid-cols-2 md:gap-6">
             <div class="mb-4">
                 <Label for="address" class="mb-2">Alamat</Label>
-                <Input
-                    id="address"
-                    placeholder="Alamat"
-                    name="address"
-                    value="Earth"
-                />
+                <Input id="address" placeholder="Alamat" name="address" />
                 {#if $errors.address}
                     <span class="text-sm text-red-500">{$errors.address}</span>
                 {/if}
             </div>
             <div class="mb-4">
                 <Label for="phone" class="mb-2">No. HP</Label>
-                <Input
-                    type="number"
-                    id="phone"
-                    placeholder="No. HP"
-                    name="phone"
-                    value="08123415678"
-                />
+                <Input id="phone" placeholder="No. HP" name="phone" />
                 {#if $errors.phone}
                     <span class="text-sm text-red-500">{$errors.phone}</span>
                 {/if}
@@ -204,11 +213,10 @@
                     >Status Kependudukan</Label
                 >
                 <Select
-                    class="my-2"
-                    items={statusList}
-                    placeholder="Pilih Status Penduduk"
-                    size="sm"
                     bind:value={resstatval}
+                    items={statusList}
+                    class="my-2"
+                    placeholder="Pilih Status Penduduk"
                     name="residentstatus"
                     id="residentstatus"
                 />
@@ -222,11 +230,13 @@
             </div>
             <div class="mb-4">
                 <Label for="job" class="mb-2">Pekerjaan</Label>
-                <Input
+                <!-- <Input id="job" placeholder="Pekerjaan" name="job" /> -->
+                <Select
                     id="job"
+                    items={jobs}
+                    bind:value={selectedJob}
                     placeholder="Pekerjaan"
                     name="job"
-                    value="Mahasiswa"
                 />
                 {#if $errors.job}
                     <span class="text-sm text-red-500">{$errors.job}</span>
@@ -243,15 +253,17 @@
                 <Label for="rt" class="mb-2">RT</Label>
                 {#if $page.props.auth.user.role == "Admin"}
                     <Input
+                        type="number"
                         id="rt"
-                        placeholder="Pekerjaan"
+                        placeholder="RT"
                         name="rt_id"
                         value={$page.props.auth.user.rt_id}
                     />
                 {:else}
                     <Input
+                        type="number"
                         id="rt"
-                        placeholder="Pekerjaan"
+                        placeholder="RT"
                         name="rt_id"
                         readonly
                         value={$page.props.auth.user.rt_id}
@@ -266,7 +278,6 @@
                 <Select
                     class="my-2"
                     items={civStat}
-                    size="sm"
                     id="status"
                     placeholder="Status"
                     name="status"
@@ -277,24 +288,30 @@
                 {/if}
             </div>
         </div>
-        <div class="mb-4">
+        <div class="mb-4 w-fit">
             <Label for="famhead" class="mb-2">Kepala Keluarga</Label>
-            {#if resstatval != "PermanentResident" || !resstatval}
+            {#if resstatval == "Kos" || !resstatval}
                 <Toggle
                     id="famhead"
                     onclick="return false"
                     placeholder="Status"
                     name="isFamilyHead"
+                    class="w-fit"
                 />
             {:else}
-                <Toggle id="famhead" placeholder="Status" name="isFamilyHead" />
+                <Toggle
+                    id="famhead"
+                    placeholder="Status"
+                    name="isFamilyHead"
+                    class="w-fit"
+                />
             {/if}
             {#if $errors.isFamilyHead}
                 <span class="text-sm text-red-500">{$errors.isFamilyHead}</span>
             {/if}
             <span class="w-full text-sm text-gray-600"
-                >*Pilih Status Kependudukan <br/> Sebelum Memutuskan Status
-                Kepala Keluarga</span
+                >*Pilih Status Kependudukan <br /> Sebelum Memutuskan Status Kepala
+                Keluarga</span
             >
         </div>
 

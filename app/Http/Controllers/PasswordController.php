@@ -40,11 +40,14 @@ class PasswordController extends Controller
 
         $model = User::withoutTrashed()->where('id', $identity)->get()->first();
 
-        if (!Hash::check($payload->get('old_password'), $model->getAuthPassword())) {
-            return Response()->json([
-                'status' => false,
-                'message' => 'Password saat ini tidak cocok',
-            ]);
+        if (!Hash::check($payload->get('password'), $model->getAuthPassword())) {
+            return Response()->json(
+                [
+                    'status' => false,
+                    'message' => 'Password saat ini tidak cocok',
+                ],
+                400,
+            );
         }
 
         $model->fill(['password' => Hash::make($payload->get('new_password'))]);

@@ -24,6 +24,8 @@
         ListgroupItem,
         Footer,
         FooterCopyright,
+        Breadcrumb,
+        BreadcrumbItem,
     } from "flowbite-svelte";
     import {
         ChartPieSolid,
@@ -32,156 +34,220 @@
         ClipboardSolid,
         VolumeUpSolid,
         BellSolid,
+        ChartMixedDollarSolid,
+        ChartMixedDollarOutline,
+        FileDocOutline,
     } from "flowbite-svelte-icons";
     import { twMerge } from "tailwind-merge";
+    import { writable } from "svelte/store";
     import axiosInstance from "axios";
+
+    const url = writable("");
+    onMount(() => {
+        url.set(window.location.pathname);
+    });
 
     const axios = axiosInstance.create({ withCredentials: true });
 
     // tempat rolenya disini
     let role = $page.props.auth.user.role;
 
-    let filtermenu: {
+    interface MenuItem {
         name: string;
         icon: any;
-        isOpenItems?: boolean;
-        children?: Record<string, string>;
         href?: string;
-    }[] = [];
+        isOpenItems?: boolean;
+        children?: { [key: string]: string[] };
+    }
 
-    if (role == "RT") {
+    let filtermenu: MenuItem[] = [];
+
+    if (role === "RT") {
         filtermenu = [
             { name: "Beranda", icon: ChartPieSolid, href: "/beranda" },
             {
                 name: "Data Warga",
                 icon: UsersGroupSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
-                    "Lihat Data Warga": "/warga-rt",
-                    "Arsip Warga": "/arsip-penduduk",
+                    "Lihat Data Warga": ["/warga-rt"],
+                    "Arsip Warga": ["/arsip-penduduk"],
+                },
+            },
+            {
+                name: "Keuangan",
+                icon: ChartMixedDollarOutline,
+                isOpenItems: false,
+                children: {
+                    Iuran: ["/iuran", "/iuran/detail"],
+                    // Pengeluaran: "/pengeluaran",
+                    "Catatan Pembayaran": ["/log-pembayaran"],
+                    "Pengambilan Dana": ["/spending"],
+                },
+            },
+            {
+                name: "Keuangan",
+                icon: ChartMixedDollarOutline,
+                isOpenItems: false,
+                children: {
+                    Iuran: "/iuran",
+                    // Pengeluaran: "/pengeluaran",
+                    "Catatan Pembayaran": "/log-pembayaran",
                 },
             },
             {
                 name: "Pengaduan",
                 icon: FileSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
-                    "Daftar Pengaduan": "/daftar-pengaduan",
+                    "Daftar Pengaduan": ["/daftar-pengaduan"],
                 },
             },
             {
-                name: "Laporan",
+                name: "Pengajuan",
                 icon: ClipboardSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
-                    "Surat Ket. Warga": "/daftar-pengajuan-surat",
-                    "Laporan keuangan": "/keuangan",
-                    "Bantuan sosial": "/daftar-bansos",
+                    "Surat Keterangan": ["/daftar-pengajuan-surat"],
+                    "Bantuan Sosial": ["/daftar-bansos"],
                 },
             },
             {
                 name: "Informasi",
                 icon: VolumeUpSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
-                    Pengumuman: "/pengumuman",
-                    "Kegiatan Warga": "/kegiatan-warga",
+                    Pengumuman: ["/pengumuman"],
+                    "Kegiatan Warga": ["/kegiatan-warga"],
                 },
             },
         ];
-    } else if (role == "RW") {
+    } else if (role === "RW") {
         filtermenu = [
             { name: "Beranda", icon: ChartPieSolid, href: "/beranda" },
             {
                 name: "Data Warga",
                 icon: UsersGroupSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
-                    "Lihat Data Warga": "/daftar-rt",
-                    "Arsip Warga": "/arsip-penduduk",
+                    "Lihat Data RT": ["/daftar-rt"],
+                    "Lihat Data Warga": ["/warga-rt"],
+                    "Arsip Warga": ["/arsip-penduduk"],
+                },
+            },
+            {
+                name: "Keuangan",
+                icon: ChartMixedDollarOutline,
+                isOpenItems: false,
+                children: {
+                    Iuran: ["/iuran"],
+                    // Pengeluaran: "/pengeluaran",
+                    "Catatan Pembayaran": ["/log-pembayaran"],
+                    "Pengambilan Dana": ["/spending"],
+                },
+            },
+            {
+                name: "Keuangan",
+                icon: ChartMixedDollarOutline,
+                isOpenItems: false,
+                children: {
+                    Iuran: "/iuran",
+                    // Pengeluaran: "/pengeluaran",
+                    "Catatan Pembayaran": "/log-pembayaran",
                 },
             },
             {
                 name: "Pengaduan",
                 icon: FileSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
-                    "Daftar Pengaduan": "/daftar-pengaduan",
+                    "Daftar Pengaduan": ["/daftar-pengaduan"],
                 },
             },
             {
-                name: "Laporan",
+                name: "Pengajuan",
                 icon: ClipboardSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
-                    "Surat Ket. Warga": "/daftar-pengajuan-surat",
-                    "Bantuan sosial": "/daftar-bansos",
+                    "Surat Keterangan": ["/daftar-pengajuan-surat"],
+                    "Bantuan Sosial": ["/daftar-bansos"],
                 },
             },
             {
                 name: "Informasi",
                 icon: VolumeUpSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
-                    Pengumuman: "/pengumuman",
-                    "Kegiatan Warga": "/kegiatan-warga",
+                    Pengumuman: ["/pengumuman"],
+                    "Kegiatan Warga": ["/kegiatan-warga"],
                 },
             },
         ];
-    } else if (role == "Admin") {
+    } else if (role === "Admin") {
         filtermenu = [
             { name: "Beranda", icon: ChartPieSolid, href: "/beranda" },
             {
                 name: "Data Warga",
                 icon: UsersGroupSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
-                    "Lihat Data Warga": "/warga-rt",
-                    "Lihat Data Warga RT": "/daftar-rt",
-                    "Arsip Warga": "/arsip-penduduk",
+                    "Lihat Data Warga": ["/warga-rt"],
+                    "Lihat Data Warga RT": ["/daftar-rt"],
+                    "Arsip Warga": ["/arsip-penduduk"],
+                },
+            },
+            {
+                name: "Keuangan",
+                icon: ChartMixedDollarOutline,
+                isOpenItems: false,
+                children: {
+                    Iuran: ["/iuran", "/iuran/detail"],
+                    // Pengeluaran: "/pengeluaran",
+                    "Catatan Pembayaran": ["/log-pembayaran"],
+                    "Pengambilan Dana": ["/spending"],
                 },
             },
             {
                 name: "Pengaduan",
                 icon: FileSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
-                    "Daftar Pengaduan": "/daftar-pengaduan",
-                    "Status Pengaduan warga": "/status-pengaduan",
+                    "Daftar Pengaduan": ["/daftar-pengaduan"],
+                    "Status Pengaduan Warga": ["/status-pengaduan"],
                 },
             },
             {
-                name: "Laporan",
+                name: "Pengajuan",
                 icon: ClipboardSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
-                    "Surat Ket. Warga": "/daftar-pengajuan-surat",
-                    "Bantuan sosial": "/daftar-bansos",
+                    "Surat Keterangan": ["/daftar-pengajuan-surat"],
+                    "Bantuan Sosial": ["/daftar-bansos"],
                 },
             },
             {
                 name: "Surat",
-                icon: ClipboardSolid,
-                isOpenItems: true,
+                icon: FileDocOutline,
+                isOpenItems: false,
                 children: {
-                    "Status Surat": "/status-pengajuan",
+                    "Status Surat": ["/status-pengajuan"],
                 },
             },
             {
                 name: "Informasi",
                 icon: VolumeUpSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
-                    Pengumuman: "/pengumuman",
-                    "Kegiatan Warga": "/kegiatan-warga",
+                    Pengumuman: ["/pengumuman"],
+                    "Kegiatan Warga": ["/kegiatan-warga"],
                 },
             },
             {
                 name: "Bantuan Sosial",
                 icon: VolumeUpSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
-                    "Status Bantuan Sosial": "/status-bansos",
+                    "Status Bantuan Sosial": ["/status-bansos"],
                 },
             },
         ];
@@ -191,31 +257,43 @@
             {
                 name: "Pengaduan",
                 icon: FileSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
-                    "Status pengaduan": "/status-pengaduan",
+                    "Status Pengaduan": ["/status-pengaduan"],
                 },
             },
             {
-                name: "Surat",
+                name: "Pengajuan",
                 icon: ClipboardSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
-                    "Status Surat": "/status-pengajuan",
+                    "Status Pengajuan": ["/status-pengajuan"],
                 },
             },
             {
                 name: "Bantuan Sosial",
                 icon: VolumeUpSolid,
-                isOpenItems: true,
+                isOpenItems: false,
                 children: {
-                    "Status Bantuan Sosial": "/status-bansos",
+                    "Status Bantuan Sosial": ["/status-bansos"],
                 },
             },
         ];
     }
 
-    export let active: string = "";
+    // function isActiveChild(
+    //     children: { [key: string]: string[] },
+    //     currentUrl: string,
+    // ): boolean {
+    //     return Object.values(children).some((urlArray) =>
+    //         urlArray.includes(currentUrl),
+    //     );
+    // }
+    function isActiveChild(children: string, currentUrl: string) {
+        return Object.values(children).some((urlArray: any) =>
+            urlArray.some((url: any) => currentUrl.startsWith(url)),
+        );
+    }
 
     let site = {
         name: "KawanDesa",
@@ -288,20 +366,17 @@
     ];
 
     const logout = async () => {
-        const { data, status } = await axios.get("/api/auth/signout");
-
-        if (status != 200) {
-            router.visit("/login");
-            return;
-        }
-
-        router.visit("/login");
+        await router.get("/api/auth/signout");
     };
 </script>
 
 <svelte:window bind:innerWidth={width} />
-<header class="flex-none w-full mx-auto bg-white dark:bg-slate-950">
-    <Navbar let:hidden let:toggle class="border-b-2 h-16 fixed">
+<header class="flex-none w-full mx-auto bg-white">
+    <Navbar
+        let:hidden
+        let:toggle
+        class="border-b-2 h-16 fixed m-0 dark:bg-gray-800 z-30"
+    >
         <NavHamburger
             onClick={toggleDrawer}
             btnClass="focus:outline-none whitespace-normal rounded-lg focus:ring-2 p-1.5 focus:ring-gray-400 hover:bg-gray-100 dark:hover:bg-gray-600 m-0 mr-3 lg:hidden"
@@ -390,19 +465,23 @@
 
         <div class="flex items-center md:order-2">
             <DarkMode class="mr-3" />
-            <Button
+            <!-- <Button
                 id="notification"
                 class="mr-3 p-2.5 border-none"
                 color="alternative"><BellSolid /></Button
-            >
+            > -->
             <Avatar
                 id="avatar-menu"
-                src="https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?cs=srgb&dl=pexels-simon-robben-614810.jpg&fm=jpg"
+                src={new String($page.props.auth.user.pict).includes(
+                    "/uploads/",
+                )
+                    ? $page.props.auth.user.pict
+                    : ""}
+                class="cursor-pointer"
             />
-            <!-- <NavHamburger class1="w-full md:flex md:w-auto md:order-1" /> -->
         </div>
         <Dropdown triggeredBy="#notification" class="p-0 max-w-md">
-            <Listgroup class="border-none">
+            <!-- <Listgroup class="border-none">
                 <h3
                     class="text-center p-3 text-sm font-medium text-black bg-gray-50 dark:bg-gray-700 dark:text-white font-bold rounded-t-lg"
                 >
@@ -429,14 +508,16 @@
                 >
                     <p>Lihat Semua</p>
                 </a>
-            </Listgroup>
+            </Listgroup> -->
         </Dropdown>
-        <Dropdown triggeredBy="#avatar-menu">
+        <Dropdown triggeredBy="#avatar-menu" class="w-52 z-[100]">
             <DropdownHeader>
-                <span class="block text-sm"
-                    >{$page.props.auth.user.fullName}</span
+                <span class="block text-sm max-w-full truncate"
+                    >Halo, {$page.props.auth.user.fullName}</span
                 >
-                <span class="block truncate text-sm font-medium">{role}</span>
+                <span class="block truncate text-sm font-medium"
+                    ><b>{role}</b></span
+                >
             </DropdownHeader>
             <DropdownItem href="/profile">Profile</DropdownItem>
             <DropdownItem on:click={async () => await logout()}
@@ -459,28 +540,32 @@
     <div class="flex items-center">
         <CloseButton
             on:click={() => (drawerHidden = true)}
-            class="mb-4 dark:text-white lg:hidden"
+            class="mb- text-black dark:text-white lg:hidden"
         />
     </div>
-    <Sidebar asideClass="w-54">
+    <Sidebar asideClass="w-54 sidebar ">
         <SidebarWrapper class="rounded-none pt-0 bg-white">
             <SidebarGroup ulClass={groupClass} class="mb-3">
-                {#each filtermenu as { name, icon, children, href, isOpenItems } (name)}
+                {#each filtermenu as { name, icon, children, href } (name)}
                     {#if children}
                         <SidebarDropdownWrapper
                             label={name}
                             class="pr-3 bg-gray-100 dark:bg-gray-700"
-                            isOpen={isOpenItems}
+                            isOpen={$url
+                                ? isActiveChild(children, $url)
+                                : false}
                         >
                             <svelte:component this={icon} slot="icon" />
-                            {#each Object.entries(children) as [title, href]}
+                            {#each Object.entries(children) as [title, hrefs]}
                                 <SidebarItem
                                     label={title}
-                                    {href}
+                                    href={hrefs[0]}
                                     spanClass="ml-9"
                                     class={twMerge(
                                         itemClass,
-                                        active == title ? "bg-gray-900" : "",
+                                        $url.includes(hrefs[0])
+                                            ? "bg-gray-100 dark:bg-gray-900"
+                                            : "",
                                     )}
                                 />
                             {/each}
@@ -490,7 +575,12 @@
                             label={name}
                             {href}
                             spanClass="ml-3"
-                            class={itemClass}
+                            class={twMerge(
+                                itemClass,
+                                $url == href
+                                    ? "bg-gray-100 dark:bg-gray-900"
+                                    : "",
+                            )}
                         >
                             <svelte:component this={icon} slot="icon" />
                         </SidebarItem>
@@ -501,13 +591,37 @@
     </Sidebar>
 </Drawer>
 
-<div class="flex px-4 mx-auto w-full mb-14">
-    <main class="lg:ml-64 mt-4 w-full mx-auto" style="margin-top: 5rem">
+<div
+    class="bg-white dark:bg-gray-900 flex px-4 mx-auto w-full min-h-screen pb-14"
+>
+    <main class="h-full lg:ml-64 mt-4 w-full mx-auto" style="margin-top: 5rem">
+        <Breadcrumb aria-label="Default breadcrumb example" class="mb-2">
+            <BreadcrumbItem href="/beranda" home>Beranda</BreadcrumbItem>
+            {#if $url.replaceAll("/", "") != "beranda"}
+                {#if $url.split("/").length > 2}
+                    <BreadcrumbItem href={"/" + $url.split("/")[1]}
+                        >{$url.split("/")[1].toUpperCase()}</BreadcrumbItem
+                    >
+                {:else}
+                    <BreadcrumbItem
+                        >{$url
+                            .replace("/", "")
+                            .replaceAll("-", " ")
+                            .toUpperCase()}</BreadcrumbItem
+                    >
+                {/if}
+                {#if $url.split("/").length > 2}
+                    <BreadcrumbItem
+                        >{$url.split("/")[2].toUpperCase()}</BreadcrumbItem
+                    >
+                {/if}
+            {/if}
+        </Breadcrumb>
         <slot />
     </main>
 </div>
 <Footer
-    class="w-full p-3 border-t-2 mt-5 flex justify-center max-md:static fixed bottom-0 bg-white z-0 mt-5"
+    class="w-full p-3 border-t-2 mt-5 flex justify-center max-md:static fixed bottom-0 bg-white dark:bg-gray-800 z-0 mt-5"
 >
     <FooterCopyright by="Simpang Lima Softwork" />
 </Footer>

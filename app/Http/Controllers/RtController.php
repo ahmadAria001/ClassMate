@@ -6,12 +6,14 @@ use App\Http\Requests\Resources\RT\Create;
 use App\Http\Requests\Resources\RT\Delete;
 use App\Http\Requests\Resources\RT\Update;
 use App\Models\RT;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Laravel\Sanctum\PersonalAccessToken;
+use ReflectionClass;
 
 class RtController extends Controller
 {
@@ -20,9 +22,67 @@ class RtController extends Controller
         return Inertia::render('Auth/RT');
     }
 
-    public function get($filter = null)
+    public function manageRTView(Request $request)
+    {
+        $token = null;
+        if (str_contains($request->url(), 'api')) {
+            $token = $request->bearerToken();
+            if (!$token) {
+                $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+                if (!$token) {
+                    return redirect('login');
+                }
+            }
+        } else {
+            $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+
+            if (!$token) {
+                return redirect('login');
+            }
+        }
+
+        $pat = PersonalAccessToken::findToken($token);
+
+        if ($pat->cant((new ReflectionClass($this))->getShortName() . ':create') && $pat->cant((new ReflectionClass($this))->getShortName() . ':edit') && $pat->cant((new ReflectionClass($this))->getShortName() . ':destroy')) {
+            return abort(404);
+        }
+
+        return Inertia::render('DaftarRT');
+    }
+
+    public function civilianBuilder(Request $request)
+    {
+        $token = null;
+        if (str_contains($request->url(), 'api')) {
+            $token = $request->bearerToken();
+            if (!$token) {
+                $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+                if (!$token) {
+                    return redirect('login');
+                }
+            }
+        } else {
+            $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+
+            if (!$token) {
+                return redirect('login');
+            }
+        }
+
+        $pat = PersonalAccessToken::findToken($token);
+
+        if ($pat->cant((new ReflectionClass($this))->getShortName() . ':create') && $pat->cant((new ReflectionClass($this))->getShortName() . ':edit') && $pat->cant((new ReflectionClass($this))->getShortName() . ':destroy')) {
+            return abort(404);
+        }
+
+        return Inertia::render('PendudukByRT');
+    }
+
+    public function get($page = 1, $filter = null)
     {
         $data = null;
+        $take = 5;
+        $length = 0;
 
         if ($filter) {
             $data = RT::withoutTrashed()
@@ -36,7 +96,7 @@ class RtController extends Controller
                 ->get();
 
             if ($data) {
-                $data = $data->skip(0)->take(10);
+                $data = $data->skip(0)->take(100);
             }
         } else {
             $data = RT::withoutTrashed()
@@ -46,40 +106,50 @@ class RtController extends Controller
                         $q->orderBy('nkk');
                     },
                 ])
+                ->skip($page > 1 ? ($page - 1) * $take : 0)
+                ->take($page == 0 ? 100 : $take)
                 ->get();
+            $length = RT::withoutTrashed()->count();
 
             if ($data) {
                 $data = $data->skip(0)->take(10);
             }
         }
 
-        return Response()->json(['data' => $data], 200);
+        return Response()->json(['data' => $data, 'length' => $length], 200);
     }
 
-    public function withCivils($filter = null)
+    public function getDropDown()
+    {
+        $data = RT::withoutTrashed()
+            ->get(['id', 'number']);
+        $length = RT::withoutTrashed()->count();
+
+        return Response()->json(['data' => $data, 'length' => $length], 200);
+    }
+
+    public function withCivils($page = 1, $filter = null)
     {
         $data = null;
+        $take = 5;
 
         if ($filter) {
-            $data = RT::withTrashed()
-                ->with(['civils' => fn($query) => $query->orderBy('nkk')])
+            $data = RT::withoutTrashed()
+                ->with(['civils' => fn ($query) => $query->orderBy('nkk')])
                 ->where('id', '=', $filter)
-                ->skip(0)
-                ->take(10)
+                ->skip($page > 1 ? ($page - 1) * $take : 0)
+                ->take($take)
                 ->get();
-
-            if ($data) {
-                $data = $data->skip(0)->take(10);
-            }
         } else {
-            $data = RT::withTrashed()
+            $data = RT::withoutTrashed()
                 ->with([
                     'civils' => function ($query) {
                         $query->orderBy('nkk');
                     },
                 ])
-                ->skip(0)
-                ->take(10)
+                ->skip($page > 1 ? ($page - 1) * $take : 0)
+                ->take($take)
+
                 ->get();
 
             if ($data) {
@@ -87,7 +157,9 @@ class RtController extends Controller
             }
         }
 
-        return Response()->json(['data' => $data], 200);
+        $length = $data->count();
+
+        return Response()->json(['data' => $data, 'length' => $length], 200);
     }
 
     public function getCustom($column, $operator, $value)
@@ -201,11 +273,19 @@ class RtController extends Controller
                 ->find(['id' => $payload->get('id')])
                 ->first();
 
+            $old_leader = $data->leader_id;
+
             if ($data) {
                 if (Auth::guard('web')->check()) {
                     $data->update([
                         'leader_id' => $payload->get('leader_id'),
                         'number' => $payload->get('number'),
+                        'updated_by' => Auth::id(),
+                    ]);
+
+                    $leader = User::withoutTrashed()->where('id', $payload->get('leader_id'))->first();
+                    $leader->update([
+                        'role' => 'RT',
                         'updated_by' => Auth::id(),
                     ]);
                 } else {
@@ -230,6 +310,20 @@ class RtController extends Controller
                     $data->update([
                         'leader_id' => $payload->get('leader_id'),
                         'number' => $payload->get('number'),
+                        'updated_by' => $model->get('id')[0]->id,
+                    ]);
+
+                    $leader = User::withoutTrashed()->where('id', $payload->get('leader_id'))->first();
+                    $leader->update([
+                        'role' => 'RT',
+                        'updated_by' => $model->get('id')[0]->id,
+                    ]);
+                }
+
+                if ($old_leader) {
+                    $formerLeader = User::withoutTrashed()->where('id', $old_leader)->first();
+                    $formerLeader->update([
+                        'role' => 'Warga',
                         'updated_by' => $model->get('id')[0]->id,
                     ]);
                 }

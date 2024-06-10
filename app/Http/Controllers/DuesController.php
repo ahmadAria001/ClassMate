@@ -11,12 +11,43 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Laravel\Sanctum\PersonalAccessToken;
+use ReflectionClass;
 
 class DuesController extends Controller
 {
-    public function __invoke()
+    public function __invoke(Request $request)
     {
-        return Inertia::render('Auth/Dues');
+        $token = null;
+        if (str_contains($request->url(), 'api')) {
+            $token = $request->bearerToken();
+            if (!$token) {
+                $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+                if (!$token) {
+                    return redirect('login');
+                }
+            }
+        } else {
+            $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+
+            if (!$token) {
+                return redirect('login');
+            }
+        }
+
+        $pat = PersonalAccessToken::findToken($token);
+
+        if (!$pat) return redirect('login');
+
+        if ($pat->cant((new ReflectionClass($this))->getShortName() . ':create') && $pat->cant((new ReflectionClass($this))->getShortName() . ':edit') && $pat->cant((new ReflectionClass($this))->getShortName() . ':destroy')) {
+            return abort(404);
+        }
+        // return Inertia::render('Auth/Dues');
+        return Inertia::render('IuranWarga');
+    }
+
+    public function show()
+    {
+        return Inertia::render('IuranDetail');
     }
 
     public function get($filter = null)
@@ -29,7 +60,45 @@ class DuesController extends Controller
             $data = Dues::withoutTrashed()->with('rt_id')->get();
         }
 
-        return Response()->json(['data' => $data], 200);
+        $createdDues = array();
+        $key = "x";
+
+        for ($i = 1; $i <= 6; $i++) {
+            $createdDues[$key] = array();
+            for ($ix = 0; $ix < 2; $ix++) {
+                array_push($createdDues[$key], ["a" => 'sda']);
+            }
+        }
+
+        return Response()->json(['data' => $data, 'test' => $createdDues], 200);
+    }
+
+    public function manageDuesView(Request $request)
+    {
+        $token = null;
+        if (str_contains($request->url(), 'api')) {
+            $token = $request->bearerToken();
+            if (!$token) {
+                $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+                if (!$token) {
+                    return redirect('login');
+                }
+            }
+        } else {
+            $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+
+            if (!$token) {
+                return redirect('login');
+            }
+        }
+
+        $pat = PersonalAccessToken::findToken($token);
+
+        if ($pat->cant((new ReflectionClass($this))->getShortName() . ':create') && $pat->cant((new ReflectionClass($this))->getShortName() . ':edit') && $pat->cant((new ReflectionClass($this))->getShortName() . ':destroy')) {
+            return abort(404);
+        }
+
+        return Inertia::render('KeuanganRT');
     }
 
     public function create(CreateDues $req)
@@ -37,12 +106,19 @@ class DuesController extends Controller
         $payload = $req->safe()->collect();
 
         try {
-            $exist = Dues::find([
-                'typeDues' => $payload->get('typeDues'),
-                'rt_id' => $payload->get('rt_id'),
-            ]);
+            $exist = Dues::withoutTrashed()->where(
+                'typeDues',
+                '=',
+                $payload->get('typeDues')
+            )->where(
+                'rt_id',
+                '=',
+                $payload->get('rt_id')
+            )->first();
+            // ,
+            error_log($payload->get('typeDues'));
 
-            if (count($exist) > 0) {
+            if ($exist) {
                 return Response()->json(
                     [
                         'status' => false,
@@ -66,8 +142,14 @@ class DuesController extends Controller
 
                 if (str_contains($req->url(), 'api')) {
                     $token = $req->bearerToken();
-                    $pat = PersonalAccessToken::findToken($token);
+                    if (!$token) {
+                        $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+                        if (!$token) {
+                            return Response()->json(['message' => 'Unauthorized'], 401);
+                        }
+                    }
 
+                    $pat = PersonalAccessToken::findToken($token);
                     $model = $pat->tokenable();
 
                     $data->created_by = $model->get('id')[0]->id;
@@ -117,6 +199,13 @@ class DuesController extends Controller
                     ]);
                 } else {
                     $token = $req->bearerToken();
+                    if (!$token) {
+                        $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+                        if (!$token) {
+                            return Response()->json(['message' => 'Unauthorized'], 401);
+                        }
+                    }
+
                     $pat = PersonalAccessToken::findToken($token);
                     $model = $pat->tokenable();
 
@@ -165,8 +254,14 @@ class DuesController extends Controller
                     ]);
                 } else {
                     $token = $req->bearerToken();
-                    $pat = PersonalAccessToken::findToken($token);
+                    if (!$token) {
+                        $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+                        if (!$token) {
+                            return Response()->json(['message' => 'Unauthorized'], 401);
+                        }
+                    }
 
+                    $pat = PersonalAccessToken::findToken($token);
                     $model = $pat->tokenable();
                     $data->update([
                         'deleted_by' => $model->get('id')[0]->id,
@@ -193,5 +288,10 @@ class DuesController extends Controller
         } catch (\Throwable $th) {
             error_log($th);
         }
+    }
+
+    public function log()
+    {
+        return Inertia::render('LogPembayaran');
     }
 }

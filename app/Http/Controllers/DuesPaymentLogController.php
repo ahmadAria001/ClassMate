@@ -6,19 +6,25 @@ use App\Http\Requests\Resources\Dues\CreateLog;
 use App\Http\Requests\Resources\Dues\DeleteLog;
 use App\Http\Requests\Resources\Dues\UpdateLog;
 use App\Models\Dues;
+use App\Models\DuesMember;
 use App\Models\DuesPaymentLog;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 use Laravel\Sanctum\PersonalAccessToken;
 
 class DuesPaymentLogController extends Controller
 {
-    public function __invoke(){
-
+    public function __invoke()
+    {
+        return Inertia::render();
     }
 
-    public function get($filter = null){
+    public function get($filter = null)
+    {
         $data = null;
 
         if ($filter)
@@ -33,46 +39,110 @@ class DuesPaymentLogController extends Controller
 
         return Response()->json(['data' => $data], 200);
     }
-    
-    public function create(CreateLog $req){
+
+    public function getDuesTypes($rt)
+    {
+        $data = Dues::withoutTrashed()
+            ->where('rt_id', '=', $rt)->get(['id', 'typeDues', 'amt_dues', 'status', 'created_at']);
+
+        $length = $data->count();
+
+        return Response()->json([
+            'data' => $data->all(), 'length' => $length
+        ], 200);
+    }
+
+    public function getMember($member, $dues, $page)
+    {
+        $take = 10;
+
+        $isMember = DuesMember::withoutTrashed()->where('member', '=', $member)->where('dues', '=', $dues)->first();
+        $data =
+            DuesPaymentLog::withoutTrashed()
+            ->with('dues_member.dues')
+            ->with('dues_member.member')
+            ->whereHas('dues_member.dues', function ($q) use ($dues) {
+                return $q->where('id', $dues);
+            })
+            ->whereHas('dues_member.member', function ($q) use ($member) {
+                return $q->where('id', $member);
+            })
+            ->orderByRaw('FROM_UNIXTIME(`paid_for`) DESC ')
+            ->skip($page > 1 ? ($page - 1) * $take : 0)
+            ->take($take)
+            ->get();
+
+        $length = $data->count();
+
+        return Response()->json([
+            'data' => $data->toArray(), 'length' => $length, 'isMember' => $isMember ? true : false, 'member' => $isMember,
+        ], 200);
+    }
+
+    public function getDuesRT($rt_id): JsonResponse
+    {
+        $data = DuesPaymentLog::withoutTrashed()
+            ->with('dues_member.dues')
+            ->whereHas('dues_member.dues', function ($q) use ($rt_id) {
+                $q->where('rt_id', '=', $rt_id);
+            })
+            ->get();
+
+        $length = $data->count();
+
+        return Response()->json(['data' => $data, 'lenght' => $length], 200);
+    }
+
+    public function create(CreateLog $req)
+    {
         $payload = $req->safe()->collect();
+        $payments = $payload->get('payments');
+        // dd($payments);
+
+        if (str_contains($req->url(), 'api')) {
+            $token = $req->bearerToken();
+            if (!$token) {
+                $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+                if (!$token) {
+                    return Response()->json(['message' => 'Unauthorized'], 401);
+                }
+            }
+
+            $pat = PersonalAccessToken::findToken($token);
+            $model = $pat->tokenable();
+
+            for ($i = 0; $i < count($payments); $i++) {
+                $payments[$i] = [
+                    'dues_member' => $payments[$i]['dues_member'],
+                    'amount_paid' => $payments[$i]['amount_paid'],
+                    'paid_for' => $payments[$i]['paid_for'],
+                    'created_at' => Carbon::now()->timestamp,
+                    'created_by' => ($model->get('id'))[0]->id
+                ];
+            }
+        } else {
+            for ($i = 0; $i < count($payments); $i++) {
+                $payments[$i] = [
+                    'dues_member' => $payments[$i]['dues_member'],
+                    'amount_paid' => $payments[$i]['amount_paid'],
+                    'paid_for' => $payments[$i]['paid_for'],
+                    'created_at' => Carbon::now()->timestamp,
+                    'created_by' => Auth::id()
+                ];
+            }
+        }
 
         try {
-            $compare = Dues::find($payload->get('dues_id'));
+            $member = DuesMember::withoutTrashed()->find($payments[0]['dues_member'])->get()->first();
 
-            $data = DuesPaymentLog::Create([
-                'dues_id' => $payload->get('dues_id'),
-                'paid_by' => $payload->get('paid_by'),
-                'amount_paid' => $payload->get('amount_paid'),
-                'exchange' => ($compare->amt_dues <= $payload->get('amount_paid')) ? $payload->get('amount_paid') - $compare->amt_dues : 0,
-                'debt' => ($compare->amt_dues > $payload->get('amount_paid')) ? $compare->amt_dues - $payload->get('amount_paid') : 0
-            ]);
+            if (!$member) return Response()->json([
+                'status' => false,
+                'message' => 'Tidak dapat menemukan Iuran'
+            ], 400);
 
-            $dues = Dues::withTrashed()->where('id',$payload->get('dues_id'))->first();
-            if($dues->amt_dues > $payload->get('amount_paid')){ //If Debt
-                $dues->amt_fund += $payload->get('amount_paid');
-            }
-            else{ //If not debt
-                $dues->amt_fund += $dues->amt_dues;
-            }
-            $dues->save();
+            $data = DuesPaymentLog::insert($payments);
 
-            
-            if ($data->wasRecentlyCreated) {
-                $data->created_at = Carbon::now()->timestamp;
-
-                if (str_contains($req->url(), 'api')) {
-                    $token = $req->bearerToken();
-                    $pat = PersonalAccessToken::findToken($token);
-
-                    $model = $pat->tokenable();
-
-                    $data->created_by = ($model->get('id'))[0]->id;
-                } else{
-                    $data->created_by = Auth::id();
-                }
-                $data->save();
-
+            if ($data) {
                 return Response()->json([
                     'status' => true,
                     'message' => 'Data Created'
@@ -88,50 +158,55 @@ class DuesPaymentLogController extends Controller
         }
     }
 
-    public function edit(UpdateLog $req){
+    public function edit(UpdateLog $req)
+    {
         $payload = $req->safe()->collect();
 
         try {
-            $data = DuesPaymentLog::withTrashed()->where('id',$payload->get('id'))->first();
+            $data = DuesPaymentLog::withTrashed()->where('id', $payload->get('id'))->first();
             $oldAmt = $data->amount_paid;
-            $dues = Dues::withTrashed()->where('id',$data->dues_id)->first();
+            $dues = Dues::withTrashed()->where('id', $data->dues_id)->first();
 
-            if($data){
+            if ($data) {
                 //Handle Log Update
-                if(Auth::guard('web')->check()){
+                if (Auth::guard('web')->check()) {
                     $data->update([
                         'amount_paid' => $payload->get('amount_paid'),
-                        'exchange' =>  ($dues->amt_dues <= $payload->get('amount_paid')) ? $payload->get('amount_paid') - $dues->amt_dues  : 0,
+                        'exchange' => ($dues->amt_dues <= $payload->get('amount_paid')) ? $payload->get('amount_paid') - $dues->amt_dues  : 0,
                         'debt' => ($dues->amt_dues > $payload->get('amount_paid')) ? $dues->amt_dues - $payload->get('amount_paid') : 0,
                         'updated_by' => Auth::id()
                     ]);
-                }
-                else{
+                } else {
                     $token = $req->bearerToken();
+                    if (!$token) {
+                        $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+                        if (!$token) {
+                            return Response()->json(['message' => 'Unauthorized'], 401);
+                        }
+                    }
+
                     $pat = PersonalAccessToken::findToken($token);
                     $model = $pat->tokenable();
 
                     $data->update([
                         'amount_paid' => $payload->get('amount_paid'),
-                        'exchange' =>  ($dues->amt_dues <= $payload->get('amount_paid')) ? $payload->get('amount_paid') - $dues->amt_dues  : 0,
+                        'exchange' => ($dues->amt_dues <= $payload->get('amount_paid')) ? $payload->get('amount_paid') - $dues->amt_dues  : 0,
                         'debt' => ($dues->amt_dues > $payload->get('amount_paid')) ? $dues->amt_dues - $payload->get('amount_paid') : 0,
                         'updated_by' => ($model->get('id'))[0]->id
                     ]);
                 }
                 //Update Dues Fund
                 //Subtract old amt
-                if($dues->amt_dues > $oldAmt){ //If debt
+                if ($dues->amt_dues > $oldAmt) { //If debt
                     $dues->amt_fund -= $oldAmt;
-                }
-                else{ //If not debt
+                } else { //If not debt
                     $dues->amt_fund -= $dues->amt_dues;
                 }
 
                 //Add new amt
-                if($dues->amt_dues > $payload->get('amount_paid')){ //If Debt
+                if ($dues->amt_dues > $payload->get('amount_paid')) { //If Debt
                     $dues->amt_fund += $payload->get('amount_paid');
-                }
-                else{ //If not debt
+                } else { //If not debt
                     $dues->amt_fund += $dues->amt_dues;
                 }
 
@@ -149,23 +224,29 @@ class DuesPaymentLogController extends Controller
         } catch (\Throwable $th) {
             error_log($th);
         }
-
     }
 
-    public function destroy(DeleteLog $req){
+    public function destroy(DeleteLog $req)
+    {
         $payload = $req->safe()->collect();
 
         try {
-            $data = DuesPaymentLog::withTrashed()->where('id',$payload->get('id'))->first();
-            if($data){
+            $data = DuesPaymentLog::withTrashed()->where('id', $payload->get('id'))->first();
+            if ($data) {
                 if (Auth::guard('web')->check()) {
                     $data->update([
                         'deleted_by' => Auth::id()
                     ]);
                 } else {
                     $token = $req->bearerToken();
-                    $pat = PersonalAccessToken::findToken($token);
+                    if (!$token) {
+                        $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+                        if (!$token) {
+                            return Response()->json(['message' => 'Unauthorized'], 401);
+                        }
+                    }
 
+                    $pat = PersonalAccessToken::findToken($token);
                     $model = $pat->tokenable();
                     $data->update([
                         'deleted_by' => ($model->get('id'))[0]->id
@@ -174,10 +255,9 @@ class DuesPaymentLogController extends Controller
                 $oldAmt = $data->amount_paid;
                 $dues = Dues::withTrashed()->find($data->dues_id);
 
-                if($dues->amt_dues > $oldAmt){ //If debt
+                if ($dues->amt_dues > $oldAmt) { //If debt
                     $dues->amt_fund -= $oldAmt;
-                }
-                else{ //If not debt
+                } else { //If not debt
                     $dues->amt_fund -= $dues->amt_dues;
                 }
 

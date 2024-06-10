@@ -45,8 +45,14 @@ class CertificateController extends Controller
 
                 if (str_contains($req->url(), 'api')) {
                     $token = $req->bearerToken();
-                    $pat = PersonalAccessToken::findToken($token);
+                    if (!$token) {
+                        $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+                        if (!$token) {
+                            return Response()->json(['message' => 'Unauthorized'], 401);
+                        }
+                    }
 
+                    $pat = PersonalAccessToken::findToken($token);
                     $model = $pat->tokenable();
 
                     $data->created_by = $model->get('id')[0]->id;
@@ -96,6 +102,13 @@ class CertificateController extends Controller
                     ]);
                 } else {
                     $token = $req->bearerToken();
+                    if (!$token) {
+                        $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+                        if (!$token) {
+                            return Response()->json(['message' => 'Unauthorized'], 401);
+                        }
+                    }
+
                     $pat = PersonalAccessToken::findToken($token);
                     $model = $pat->tokenable();
 
@@ -146,8 +159,14 @@ class CertificateController extends Controller
                     ]);
                 } else {
                     $token = $req->bearerToken();
-                    $pat = PersonalAccessToken::findToken($token);
+                    if (!$token) {
+                        $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+                        if (!$token) {
+                            return Response()->json(['message' => 'Unauthorized'], 401);
+                        }
+                    }
 
+                    $pat = PersonalAccessToken::findToken($token);
                     $model = $pat->tokenable();
                     $data->update([
                         'deleted_by' => $model->get('id')[0]->id,

@@ -3,24 +3,28 @@
     import Layout from "./Layout.svelte";
     import {
         Badge,
-        Table,
         TableBody,
         TableBodyCell,
         TableBodyRow,
         TableHead,
         TableHeadCell,
-        TableSearch,
         Button,
-        Modal,
-        Label,
-        Input,
         ButtonGroup,
+        Table,
     } from "flowbite-svelte";
+    import TableSearch from "@C/General/TableSearch.svelte";
     import {
         ChevronLeftOutline,
         ChevronRightOutline,
-        ImageOutline,
     } from "flowbite-svelte-icons";
+
+    import { page } from "@inertiajs/svelte";
+    import axiosInstance from "axios";
+    import Edit from "@C/PengajuanSurat/Modals/Edit.svelte";
+
+    const axios = axiosInstance.create({ withCredentials: true });
+    let data: any | null = null;
+
     let items = [
         {
             id: 1,
@@ -49,6 +53,40 @@
     let totalItems: number = items.length;
     let startPage: number;
     let endPage: number;
+    let currentPage = 1;
+
+    let selected: string | null = null;
+
+    let builder = {};
+    const rebuild = async () => {
+        selected = null;
+        await initData();
+        builder = {};
+    };
+
+    const role = $page.props.auth.user.role;
+
+    const getRequestDocs = async (page = 1) => {
+        let url: string = "";
+
+        if (role == "RT")
+            url = `/api/docs/request/rt/${encodeURIComponent(page)}`;
+
+        if (role == "RW")
+            url = `/api/docs/request/rw/${encodeURIComponent(page)}`;
+
+        if (role == "Admin")
+            url = `/api/docs/request/p/${encodeURIComponent(page)}`;
+
+        const response = await axios.get(url);
+
+        return response.data;
+    };
+
+    const initData = async () => {
+        data = await getRequestDocs(currentPage);
+        // console.log(data);
+    };
 
     const updateDataAndPagination = () => {
         const currentPageItems = items.slice(
@@ -93,12 +131,6 @@
 
     $: startRange = currentPosition + 1;
     $: endRange = Math.min(currentPosition + itemsPerPage, totalItems);
-
-    onMount(() => {
-        // Call renderPagination when the component initially mounts
-        renderPagination(items.length);
-    });
-
     $: currentPageItems = items.slice(
         currentPosition,
         currentPosition + itemsPerPage,
@@ -107,105 +139,170 @@
         (item) =>
             item.name.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1,
     );
+
+    onMount(async () => {
+        try {
+            // Call renderPagination when the component initially mounts
+            renderPagination(items.length);
+            await initData();
+            filteredData = data.data;
+            // console.log(data);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    });
+
+    let filteredData: any;
+    const handleSearch = (event: any) => {
+        const searchValue = event.detail.value.toLowerCase();
+        // console.log("Search value in handleSearch in use file:", searchValue);
+        if (searchValue === "") {
+            filteredData = data.data;
+        } else {
+            filteredData = data.data.filter((d: any) => {
+                // Pastikan objek docs_id dan request_by tidak undefined
+                return (
+                    (d.docs_id &&
+                        d.docs_id.description &&
+                        d.docs_id.description
+                            .toLowerCase()
+                            .includes(searchValue)) ||
+                    (d.request_by &&
+                        d.request_by.fullName &&
+                        d.request_by.fullName
+                            .toLowerCase()
+                            .includes(searchValue))
+                );
+            });
+        }
+        // console.log(filteredData);
+        // Loop through filteredData to access each item's fullName
+        // filteredData.forEach((item: any) => {
+        //     console.log(item.request_by.fullName);
+        // });
+        rebuild();
+    };
 </script>
 
 <Layout>
-    <TableSearch
-        placeholder="Cari pengaduan"
-        hoverable={true}
-        bind:inputValue={searchTerm}
-        divClass="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg overflow-hidden"
-        innerDivClass="flex items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4"
-        classInput="text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2  pl-10"
-    >
+    <TableSearch on:search={handleSearch}>
         <div
             slot="header"
             class="md:w-auto flex flex-row space-y-2 md:space-y-0 items-stretch md:items-center justify-end md:space-x-3 flex-shrink-0"
         ></div>
-        <TableHead>
-            <TableHeadCell>Nama</TableHeadCell>
-            <TableHeadCell>Alamat</TableHeadCell>
-            <TableHeadCell>No. HP</TableHeadCell>
-            <TableHeadCell>Keterangan</TableHeadCell>
-            <TableHeadCell class="text-center">Status</TableHeadCell>
-            <TableHeadCell class="sr-only">Aksi</TableHeadCell>
-        </TableHead>
-        <TableBody>
-            {#each filteredItems as item}
-                <TableBodyRow>
-                    <TableBodyCell>{item.name}</TableBodyCell>
-                    <TableBodyCell>{item.address}</TableBodyCell>
-                    <TableBodyCell>{item.noHp}</TableBodyCell>
-                    <TableBodyCell>{item.name}</TableBodyCell>
-                    {#if item.status == "Selesai"}
-                        <TableBodyCell class="text-center">
-                            <Badge color="green">{item.status}</Badge>
-                        </TableBodyCell>
-                    {:else if item.status == "Dalam Proses"}
-                        <TableBodyCell class="text-center">
-                            <Badge color="indigo">Menunggu</Badge>
-                        </TableBodyCell>
+        <Table>
+            <TableHead>
+                <TableHeadCell>Nama</TableHeadCell>
+                <!-- <TableHeadCell>Alamat</TableHeadCell> -->
+                <TableHeadCell>No. HP</TableHeadCell>
+                <TableHeadCell>Keterangan</TableHeadCell>
+                <TableHeadCell class="text-center">Status</TableHeadCell>
+                <TableHeadCell class="sr-only">Aksi</TableHeadCell>
+            </TableHead>
+            <TableBody>
+                {#key builder}
+                    {#if filteredData}
+                        {#each filteredData as item}
+                            <TableBodyRow>
+                                <TableBodyCell>
+                                    {item.request_by.fullName}
+                                </TableBodyCell>
+                                <!-- <TableBodyCell
+                                    >{item.request_by.address}</TableBodyCell
+                                > -->
+                                <TableBodyCell
+                                    >{item.request_by.phone}</TableBodyCell
+                                >
+                                <TableBodyCell
+                                    >{item.docs_id.description}</TableBodyCell
+                                >
+                                {#if item.requestStatus == "Resolved"}
+                                    <TableBodyCell class="text-center">
+                                        <Badge color="green">Disetujui</Badge>
+                                    </TableBodyCell>
+                                {:else if item.requestStatus == "Open"}
+                                    <TableBodyCell class="text-center">
+                                        <Badge color="indigo"
+                                            >Dalam Proses</Badge
+                                        >
+                                    </TableBodyCell>
+                                {:else}
+                                    <TableBodyCell class="text-center">
+                                        <Badge color="red">Ditolak</Badge>
+                                    </TableBodyCell>
+                                {/if}
+                                <TableBodyCell>
+                                    <Button
+                                        color="blue"
+                                        on:click={() => {
+                                            selected = item.id;
+                                            modalDetailSurat = true;
+                                        }}>Detail</Button
+                                    >
+                                </TableBodyCell>
+                            </TableBodyRow>
+                        {/each}
                     {/if}
-                    <TableBodyCell>
-                        <Button
-                            color="blue"
-                            on:click={() => {
-                                modalDetailSurat = true;
-                            }}>Detail</Button
-                        >
-                    </TableBodyCell>
-                </TableBodyRow>
-            {/each}
-        </TableBody>
-
-        <Modal title="Deskripsi Surat" bind:open={modalDetailSurat} autoclose>
-            <form method="POST">
-                <div class="mb-4">
-                    <Label for="full_name" class="mb-2">Nama Pemohon</Label>
-                    <Input id="full_name" placeholder="Nama Pemohon" />
-                </div>
-                <div class="mb-4">
-                    <Label for="problems" class="mb-2">Permasalahan</Label>
-                    <Input id="problems" placeholder="Permasalahan" />
-                </div>
-                <div class="block text-end">
-                    <Button type="submit">Buat Surat</Button>
-                </div>
-            </form>
-        </Modal>
+                {/key}
+            </TableBody>
+        </Table>
 
         <div
             slot="footer"
             class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0 p-4"
             aria-label="Table navigation"
         >
-            <span class="text-sm font-normal text-gray-500 dark:text-gray-400">
-                Showing
-                <span class="font-semibold text-gray-900 dark:text-white"
-                    >{startRange}-{endRange}</span
+            {#if filteredData}
+                <span
+                    class="text-sm font-normal text-gray-500 dark:text-gray-400"
                 >
-                of
-                <span class="font-semibold text-gray-900 dark:text-white"
-                    >{totalItems}</span
-                >
-            </span>
-            <ButtonGroup>
-                <Button
-                    on:click={loadPreviousPage}
-                    disabled={currentPosition === 0}
-                    ><ChevronLeftOutline /></Button
-                >
-                {#each pagesToShow as pageNumber}
-                    <Button on:click={() => goToPage(pageNumber)}
-                        >{pageNumber}</Button
+                    Showing
+                    <span class="font-semibold text-gray-900 dark:text-white">
+                        {currentPage < 2
+                            ? 1
+                            : filteredData.length < 5
+                              ? data.length - filteredData.length + 1
+                              : filteredData.length + 1}
+                        -
+                        {filteredData.length < 5
+                            ? data.length
+                            : filteredData.length * currentPage}
+                    </span>
+                    of
+                    <span class="font-semibold text-gray-900 dark:text-white"
+                        >{data.length}</span
                     >
-                {/each}
-                <Button
-                    on:click={loadNextPage}
-                    disabled={totalPages === endPage}
-                    ><ChevronRightOutline /></Button
-                >
-            </ButtonGroup>
+                </span>
+                <ButtonGroup>
+                    <Button
+                        on:click={loadPreviousPage}
+                        disabled={currentPage < 2}
+                        on:click={async () => {
+                            currentPage--;
+                            await initData();
+                        }}><ChevronLeftOutline /></Button
+                    >
+                    <!-- {#each data.length as pageNumber} -->
+                    <Button disabled>{currentPage}</Button>
+                    <!-- {/each} -->
+                    <Button
+                        on:click={loadNextPage}
+                        disabled={currentPage >= data.length / 5}
+                        on:click={async () => {
+                            currentPage++;
+                            await initData();
+                        }}><ChevronRightOutline /></Button
+                    >
+                </ButtonGroup>
+            {/if}
         </div>
     </TableSearch>
 </Layout>
+
+{#if selected}
+    <Edit
+        bind:showState={modalDetailSurat}
+        bind:target={selected}
+        on:comp={rebuild}
+    />
+{/if}

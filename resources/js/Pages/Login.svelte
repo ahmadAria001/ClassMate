@@ -5,7 +5,6 @@
     import axios from "axios";
     import { page, router } from "@inertiajs/svelte";
     import { Login } from "@R/schema";
-    import { setCookie, getCookie } from "./../Utils/Cokies";
     import { Label, Input, Checkbox, A, Button } from "flowbite-svelte";
     export let site = {
         name: "KawanDesa",
@@ -27,11 +26,9 @@
             _token: $page.props.csrf_token,
         });
 
-        const { status, token, exp } = response.data;
-        // if (status) setCookie("token", response.data.token, exp);
+        const data = response.data;
 
-        // before '/civilian'
-        router.visit("/beranda");
+        if (data.status) window.location = "/beranda";
     };
 
     const errHandler = () => {};
@@ -66,17 +63,17 @@
         class="flex flex-col items-center justify-center px-6 pt-8 max-auto md:h-screen pt:mt-0"
     >
         <div class="md:w-1/3">
-            <a
-                href={site.link}
-                class="flex flex-col items-center justify-center mb-3"
-            >
-                <img src={site.img} alt={site.imgAlt} class="mb-3" />
-                <span class="text-2xl font-bold">{site.name}</span>
-            </a>
+            <div class="flex flex-col items-center justify-center mb-3">
+                <a href={site.link} class="flex flex-col">
+                    <img src={site.img} alt={site.imgAlt} class="mb-3" />
+                    <span class="text-2xl font-bold">{site.name}</span>
+                </a>
+            </div>
             <form use:form method="POST">
                 <Label class="space-y-2 mb-3">
-                    <span>NIK</span>
+                    <span class="dark:text-black">Username</span>
                     <Input
+                        class="dark:bg-white dark:text-black"
                         type="text"
                         name="username"
                         placeholder="Masukan NIK anda"
@@ -87,8 +84,9 @@
                     <span class="text-sm text-red-500">{$errors.username}</span>
                 {/if}
                 <Label class="space-y-2 mb-3">
-                    <span>Password</span>
+                    <span class="dark:text-black">Password</span>
                     <Input
+                        class="dark:bg-white dark:text-black"
                         type="password"
                         name="password"
                         placeholder="Masukan password anda"
@@ -104,7 +102,9 @@
                     >
                 {/if}
                 <div class="flex items-start mb-3">
-                    <Checkbox color="blue">Ingat saya</Checkbox>
+                    <Checkbox color="blue" class="dark:text-black"
+                        >Ingat saya</Checkbox
+                    >
                     <a
                         href="/"
                         class="ml-auto text-sm font-bold text-blue-700 hover:underline dark:text-blue-500"
@@ -117,93 +117,10 @@
                     disabled={$isSubmitting}
                     class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 />
-                <Label class="font-bold mt-3"
+                <Label class="font-bold mt-3 dark:text-black"
                     >Belum Punya Akun? <A href="/register">Buat Akun</A></Label
                 >
             </form>
         </div>
     </div>
 </main>
-
-<!-- component -->
-<!-- <div
-    class="min-h-screen flex items-center justify-center w-full dark:bg-gray-950"
->
-    <div
-        class="bg-white dark:bg-gray-900 shadow-md rounded-lg px-8 py-6 max-w-md"
-    >
-        <h1 class="text-2xl font-bold text-center mb-4 dark:text-gray-200">
-            Welcome Back!
-        </h1>
-        <form use:form method="POST">
-            <div class="mb-4">
-                <label
-                    for="username"
-                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                    >Username</label
-                >
-                <input
-                    type="text"
-                    id="username"
-                    name="username"
-                    class="shadow-sm rounded-md w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="whois"
-                    required
-                />
-                {#if $errors.username}
-                    <span class="text-sm text-red-500">{$errors.username}</span>
-                {/if}
-            </div>
-            <div class="mb-4">
-                <label
-                    for="password"
-                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                    >Password</label
-                >
-                <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    class="shadow-sm rounded-md w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="Enter your password"
-                    required
-                />
-                {#if $errors.password}
-                    <span class="text-sm text-red-500">{$errors.password}</span>
-                    <br />
-                {/if}
-                <a
-                    href="#"
-                    class="text-xs text-gray-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >Forgot Password?</a
-                >
-            </div>
-            <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center">
-                    <input
-                        type="checkbox"
-                        id="remember"
-                        class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 focus:outline-none"
-                        checked
-                    />
-                    <label
-                        for="remember"
-                        class="ml-2 block text-sm text-gray-700 dark:text-gray-300"
-                        >Remember me</label
-                    >
-                </div>
-                <a
-                    href="#"
-                    class="text-xs text-indigo-500 hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >Create Account</a
-                >
-            </div>
-            <input
-                type="submit"
-                value="Signin"
-                disabled={$isSubmitting}
-                class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            />
-        </form>
-    </div>
-</div> -->

@@ -17,12 +17,41 @@ use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 use Laravel\Sanctum\PersonalAccessToken;
+use ReflectionClass;
 
 class CivilianController extends Controller
 {
     public function __invoke(): Response
     {
         return Inertia::render('Auth/Civilian');
+    }
+
+    public function viewArchived(Request $request)
+    {
+        $token = null;
+        if (str_contains($request->url(), 'api')) {
+            $token = $request->bearerToken();
+            if (!$token) {
+                $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+                if (!$token) {
+                    return redirect('login');
+                }
+            }
+        } else {
+            $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+
+            if (!$token) {
+                return redirect('login');
+            }
+        }
+
+        $pat = PersonalAccessToken::findToken($token);
+
+        if ($pat->cant((new ReflectionClass($this))->getShortName() . ':get')) {
+            return abort(404);
+        }
+
+        return Inertia::render('ArsipPenduduk');
     }
 
     public function get($filter = null): JsonResponse
@@ -35,6 +64,33 @@ class CivilianController extends Controller
         }
 
         return Response()->json(['data' => $data], 200);
+    }
+
+
+    public function getCivilanRT($rt_id): JsonResponse
+    {
+        $data = Civilian::withoutTrashed()
+            ->where('rt_id', $rt_id)
+            ->get();
+
+        $length = $data->count();
+
+        return Response()->json(['data' => $data, 'lenght' => $length], 200);
+    }
+
+    public function getFamilyHead($rt_id): JsonResponse
+    {
+        $data = Civilian::withoutTrashed()
+            ->with('rt_id')
+            ->whereHas('rt_id', function ($q) use ($rt_id) {
+                return $q->where('id', $rt_id);
+            })
+            ->where('isFamilyHead', true)
+            ->get();
+
+        $length = $data->count();
+
+        return Response()->json(['data' => $data, 'lenght' => $length], 200);
     }
 
     public function getCustom($column, $operator, $value): JsonResponse

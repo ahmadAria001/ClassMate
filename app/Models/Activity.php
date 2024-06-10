@@ -11,18 +11,7 @@ class Activity extends Model
 {
     use HasFactory, SoftDeletes;
     protected $table = 'activity';
-    protected $fillable = [
-        'docs_id',
-        'name',
-        'startDate',
-        'endDate',
-        'created_at',
-        'created_by',
-        'updated_at',
-        'updated_by',
-        'deleted_at',
-        'deleted_by'
-    ];
+    protected $fillable = ['docs_id', 'name', 'startDate', 'endDate', 'location', 'created_at', 'created_by', 'updated_at', 'updated_by', 'deleted_at', 'deleted_by'];
     protected $dateFormat = 'U';
 
     public function docs_id(): BelongsTo

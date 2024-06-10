@@ -13,11 +13,14 @@ class FinancialAssistance extends Model
     use HasFactory, SoftDeletes;
     protected $table = 'bansos';
     protected $fillable = [
+        'id',
         'request_by',
-        'tanggungan',
-        'alasan',
+        'childrens',
+        'salary',
+        'expenses',
+        'job_status',
+        'residence_status',
         'status',
-        'tanggungan',
         'created_at',
         'created_by',
         'updated_at',

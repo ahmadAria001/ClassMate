@@ -7,17 +7,35 @@
         TableBodyRow,
         TableHead,
         TableHeadCell,
-        TableSearch,
         Button,
         Modal,
         Label,
         Input,
         ButtonGroup,
+        Popover,
+        Table,
     } from "flowbite-svelte";
+    import TableSearch from "@C/General/TableSearch.svelte";
     import {
         ChevronLeftOutline,
         ChevronRightOutline,
+        QuestionCircleSolid,
     } from "flowbite-svelte-icons";
+
+    import axiosInstance from "axios";
+    import Create from "@C/Kegiatan/Modals/Create.svelte";
+    import Edit from "@C/Kegiatan/Modals/Edit.svelte";
+
+    const axios = axiosInstance.create({ withCredentials: true });
+    let builder = {};
+
+    const rebuild = async () => {
+        await initData();
+        builder = {};
+    };
+
+    let data: any | null = null;
+
     let items = [
         {
             id: 1,
@@ -45,6 +63,21 @@
     let totalItems: number = items.length;
     let startPage: number;
     let endPage: number;
+    let currentPage = 1;
+
+    let selected: string | null = null;
+
+    const getRequestDocs = async (page = 1) => {
+        const response = await axios.get(
+            `/api/docs/activity/p/${encodeURIComponent(page)}`,
+        );
+
+        return response.data;
+    };
+
+    const initData = async () => {
+        data = await getRequestDocs(currentPage);
+    };
 
     const updateDataAndPagination = () => {
         const currentPageItems = items.slice(
@@ -90,11 +123,6 @@
     $: startRange = currentPosition + 1;
     $: endRange = Math.min(currentPosition + itemsPerPage, totalItems);
 
-    onMount(() => {
-        // Call renderPagination when the component initially mounts
-        renderPagination(items.length);
-    });
-
     $: currentPageItems = items.slice(
         currentPosition,
         currentPosition + itemsPerPage,
@@ -103,17 +131,64 @@
         (item) =>
             item.name.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1,
     );
+
+    const dateFormatter = (epoc: number) => {
+        const date = new Date(epoc);
+
+        const monthNames = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+        ];
+
+        const day = date.getDate();
+
+        const monthIndex = date.getMonth();
+        const monthName = monthNames[monthIndex];
+
+        const year = date.getFullYear();
+
+        return `${day} ${monthName} ${year}`;
+    };
+
+    onMount(async () => {
+        try {
+            // Call renderPagination when the component initially mounts
+            renderPagination(items.length);
+            await initData();
+            filteredData = data.data;
+            // console.log(filteredData);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    });
+
+    let filteredData: any;
+    const handleSearch = (event: any) => {
+        const searchValue = event.detail.value.toLowerCase();
+        // console.log("Search value in handleSearch in use file:", searchValue);
+        if (searchValue == "") {
+            filteredData = [data.data];
+        }
+        filteredData = data.data.filter((d: any) =>
+            d.name.toLowerCase().includes(searchValue),
+        );
+        // console.log(filteredData);
+        rebuild();
+    };
 </script>
 
 <Layout>
-    <TableSearch
-        placeholder="Cari Kegiatan"
-        hoverable={true}
-        bind:inputValue={searchTerm}
-        divClass="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg overflow-hidden"
-        innerDivClass="flex items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4"
-        classInput="text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2  pl-10"
-    >
+    <TableSearch on:search={handleSearch}>
         <div
             slot="header"
             class="md:w-auto flex flex-row space-y-2 md:space-y-0 items-stretch md:items-center justify-end md:space-x-3 flex-shrink-0"
@@ -124,130 +199,133 @@
                 }}>+ Tambah Kegiatan</Button
             >
         </div>
-        <Modal title="Tambah Kegiatan" bind:open={addActivity} autoclose>
-            <form method="POST">
-                <div class="grid md:grid-cols-2 md:gap-6">
-                    <div class="mb-4">
-                        <Label for="activityName" class="mb-2"
-                            >Nama Kegiatan</Label
-                        >
-                        <Input id="activityName" placeholder="Nama Kegiatan" />
-                    </div>
-                    <div class="mb-4">
-                        <Label for="location" class="mb-2">Lokasi</Label>
-                        <Input id="location" placeholder="Lokasi" />
-                    </div>
-                </div>
-                <div class="grid md:grid-cols-2 md:gap-6">
-                    <div class="mb-4">
-                        <Label for="time" class="mb-2">Waktu</Label>
-                        <Input id="time" placeholder="Waktu" />
-                    </div>
-                    <div class="mb-4">
-                        <Label for="date" class="mb-2">Tanggal</Label>
-                        <Input type="date" id="date" placeholder="Tanggal" />
-                    </div>
-                </div>
-                <div class="block flex">
-                    <Button type="submit" class="ml-auto">Simpan</Button>
-                </div>
-            </form>
-        </Modal>
+        <Table>
+            <TableHead>
+                <TableHeadCell>Nama Kegiatan</TableHeadCell>
+                <TableHeadCell>Lokasi</TableHeadCell>
+                <TableHeadCell class="text-center">Waktu</TableHeadCell>
+                <!-- <TableHeadCell class="text-center">Tanggal</TableHeadCell> -->
+                <TableHeadCell class="sr-only">Aksi</TableHeadCell>
+            </TableHead>
+            <TableBody>
+                {#key builder}
+                    {#if filteredData}
+                        {#each filteredData as item, idx}
+                            <TableBodyRow>
+                                <TableBodyCell>
+                                    <div
+                                        class="flex justify-between align-middle gap-2"
+                                    >
+                                        <span class="w-full truncate">
+                                            {item.name}
+                                        </span>
+                                        <QuestionCircleSolid
+                                            id={`title-${item.id}`}
+                                        />
+                                    </div>
+                                </TableBodyCell>
+                                <TableBodyCell>
+                                    {item.location}
+                                </TableBodyCell>
+                                <TableBodyCell
+                                    class="text-center uppercase flex justify-center"
+                                >
+                                    <span class="text-center">
+                                        {dateFormatter(item.startDate * 1000)}
+                                        <br />
+                                        {new Date(
+                                            item.startDate * 1000,
+                                        ).toLocaleTimeString(undefined, {
+                                            hour12: false,
+                                        })}
+                                    </span>
+                                    <span class="ms-5 text-center">
+                                        {dateFormatter(item.endDate * 1000)}
+                                        <br />
+                                        {new Date(
+                                            item.endDate * 1000,
+                                        ).toLocaleTimeString(undefined, {
+                                            hour12: false,
+                                        })}
+                                    </span>
+                                </TableBodyCell>
+                                <TableBodyCell>
+                                    <Button
+                                        color="blue"
+                                        on:click={() => {
+                                            selected = item.id;
+                                            modalEdit = true;
+                                        }}>Edit Data</Button
+                                    >
+                                </TableBodyCell>
+                            </TableBodyRow>
 
-        <TableHead>
-            <TableHeadCell>Nama Kegiatan</TableHeadCell>
-            <TableHeadCell>Lokasi</TableHeadCell>
-            <TableHeadCell class="text-center">Waktu</TableHeadCell>
-            <TableHeadCell class="text-center">Tanggal</TableHeadCell>
-            <TableHeadCell class="sr-only">Aksi</TableHeadCell>
-        </TableHead>
-        <TableBody>
-            {#each filteredItems as item}
-                <TableBodyRow>
-                    <TableBodyCell>{item.name}</TableBodyCell>
-                    <TableBodyCell>{item.location}</TableBodyCell>
-                    <TableBodyCell class="text-center uppercase"
-                        >{item.time}</TableBodyCell
-                    >
-                    <TableBodyCell class="text-center"
-                        >{item.date}</TableBodyCell
-                    >
-                    <TableBodyCell>
-                        <Button
-                            color="blue"
-                            on:click={() => {
-                                modalEdit = true;
-                            }}>Edit Data</Button
-                        >
-                    </TableBodyCell>
-                </TableBodyRow>
-            {/each}
-        </TableBody>
-
-        <!-- modal edit -->
-
-        <Modal title="Edit Kegiatan" bind:open={modalEdit} autoclose>
-            <form method="POST">
-                <div class="grid md:grid-cols-2 md:gap-6">
-                    <div class="mb-4">
-                        <Label for="activityName" class="mb-2"
-                            >Nama Kegiatan</Label
-                        >
-                        <Input id="activityName" placeholder="Nama Kegiatan" />
-                    </div>
-                    <div class="mb-4">
-                        <Label for="location" class="mb-2">Lokasi</Label>
-                        <Input id="location" placeholder="Lokasi" />
-                    </div>
-                </div>
-                <div class="grid md:grid-cols-2 md:gap-6">
-                    <div class="mb-4">
-                        <Label for="time" class="mb-2">Waktu</Label>
-                        <Input id="time" placeholder="Waktu" />
-                    </div>
-                    <div class="mb-4">
-                        <Label for="date" class="mb-2">Tanggal</Label>
-                        <Input type="date" id="date" placeholder="Tanggal" />
-                    </div>
-                </div>
-                <div class="block flex">
-                    <Button type="submit" class="ml-auto">Simpan</Button>
-                </div>
-            </form>
-        </Modal>
-
+                            <Popover
+                                class="w-64 text-sm text-black dark:text-white"
+                                title="Deskripsi"
+                                triggeredBy={`#title-${item.id}`}
+                            >
+                                {item.docs_id.description}
+                            </Popover>
+                        {/each}
+                    {/if}
+                {/key}
+            </TableBody>
+        </Table>
         <div
             slot="footer"
             class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0 p-4"
             aria-label="Table navigation"
         >
-            <span class="text-sm font-normal text-gray-500 dark:text-gray-400">
-                Showing
-                <span class="font-semibold text-gray-900 dark:text-white"
-                    >{startRange}-{endRange}</span
+            {#if filteredData}
+                <span
+                    class="text-sm font-normal text-gray-500 dark:text-gray-400"
                 >
-                of
-                <span class="font-semibold text-gray-900 dark:text-white"
-                    >{totalItems}</span
-                >
-            </span>
-            <ButtonGroup>
-                <Button
-                    on:click={loadPreviousPage}
-                    disabled={currentPosition === 0}
-                    ><ChevronLeftOutline /></Button
-                >
-                {#each pagesToShow as pageNumber}
-                    <Button on:click={() => goToPage(pageNumber)}
-                        >{pageNumber}</Button
+                    Showing
+                    <span class="font-semibold text-gray-900 dark:text-white">
+                        {currentPage < 2
+                            ? 1
+                            : filteredData.length < 5
+                              ? data.length - filteredData.length + 1
+                              : filteredData.length + 1}
+                        -
+                        {filteredData.length < 5
+                            ? data.length
+                            : filteredData.length * currentPage}
+                    </span>
+                    of
+                    <span class="font-semibold text-gray-900 dark:text-white"
+                        >{data.length}</span
                     >
-                {/each}
-                <Button
-                    on:click={loadNextPage}
-                    disabled={totalPages === endPage}
-                    ><ChevronRightOutline /></Button
-                >
-            </ButtonGroup>
+                </span>
+                <ButtonGroup>
+                    <Button
+                        disabled={currentPage < 2}
+                        on:click={async () => {
+                            currentPage--;
+                            await initData();
+                        }}><ChevronLeftOutline /></Button
+                    >
+                    <!-- {#each data.length as pageNumber} -->
+                    <Button disabled>{currentPage}</Button>
+                    <!-- {/each} -->
+                    <Button
+                        disabled={currentPage >= data.length / 5}
+                        on:click={async () => {
+                            currentPage++;
+                            await initData();
+                        }}><ChevronRightOutline /></Button
+                    >
+                </ButtonGroup>
+            {/if}
         </div>
     </TableSearch>
 </Layout>
+
+{#if addActivity}
+    <Create bind:showState={addActivity} on:comp={rebuild} />
+{/if}
+
+{#if selected && modalEdit}
+    <Edit bind:showState={modalEdit} bind:target={selected} on:comp={rebuild} />
+{/if}

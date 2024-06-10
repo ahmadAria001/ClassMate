@@ -6,14 +6,39 @@ use App\Http\Requests\Resources\User\Create;
 use App\Http\Requests\Resources\User\Delete;
 use App\Http\Requests\Resources\User\Update;
 use App\Models\Civilian;
+use App\Models\RT;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Inertia\Inertia;
 use Laravel\Sanctum\PersonalAccessToken;
 
 class UserController extends Controller
 {
+    public function __invoke(Request $request)
+    {
+        $token = null;
+        if (str_contains($request->url(), 'api')) {
+            $token = $request->bearerToken();
+            if (!$token) {
+                $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+                if (!$token) {
+                    return redirect('login');
+                }
+            }
+        } else {
+            $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
+
+            if (!$token) {
+                return redirect('login');
+            }
+        }
+
+        return Inertia::render('Profile');
+    }
+
     public function get($filter = null)
     {
         $data = null;
@@ -33,6 +58,13 @@ class UserController extends Controller
         }
 
         return Response()->json(['data' => $data], 200);
+    }
+
+    public function getRW()
+    {
+        $data =  User::withoutTrashed()->with('civilian_id.rt_id')->where('role', '=', "RW")->get();
+
+        return Response()->json(['data' => $data->first()], 200);
     }
 
     public function getCustom($column, $operator, $value)
@@ -65,7 +97,7 @@ class UserController extends Controller
             }
 
             $username = preg_replace('/\s+/', '', strtolower($existingCivils->fullName));
-            $existingName = User::where('username', '=', $username)->get();
+            $existingName = User::where('username', 'like', "$username%")->get();
 
             if (count($existingName) > 0) {
                 $username = $username . count($existingName);
@@ -80,30 +112,7 @@ class UserController extends Controller
 
             if ($data->wasRecentlyCreated) {
                 $data->created_at = Carbon::now()->timestamp;
-
-                if (str_contains($req->url(), 'api')) {
-                    $token = $req->bearerToken();
-
-                    if (!$token) {
-                        $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
-
-                        if (!$token) {
-                            return Response()->json(
-                                [
-                                    'message' => 'Unauthorized',
-                                ],
-                                401,
-                            );
-                        }
-                    }
-
-                    $pat = PersonalAccessToken::findToken($token);
-                    $model = $pat->tokenable();
-
-                    $data->created_by = $model->get('id')[0]->id;
-                } else {
-                    $data->created_by = Auth::id();
-                }
+                $data->created_by = $data->id;
 
                 $data->save();
 
@@ -130,15 +139,19 @@ class UserController extends Controller
         $payload = $req->safe()->collect();
 
         try {
+            $formerRW = User::withoutTrashed()->where('role', 'RW')->first();
             $data = User::withTrashed()
                 ->find(['id' => $payload->get('id')])
                 ->first();
 
+            $old_role = $data->role;
+
             if ($data) {
                 if (Auth::guard('web')->check()) {
                     $data->update([
-                        'leader_id' => $payload->get('leader_id'),
-                        'number' => $payload->get('number'),
+                        'username' => $payload->get('username') ? $payload->get('username') : $data->username,
+                        'role' => $payload->get('role') ? $payload->get('role') : $data->role,
+                        'intro' => $payload->get('intro') ? $payload->get('intro') : $data->intro,
                         'updated_by' => Auth::id(),
                     ]);
                 } else {
@@ -161,10 +174,22 @@ class UserController extends Controller
                     $model = $pat->tokenable();
 
                     $data->update([
-                        'leader_id' => $payload->get('leader_id'),
-                        'number' => $payload->get('number'),
+                        'username' => $payload->get('username') ? $payload->get('username') : $data->username,
+                        'role' => $payload->get('role') ? $payload->get('role') : $data->role,
+                        'intro' => $payload->get('intro') ? $payload->get('intro') : $data->intro,
                         'updated_by' => $model->get('id')[0]->id,
                     ]);
+                }
+
+                if ($payload->get('role') == 'RW' && $formerRW) {
+                    $formerRW->update(['role' => 'Warga']);
+                    $formerRW->save();
+                }
+
+                if ($old_role == 'RT') {
+                    $rt = RT::withoutTrashed()->find($data->id)->first();
+                    $rt->update(['leader_id' => null]);
+                    $rt->save();
                 }
 
                 return Response()->json([

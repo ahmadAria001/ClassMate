@@ -32,8 +32,9 @@
         onSubmit: async (values) => {
             console.log(values);
             const response = await axios.post("/api/auth/pw/reset", {
-                old_password: values.old_password,
+                password: values.old_password,
                 new_password: values.new_password,
+                new_password_confirmation: values.confirm_pass,
                 _token: $page.props.csrf_token,
             });
 
@@ -132,7 +133,7 @@
             <div>
                 <div class="block flex mt-3">
                     <Popover
-                        class="w-64 text-sm text-white"
+                        class="w-64 text-sm text-white z-50"
                         title="Persyaratan Password"
                         triggeredBy={`#pass-hint`}
                     >
@@ -151,14 +152,14 @@
                     </Popover>
                     <Button
                         type="submit"
-                        class="ml-auto"
+                        class="ml-auto flex items-center"
                         disabled={!isSubmitting}
                     >
                         Simpan Perubahan
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 24 24"
-                            class="w-5 h-5 dark:fill-white ms-2 mt-1"
+                            class="w-5 h-5 fill-white ml-1"
                             ><path
                                 d="m7 17.013 4.413-.015 9.632-9.54c.378-.378.586-.88.586-1.414s-.208-1.036-.586-1.414l-1.586-1.586c-.756-.756-2.075-.752-2.825-.003L7 12.583v4.43zM18.045 4.458l1.589 1.583-1.597 1.582-1.586-1.585 1.594-1.58zM9 13.417l6.03-5.973 1.586 1.586-6.029 5.971L9 15.006v-1.589z"
                             ></path><path

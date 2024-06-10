@@ -21,14 +21,17 @@ class Get
         if (!$token) {
             $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
 
-            if (!$token)
+            if (!$token) {
                 abort(401, 'Unauthorized');
+            }
         }
 
         $pat = PersonalAccessToken::findToken($token);
-        if (!$pat) abort(401, 'Unauthorized');;
+        if (!$pat) {
+            abort(401, 'Unauthorized');
+        }
 
-        if ($pat->cant([\App\Http\Controllers\EnvironmentInfoController::class, 'get']) && !($pat->can('*'))) {
+        if ($pat->cant('NewsController:get') && !$pat->can('*')) {
             return $next(null);
         }
 

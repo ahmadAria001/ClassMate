@@ -9,7 +9,6 @@
         TableBodyRow,
         TableHead,
         TableHeadCell,
-        TableSearch,
         Button,
         Modal,
         Label,
@@ -19,6 +18,7 @@
         Select,
         Popover,
     } from "flowbite-svelte";
+    import TableSearch from "@C/General/TableSearch.svelte";
     import {
         ChevronLeftOutline,
         ChevronRightOutline,
@@ -34,8 +34,6 @@
 
     import axiosInstance from "axios";
     const axios = axiosInstance.create({ withCredentials: true });
-
-    import { setCookie, getCookie } from "@R/Utils/Cokies";
 
     let items = [
         {
@@ -62,7 +60,9 @@
         // 459,
     ];
 
+    let data: any;
     let role = $page.props.auth.user.role;
+    // let role = "RT";
     // "RT";
     let addCivilian = false;
     let modalEdit = false;
@@ -78,6 +78,8 @@
     let totalItems: number = items.length;
     let startPage: number;
     let endPage: number;
+
+    let currentPage = 1;
 
     const title = "Lihat Data Warga";
 
@@ -142,8 +144,9 @@
     ) => {
         try {
             if (role == "RT") id = $page.props.auth.user.rt_id;
+            // await getDataByRT(id,landing)
 
-            let url = `/api/rt/${id}`;
+            let url = `/api/rt/${currentPage}/${id}`;
 
             if (!custom) {
                 const response = await axios.get(url, {
@@ -176,7 +179,7 @@
                         });
                     }
 
-                    return landingData;
+                    return { data: landingData, length: landingData.length };
                 }
 
                 return response.data;
@@ -191,10 +194,13 @@
         }
     };
 
-    onMount(async () => {
-        // Call renderPagination when the component initially mounts
-        renderPagination(items.length);
-    });
+    const initPage = async () => {
+        if (role == "RT") {
+            data = await getData("", true);
+        } else {
+            data = await getData();
+        }
+    };
 
     $: currentPageItems = items.slice(
         currentPosition,
@@ -206,12 +212,14 @@
     );
 
     const getWCV = async (id: string = "") => {
-        const token = getCookie("token");
-        const response = await axios.get(`/api/rt/cvl/${id}`, {
-            headers: {
-                Accept: "application/json",
+        const response = await axios.get(
+            `/api/rt/cvl/0/${encodeURIComponent(id)}`,
+            {
+                headers: {
+                    Accept: "application/json",
+                },
             },
-        });
+        );
 
         return response.data;
     };
@@ -226,7 +234,21 @@
         return response.data;
     };
 
-    export const rebuild = () => {
+    onMount(async () => {
+        try {
+            // Call renderPagination when the component initially mounts
+            renderPagination(items.length);
+            await initPage();
+            // console.log(data.data);
+            filteredData = data.data;
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    });
+
+    export const rebuild = async () => {
+        await initPage();
+
         builder = {};
     };
 
@@ -235,6 +257,20 @@
         operator: string;
         value: string;
     } = { column: "", operator: "", value: "" };
+
+    let filteredData: any;
+    const handleSearch = (event: any) => {
+        const searchValue = event.detail.value.toLowerCase();
+        // console.log("Search value in handleSearch in use file:", searchValue);
+        if (searchValue == "") {
+            filteredData = [data.data];
+        }
+        filteredData = data.data.filter((d: any) =>
+            d.fullName.toLowerCase().includes(searchValue),
+        );
+        // console.log(filteredData);
+        rebuild();
+    };
 </script>
 
 <svelte:head>
@@ -243,15 +279,8 @@
     </title>
 </svelte:head>
 
-<Layout active={title}>
-    <TableSearch
-        placeholder="Cari warga"
-        hoverable={true}
-        bind:inputValue={searchTerm}
-        divClass="bg-white dark:bg-gray-800 shadow-md sm:rounded-lg overflow-hidden"
-        innerDivClass="flex items-center justify-between space-y-3 md:space-y-0 md:space-x-4 p-4"
-        classInput="text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2  pl-10"
-    >
+<Layout>
+    <TableSearch on:search={handleSearch}>
         <div
             slot="header"
             class="md:w-auto flex flex-row space-y-2 md:space-y-0 items-stretch md:items-center justify-end md:space-x-3 flex-shrink-0"
@@ -263,186 +292,160 @@
             >
         </div>
 
-        <Create bind:showState={addCivilian} />
-
-        <TableHead>
-            {#if role === "RT"}
-                <TableHeadCell>Nama Kepala Keluarga</TableHeadCell>
-                <TableHeadCell>Alamaat</TableHeadCell>
-                <!-- <TableHeadCell>Pekerjaan</TableHeadCell> -->
-                <TableHeadCell class="text-center" width="20%"
-                    >Pekerjaan</TableHeadCell
-                >
-                <TableHeadCell class="text-center" width="20%"
-                    >Status Kependudukan</TableHeadCell
-                >
-                <TableHeadCell>Status Penduduk</TableHeadCell>
-                <TableHeadCell class="sr-only"></TableHeadCell>
-            {:else}
-                <TableHeadCell>RT</TableHeadCell>
-                <TableHeadCell>Ketua</TableHeadCell>
-                <TableHeadCell></TableHeadCell>
-            {/if}
-        </TableHead>
-        <TableBody>
-            {#key builder}
+        <Create bind:showState={addCivilian} on:comp={rebuild} />
+        <Table>
+            <TableHead>
                 {#if role === "RT"}
-                    {#await getData("", true) then data}
-                        {#each data as item, idx}
-                            <TableBodyRow>
-                                <TableBodyCell>{item.fullName}</TableBodyCell>
-                                <TableBodyCell>{item.address}</TableBodyCell>
-                                <TableBodyCell>{item.job}</TableBodyCell>
-                                {#if item.residentstatus == "PermanentResident"}
-                                    <TableBodyCell class="text-center">
-                                        <Badge color="green">Tetap</Badge>
-                                    </TableBodyCell>
-                                {:else if item.residentstatus == "ContractResident"}
-                                    <TableBodyCell class="text-center">
-                                        <Badge color="indigo">Kontrak</Badge>
-                                    </TableBodyCell>
-                                {:else if item.residentstatus == "Kos"}
-                                    <TableBodyCell class="text-center">
-                                        <Badge color="yellow">Kos</Badge>
-                                    </TableBodyCell>
-                                {/if}
-                                {#if item.status == "Aktif"}
-                                    <TableBodyCell class="text-center">
-                                        <Badge color="green"
-                                            >{item.status}</Badge
-                                        >
-                                    </TableBodyCell>
-                                {/if}
-                                {#if item.status == "Meninggal"}
-                                    <TableBodyCell class="text-center">
-                                        <Badge color="red">{item.status}</Badge>
-                                    </TableBodyCell>
-                                {:else if item.status == "Pindah"}
-                                    <TableBodyCell class="text-center">
-                                        <Badge color="yellow"
-                                            >{item.status}</Badge
-                                        >
-                                    </TableBodyCell>
-                                {/if}
-
-                                <TableBodyCell class="text-end">
-                                    <Button
-                                        color="blue"
-                                        on:click={() => {
-                                            selected = item.id;
-                                            custom.column = "nkk";
-                                            custom.operator = "=";
-                                            custom.value = item.nkk;
-
-                                            modalFamily = true;
-                                        }}>Detail</Button
-                                    >
-                                    <!-- tampilan edit keluarga? -->
-                                    <Button
-                                        color="yellow"
-                                        on:click={() => {
-                                            modalEdit = true;
-                                            selEdit = item.id;
-                                        }}>Edit</Button
-                                    >
-                                    <Button
-                                        color="red"
-                                        on:click={() => {
-                                            selDel = item.id;
-                                            modalDelete = true;
-                                        }}>Hapus</Button
-                                    >
-                                </TableBodyCell>
-                            </TableBodyRow>
-                        {/each}
-                    {/await}
+                    <TableHeadCell>Nama Kepala Keluarga</TableHeadCell>
+                    <!-- <TableHeadCell>Alamat</TableHeadCell> -->
+                    <!-- <TableHeadCell>Pekerjaan</TableHeadCell> -->
+                    <TableHeadCell>Pekerjaan</TableHeadCell>
+                    <TableHeadCell class="text-center"
+                        >Status Kependudukan</TableHeadCell
+                    >
+                    <!-- <TableHeadCell class="text-center"
+                        >Status Penduduk</TableHeadCell
+                    > -->
+                    <TableHeadCell class="sr-only"></TableHeadCell>
                 {:else}
-                    {#await getData() then item}
-                        {#each item.data as { id, leader_id, created_at, created_by, number, updated_at, updated_by, deleted_at, deleted_by }, idx}
-                            <TableBodyRow>
-                                <TableBodyCell>RT. {number}</TableBodyCell>
-                                <TableBodyCell
-                                    >{leader_id
-                                        ? leader_id.civilian_id.fullName
-                                        : leader_id}</TableBodyCell
-                                >
-                                <TableBodyCell class="text-end">
-                                    <!-- buttons base on role -->
-                                    {#if role == "RW"}
-                                        <Button
-                                            color="blue"
-                                            on:click={() => {
-                                                selected = id;
-                                                modalFamily = true;
-                                            }}>Detail</Button
-                                        >
+                    <TableHeadCell>RT</TableHeadCell>
+                    <TableHeadCell>Ketua</TableHeadCell>
+                    <TableHeadCell></TableHeadCell>
+                {/if}
+            </TableHead>
+            <TableBody>
+                {#key builder}
+                    {#if filteredData}
+                        {#if role === "RT"}
+                            {#each filteredData as item, idx}
+                                <TableBodyRow>
+                                    <TableBodyCell class="max-w-xs truncate"
+                                        >{item.fullName}</TableBodyCell
+                                    >
+                                    <!-- <TableBodyCell>{item.address}</TableBodyCell
+                                    > -->
+                                    <TableBodyCell class="text-left"
+                                        >{item.job}</TableBodyCell
+                                    >
+                                    {#if item.residentstatus == "PermanentResident"}
+                                        <TableBodyCell class="text-center">
+                                            <Badge color="green">Tetap</Badge>
+                                        </TableBodyCell>
+                                    {:else if item.residentstatus == "ContractResident"}
+                                        <TableBodyCell class="text-center">
+                                            <Badge color="indigo">Kontrak</Badge
+                                            >
+                                        </TableBodyCell>
+                                    {:else if item.residentstatus == "Kos"}
+                                        <TableBodyCell class="text-center">
+                                            <Badge color="yellow">Kos</Badge>
+                                        </TableBodyCell>
                                     {/if}
-                                    {#if role == "RT"}
+
+                                    <TableBodyCell class="text-end">
                                         <Button
                                             color="blue"
                                             on:click={() => {
+                                                selected = item.id;
+                                                custom.column = "nkk";
+                                                custom.operator = "=";
+                                                custom.value = item.nkk;
+
                                                 modalFamily = true;
                                             }}>Detail</Button
                                         >
-                                        <!-- tampilan edit keluarga? -->
-                                        <Button color="yellow">Edit</Button>
+                                        <Button
+                                            color="yellow"
+                                            on:click={() => {
+                                                modalEdit = true;
+                                                selEdit = item.id;
+                                            }}>Edit</Button
+                                        >
                                         <Button
                                             color="red"
                                             on:click={() => {
-                                                selected = item.id;
+                                                selDel = item.id;
                                                 modalDelete = true;
                                             }}>Hapus</Button
                                         >
-                                    {/if}
-                                    {#if role == "Admin"}
-                                        <Button
-                                            color="blue"
-                                            on:click={() => {
-                                                selected = id;
-                                                modalFamily = true;
-                                            }}>Detail</Button
-                                        >
-                                        <!-- <Button -->
-                                        <!--     color="yellow" -->
-                                        <!--     on:click={() => { -->
-                                        <!--         selected = item.id; -->
-                                        <!--         modalEdit = true; -->
-                                        <!--     }}>Edit</Button -->
-                                        <!-- > -->
-                                        <!-- <Button -->
-                                        <!--     color="red" -->
-                                        <!--     on:click={() => { -->
-                                        <!--         selDel = item.id; -->
-                                        <!--         modalDelete = true; -->
-                                        <!--     }}>Hapus</Button -->
-                                        <!-- > -->
-                                    {/if}
-                                </TableBodyCell>
-                            </TableBodyRow>
-                        {/each}
-                    {/await}
-                {/if}
-            {/key}
-        </TableBody>
+                                    </TableBodyCell>
+                                </TableBodyRow>
+                            {/each}
+                        {:else}
+                            {#each data.data as { id, leader_id, created_at, created_by, number, updated_at, updated_by, deleted_at, deleted_by }, idx}
+                                <TableBodyRow>
+                                    <TableBodyCell>RT. {number}</TableBodyCell>
+                                    <TableBodyCell
+                                        >{leader_id
+                                            ? leader_id.civilian_id.fullName
+                                            : leader_id}</TableBodyCell
+                                    >
+                                    <TableBodyCell class="text-end">
+                                        <!-- buttons base on role -->
+                                        {#if role == "RW"}
+                                            <Button
+                                                color="blue"
+                                                on:click={() => {
+                                                    selected = id;
+                                                    modalFamily = true;
+                                                }}>Detail</Button
+                                            >
+                                        {/if}
+                                        {#if role == "RT"}
+                                            <Button
+                                                color="blue"
+                                                on:click={() => {
+                                                    modalFamily = true;
+                                                }}>Detail</Button
+                                            >
+                                            <Button color="yellow">Edit</Button>
+                                            <Button
+                                                color="red"
+                                                on:click={() => {
+                                                    selected = id;
+                                                    modalDelete = true;
+                                                }}>Hapus</Button
+                                            >
+                                        {/if}
+                                        {#if role == "Admin"}
+                                            <Button
+                                                color="blue"
+                                                on:click={() => {
+                                                    selected = id;
+                                                    modalFamily = true;
+                                                }}>Detail</Button
+                                            >
+                                        {/if}
+                                    </TableBodyCell>
+                                </TableBodyRow>
+                            {/each}
+                        {/if}
+                    {:else}
+                        <TableBodyRow>
+                            <TableBodyCell class="text-center"
+                                >Data tidak ditemukan</TableBodyCell
+                            >
+                        </TableBodyRow>
+                    {/if}
+                {/key}
+            </TableBody>
+        </Table>
 
         <!-- modal detail -->
         {#key builder}
             <Modal
                 title="Data Keluarga"
                 bind:open={modalFamily}
-                size="lg"
+                size="xl"
                 autoclose
             >
                 <Table>
                     <TableHead>
-                        <TableHeadCell>Nama Lengkap</TableHeadCell>
+                        <TableHeadCell width="20%">Nama Lengkap</TableHeadCell>
                         <TableHeadCell>Alamat</TableHeadCell>
                         <TableHeadCell>Pekerjaan</TableHeadCell>
                         <TableHeadCell class="text-center"
                             >Status Kependudukan</TableHeadCell
-                        >
-                        <TableHeadCell class="text-center"
-                            >Kondisi</TableHeadCell
                         >
 
                         {#if role == "RT" || role == "Admin"}
@@ -455,7 +458,9 @@
                                 {#await getData("", false, custom) then data}
                                     {#each data.data as item, idx}
                                         <TableBodyRow>
-                                            <TableBodyCell>
+                                            <TableBodyCell
+                                                class="max-w-xs truncate"
+                                            >
                                                 {item.fullName}
                                             </TableBodyCell>
                                             <TableBodyCell
@@ -489,32 +494,6 @@
                                                     >
                                                 </TableBodyCell>
                                             {/if}
-                                            {#if item.status == "Aktif"}
-                                                <TableBodyCell
-                                                    class="text-center"
-                                                >
-                                                    <Badge color="green"
-                                                        >{item.status}</Badge
-                                                    >
-                                                </TableBodyCell>
-                                            {/if}
-                                            {#if item.status == "Meninggal"}
-                                                <TableBodyCell
-                                                    class="text-center"
-                                                >
-                                                    <Badge color="red"
-                                                        >{item.status}</Badge
-                                                    >
-                                                </TableBodyCell>
-                                            {:else if item.status == "Pindah"}
-                                                <TableBodyCell
-                                                    class="text-center"
-                                                >
-                                                    <Badge color="yellow"
-                                                        >{item.status}</Badge
-                                                    >
-                                                </TableBodyCell>
-                                            {/if}
 
                                             <TableBodyCell>
                                                 <Button
@@ -540,7 +519,9 @@
                                     {#each data.data[0].civils as item, idx}
                                         <TableBodyRow>
                                             <TableBodyCell
-                                                tdClass="flex gap-2 justify-center align-middle my-6"
+                                                tdClass="flex gap-2 my-6 {!item.isFamilyHead
+                                                    ? 'pl-7'
+                                                    : ''}"
                                             >
                                                 {#if item.isFamilyHead}
                                                     <svg
@@ -601,33 +582,6 @@
                                                 >
                                                     <Badge color="yellow"
                                                         >Kos</Badge
-                                                    >
-                                                </TableBodyCell>
-                                            {/if}
-                                            {#if item.status == "Aktif"}
-                                                <TableBodyCell
-                                                    class="text-center"
-                                                >
-                                                    <Badge color="green"
-                                                        >Aktif</Badge
-                                                    >
-                                                </TableBodyCell>
-                                            {/if}
-                                            {#if item.status == "Meninggal"}
-                                                <TableBodyCell
-                                                    class="text-center"
-                                                >
-                                                    <Badge color="red"
-                                                        >{item.status}</Badge
-                                                    >
-                                                </TableBodyCell>
-                                            {/if}
-                                            {#if item.status == "Pindah"}
-                                                <TableBodyCell
-                                                    class="text-center"
-                                                >
-                                                    <Badge color="yellow"
-                                                        >{item.status}</Badge
                                                     >
                                                 </TableBodyCell>
                                             {/if}
@@ -695,33 +649,47 @@
             class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0 p-4"
             aria-label="Table navigation"
         >
-            <span class="text-sm font-normal text-gray-500 dark:text-gray-400">
-                Showing
-                <span class="font-semibold text-gray-900 dark:text-white"
-                    >{startRange}-{endRange}</span
+            {#if data && role != "RT"}
+                <span
+                    class="text-sm font-normal text-gray-500 dark:text-gray-400"
                 >
-                of
-                <span class="font-semibold text-gray-900 dark:text-white"
-                    >{totalItems}</span
-                >
-            </span>
-            <ButtonGroup>
-                <Button
-                    on:click={loadPreviousPage}
-                    disabled={currentPosition === 0}
-                    ><ChevronLeftOutline /></Button
-                >
-                {#each pagesToShow as pageNumber}
-                    <Button on:click={() => goToPage(pageNumber)}
-                        >{pageNumber}</Button
+                    Showing
+                    <span class="font-semibold text-gray-900 dark:text-white">
+                        {currentPage < 2
+                            ? 1
+                            : data.data.length < 6
+                              ? data.length - data.data.length + 1
+                              : data.data.length + 1}
+                        -
+                        {data.data.length < 6
+                            ? data.length
+                            : data.data.length * currentPage}
+                    </span>
+                    of
+                    <span class="font-semibold text-gray-900 dark:text-white"
+                        >{data.length}</span
                     >
-                {/each}
-                <Button
-                    on:click={loadNextPage}
-                    disabled={totalPages === endPage}
-                    ><ChevronRightOutline /></Button
-                >
-            </ButtonGroup>
+                </span>
+                <ButtonGroup>
+                    <Button
+                        disabled={currentPage < 2}
+                        on:click={async () => {
+                            currentPage--;
+                            await initPage();
+                        }}><ChevronLeftOutline /></Button
+                    >
+                    <!-- {#each data.length as pageNumber} -->
+                    <Button disabled>{currentPage}</Button>
+                    <!-- {/each} -->
+                    <Button
+                        disabled={currentPage >= data.length / 5}
+                        on:click={async () => {
+                            currentPage++;
+                            await initPage();
+                        }}><ChevronRightOutline /></Button
+                    >
+                </ButtonGroup>
+            {/if}
         </div>
     </TableSearch>
 </Layout>
