@@ -51,6 +51,6 @@ $app->singleton(
 | from the actual running of the application and sending responses.
 |
 */
-// $app->loadEnvironmentFrom('.env');
-$app->loadEnvironmentFrom('.env.dev');
+$app->loadEnvironmentFrom('.env');
+// $app->loadEnvironmentFrom('.env.dev');
 return $app;
