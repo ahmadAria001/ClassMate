@@ -187,8 +187,6 @@
                     Pengeluaran: ["/pengeluaran"],
                 },
             },
-                },
-            },
             {
                 name: "Pengaduan",
                 icon: FileSolid,
