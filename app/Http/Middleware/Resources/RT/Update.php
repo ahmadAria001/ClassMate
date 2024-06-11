@@ -29,7 +29,7 @@ class Update
         $pat = PersonalAccessToken::findToken($token);
         if (!$pat) abort(401, 'Unauthorized');
 
-        if ($pat->cant('RtController:edit') && !($pat->can('*')) ) {
+        if ($pat->cant('RtController:edit') && !($pat->can('*'))) {
             abort(401, 'Unauthorized');
         }
 

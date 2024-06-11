@@ -24,7 +24,7 @@ Route::prefix('/dues')->group(fn () => [
     Route::post('/member', [DuesMemberController::class, 'create'])->middleware(CreateDues::class),
     Route::put('/member', [DuesMemberController::class, 'edit'])->middleware(UpdateDues::class),
     Route::delete('/member', [DuesMemberController::class, 'destroy'])->middleware(DeleteDues::class),
-  
+
     Route::get('/', [DuesController::class, 'get'])->middleware(GetDues::class),
     Route::get('/{filter}', [DuesController::class, 'get'])->middleware(GetDues::class),
 

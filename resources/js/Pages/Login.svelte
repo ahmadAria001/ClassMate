@@ -5,7 +5,6 @@
     import axios from "axios";
     import { page, router } from "@inertiajs/svelte";
     import { Login } from "@R/schema";
-
     import { Label, Input, Checkbox, A, Button } from "flowbite-svelte";
     export let site = {
         name: "KawanDesa",
