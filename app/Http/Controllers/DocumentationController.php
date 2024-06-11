@@ -32,21 +32,22 @@ class DocumentationController extends Controller
 
         return Response()->json(['data' => $data], 200);
     }
-    public function create(CreateDocumentation $request){
+    public function create(CreateDocumentation $request)
+    {
         $payload = $request->safe()->collect();
 
-        try{
+        try {
             $docs = Docs::create([
                 'description' => $payload->get('description'),
                 'type' => 'Administration'
             ]);
 
-            
+
             $image = $request->file('contentAttachment');
             $name = ($image) ? Carbon::now() . '_' . $image->getClientOriginalName() : null;
-            
+
             $data = Documentation::create([
-                'docs_id'=>$docs->id,
+                'docs_id' => $docs->id,
                 'contentType' => $payload->get('contentType'),
                 'contentDesc' => $payload->get('contentDesc'),
                 'contentAttachment' => ($image) ? $name : null
@@ -66,7 +67,7 @@ class DocumentationController extends Controller
                     if (!$token) {
                         $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
                         if (!$token) {
-                            return Response()->json(['message'=>'Unauthorized'],401);
+                            return Response()->json(['message' => 'Unauthorized'], 401);
                         }
                     }
 
@@ -75,7 +76,7 @@ class DocumentationController extends Controller
 
                     $docs->created_by = ($model->get('id'))[0]->id;
                     $data->created_by = ($model->get('id'))[0]->id;
-                } else{
+                } else {
                     $docs->created_by = Auth::id();
                     $data->created_by = Auth::id();
                 }
@@ -87,30 +88,29 @@ class DocumentationController extends Controller
                     'message' => 'Data Created'
                 ]);
             }
-            
+
             return Response()->json([
                 'status' => false,
                 'message' => 'Data already exist'
             ], 400);
-        }
-        
-        catch(\Throwable $th){
+        } catch (\Throwable $th) {
             error_log($th);
         }
     }
-    public function edit(UpdateDocumentation $request){
+    public function edit(UpdateDocumentation $request)
+    {
         $payload = $request->safe()->collect();
 
-        try{
-            $data = Documentation::withTrashed()->where('id',$payload->get('id'))->first();
-            $docs = Docs::withTrashed()->where('id',$data->docs_id)->first();
-            
-            if($data){
+        try {
+            $data = Documentation::withTrashed()->where('id', $payload->get('id'))->first();
+            $docs = Docs::withTrashed()->where('id', $data->docs_id)->first();
+
+            if ($data) {
                 $image = $request->file('contentAttachment');
                 $name = ($image) ? Carbon::now() . '_' . $image->getClientOriginalName() : null;
-            
+
                 //Handle Log Update
-                if(Auth::guard('web')->check()){
+                if (Auth::guard('web')->check()) {
                     $data->update([
                         'contentType' => ($payload->get('contentType')) ? $payload->get('contentType') : $data->contentType,
                         'contentDesc' => ($payload->get('contentDesc')) ? $payload->get('contentDesc') : $data->contentDesc,
@@ -122,13 +122,12 @@ class DocumentationController extends Controller
                         'description' => ($payload->get('description')) ?  $payload->get('description') : $docs->description,
                         'updated_by' => Auth::id()
                     ]);
-                }
-                else{
+                } else {
                     $token = $request->bearerToken();
                     if (!$token) {
                         $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
                         if (!$token) {
-                            return Response()->json(['message'=>'Unauthorized'],401);
+                            return Response()->json(['message' => 'Unauthorized'], 401);
                         }
                     }
 
@@ -164,19 +163,19 @@ class DocumentationController extends Controller
                 'status' => false,
                 'message' => 'Data Not found'
             ], 400);
-            
-        }catch(\Throwable $th){
+        } catch (\Throwable $th) {
             error_log($th);
         }
     }
-    public function destroy(DeleteDocumentation $request){
+    public function destroy(DeleteDocumentation $request)
+    {
         $payload = $request->safe()->collect();
 
-        try{
-            $data = Documentation::withTrashed()->where('id',$payload->get('id'))->first();
-            $docs = Docs::withTrashed()->where('id',$data->docs_id)->first();
+        try {
+            $data = Documentation::withTrashed()->where('id', $payload->get('id'))->first();
+            $docs = Docs::withTrashed()->where('id', $data->docs_id)->first();
 
-            if($data){
+            if ($data) {
                 if (Auth::guard('web')->check()) {
                     $data->update([
                         'deleted_by' => Auth::id()
@@ -186,7 +185,7 @@ class DocumentationController extends Controller
                     if (!$token) {
                         $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
                         if (!$token) {
-                            return Response()->json(['message'=>'Unauthorized'],401);
+                            return Response()->json(['message' => 'Unauthorized'], 401);
                         }
                     }
 
@@ -210,7 +209,7 @@ class DocumentationController extends Controller
                 'status' => false,
                 'message' => 'Data Not found'
             ], 400);
-        }catch(\Throwable $th){
+        } catch (\Throwable $th) {
             error_log($th);
         }
     }

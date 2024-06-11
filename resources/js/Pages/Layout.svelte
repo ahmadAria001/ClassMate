@@ -212,9 +212,10 @@
                 icon: ChartMixedDollarOutline,
                 isOpenItems: false,
                 children: {
-                    Iuran: "/iuran",
+                    Iuran: ["/iuran", "/iuran/detail"],
                     // Pengeluaran: "/pengeluaran",
-                    "Catatan Pembayaran": "/log-pembayaran",
+                    "Catatan Pembayaran": ["/log-pembayaran"],
+                    "Pengambilan Dana": ["/spending"],
                 },
             },
             {

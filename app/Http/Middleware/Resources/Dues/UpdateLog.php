@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Middleware\Resources\Dues;
 
 use Closure;

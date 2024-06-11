@@ -43,7 +43,6 @@
             status: "Dalam Proses",
         },
     ];
-
     let modalDetailSurat = false;
     let searchTerm = "";
     let currentPosition = 0;
