@@ -53,7 +53,7 @@ class ProfileImageController extends Controller
 
         $model = User::withoutTrashed()->where('id', $user)->first();
 
-        $name = Carbon::now() . '_' . $image->hashName();
+        $name = Carbon::now()->timestamp . '_' . $image->hashName();
 
         try {
             if (!Storage::directoryExists('public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads')) {
