@@ -533,9 +533,9 @@
 </script>
 
 <Layout>
-    <h2 class="text-xl font-semibold mb-2 dark:text-white">
+    <!-- <h2 class="text-xl font-semibold mb-2 dark:text-white">
         Hasil Rekomendasi Pengajuan Bansos
-    </h2>
+    </h2> -->
     <TableSearch on:search={handleSearch}>
         <div slot="header">
             <Button color="blue" on:click={() => (calcModal = true)}
@@ -660,268 +660,6 @@
             {/if}
         </div>
     </TableSearch>
-
-    <!-- <h2 class="text-xl font-semibold mt-6 mb-2">Daftar Pengajuan Bansos</h2>
-    <Table>
-        <TableHead defaultRow={false}>
-            <tr>
-                <TableHeadCell rowspan="3">Alternatif</TableHeadCell>
-                {#each kriteriaBobot as kriteria}
-                    <TableHeadCell>{kriteria.nama}</TableHeadCell>
-                {/each}
-            </tr>
-            <tr>
-                {#each kriteriaBobot as kriteria}
-                    <TableHeadCell>{kriteria.bobot}</TableHeadCell>
-                {/each}
-            </tr>
-            <tr>
-                {#each kriteriaBobot as kriteria}
-                    <TableHeadCell>{kriteria.type}</TableHeadCell>
-                {/each}
-            </tr>
-        </TableHead>
-        <TableBody>
-            {#each alternatif as alt}
-                <TableBodyRow>
-                    <TableBodyCell>{alt.nama}</TableBodyCell>
-                    {#each alt.kriteria as nilai}
-                        <TableBodyCell>{nilai}</TableBodyCell>
-                    {/each}
-                </TableBodyRow>
-            {/each}
-        </TableBody>
-    </Table>
-    <h1 class="text-2xl font-bold mb-4">Sistem Pendukung Keputusan (SAW)</h1>
-
-    <h2 class="text-xl font-semibold mt-6 mb-2">
-        Data Alternatif dan Kriteria
-    </h2>
-    <Table>
-        <TableHead>
-            <TableBody>
-                <TableBodyCell>Alternatif</TableBodyCell>
-                {#each kriteriaBobot as kriteria}
-                    <TableBodyCell>{kriteria.nama}</TableBodyCell>
-                {/each}
-            </TableBody>
-        </TableHead>
-        <TableBody>
-            {#each alternatif as alt}
-                <TableBody>
-                    <TableBodyCell>{alt.nama}</TableBodyCell>
-                    {#each alt.kriteria as nilai}
-                        <TableBodyCell>{nilai}</TableBodyCell>
-                    {/each}
-                </TableBody>
-            {/each}
-        </TableBody>
-    </Table>
-
-    <h2 class="text-xl font-semibold mt-6 mb-2">Hasil Normalisasi</h2>
-    <Table>
-        <TableHead>
-            <TableBody>
-                <TableBodyCell>Alternatif</TableBodyCell>
-                {#each kriteriaBobot as kriteria}
-                    <TableBodyCell>{kriteria.nama}</TableBodyCell>
-                {/each}
-            </TableBody>
-        </TableHead>
-        <TableBody>
-            {#each normalisasi as norm}
-                <TableBody>
-                    <TableBodyCell>{norm.nama}</TableBodyCell>
-                    {#each norm.kriteria as nilai}
-                        <TableBodyCell>{nilai.toFixed(2)}</TableBodyCell>
-                    {/each}
-                </TableBody>
-            {/each}
-        </TableBody>
-    </Table>
-
-    <h2 class="text-xl font-semibold mt-6 mb-2">Hasil Akhir</h2>
-    <Table>
-        <TableHead>
-            <TableBody>
-                <TableBodyCell>Alternatif</TableBodyCell>
-                <TableBodyCell>Nilai Akhir</TableBodyCell>
-            </TableBody>
-        </TableHead>
-        <TableBody>
-            {#each hasilAkhir as hasil}
-                <TableBody>
-                    <TableBodyCell>{hasil.nama}</TableBodyCell>
-                    <TableBodyCell>{hasil.nilai.toFixed(2)}</TableBodyCell>
-                </TableBody>
-            {/each}
-        </TableBody>
-    </Table>
-
-    <h1 class="text-2xl font-bold mb-4">Sistem Pendukung Keputusan (TOPSIS)</h1>
-
-    <h2 class="text-xl font-semibold mt-6 mb-2">
-        Data Alternatif dan Kriteria
-    </h2>
-    <Table>
-        <TableHead>
-            <TableBody>
-                <TableBodyCell>Alternatif</TableBodyCell>
-                {#each kriteriaBobot as kriteria}
-                    <TableBodyCell>{kriteria.nama}</TableBodyCell>
-                {/each}
-            </TableBody>
-        </TableHead>
-        <TableBody>
-            {#each alternatif as alt}
-                <TableBody>
-                    <TableBodyCell>{alt.nama}</TableBodyCell>
-                    {#each alt.kriteria as nilai}
-                        <TableBodyCell>{nilai}</TableBodyCell>
-                    {/each}
-                </TableBody>
-            {/each}
-        </TableBody>
-    </Table>
-
-    <h2 class="text-xl font-semibold mt-6 mb-2">Matrik Normalisasi (R)</h2>
-    <Table>
-        <TableHead>
-            <TableBody>
-                <TableBodyCell>Alternatif</TableBodyCell>
-                {#each kriteriaBobot as kriteria}
-                    <TableBodyCell>{kriteria.nama}</TableBodyCell>
-                {/each}
-            </TableBody>
-        </TableHead>
-        <TableBody>
-            {#each normalisasiTopsis as norm}
-                <TableBody>
-                    <TableBodyCell>{norm.nama}</TableBodyCell>
-                    {#each norm.kriteria as nilai}
-                        <TableBodyCell>{nilai.toFixed(4)}</TableBodyCell>
-                    {/each}
-                </TableBody>
-            {/each}
-        </TableBody>
-    </Table>
-
-    <h2 class="text-xl font-semibold mt-6 mb-2">
-        Matrik Normalisasi Berbobot (Y)
-    </h2>
-    <Table>
-        <TableHead>
-            <TableBody>
-                <TableBodyCell>Alternatif</TableBodyCell>
-                {#each kriteriaBobot as kriteria}
-                    <TableBodyCell>{kriteria.nama}</TableBodyCell>
-                {/each}
-            </TableBody>
-        </TableHead>
-        <TableBody>
-            {#each normalisasiBerbobot as norm}
-                <TableBody>
-                    <TableBodyCell>{norm.nama}</TableBodyCell>
-                    {#each norm.kriteria as nilai}
-                        <TableBodyCell>{nilai.toFixed(4)}</TableBodyCell>
-                    {/each}
-                </TableBody>
-            {/each}
-        </TableBody>
-    </Table>
-
-    <h2 class="text-xl font-semibold mt-6 mb-2">
-        Solusi Ideal Positif (A<sup>+</sup>) dan Solusi Ideal Negatif (A<sup
-            >-</sup
-        >)
-    </h2>
-    <Table>
-        <TableHead>
-            <TableBody>
-                <TableBodyCell>Kriteria</TableBodyCell>
-                {#each kriteriaBobot as kriteria}
-                    <TableBodyCell>{kriteria.nama}</TableBodyCell>
-                {/each}
-            </TableBody>
-        </TableHead>
-        <TableBody>
-            <TableBody>
-                <TableBodyCell
-                    >Solusi Ideal Positif (A<sup>+</sup>)</TableBodyCell
-                >
-                {#each solusiIdealPositif as nilai}
-                    <TableBodyCell>{nilai.toFixed(4)}</TableBodyCell>
-                {/each}
-            </TableBody>
-            <TableBody>
-                <TableBodyCell
-                    >Solusi Ideal Negatif (A<sup>-</sup>)</TableBodyCell
-                >
-                {#each solusiIdealNegatif as nilai}
-                    <TableBodyCell>{nilai.toFixed(4)}</TableBodyCell>
-                {/each}
-            </TableBody>
-        </TableBody>
-    </Table>
-
-    <h2 class="text-xl font-semibold mt-6 mb-2">
-        Jarak Solusi Ideal Positif (D<sup>+</sup>) dan Jarak Solusi Ideal
-        Negatif (D<sup>-</sup>)
-    </h2>
-    <Table>
-        <TableHead>
-            <TableBody>
-                <TableBodyCell>Alternatif</TableBodyCell>
-                <TableBodyCell>Jarak Positif (D<sup>+</sup>)</TableBodyCell>
-                <TableBodyCell>Jarak Negatif (D<sup>-</sup>)</TableBodyCell>
-            </TableBody>
-        </TableHead>
-        <TableBody>
-            {#each jarakPositif as jarakP, index}
-                <TableBody>
-                    <TableBodyCell>{jarakP.nama}</TableBodyCell>
-                    <TableBodyCell>{jarakP.jarak.toFixed(4)}</TableBodyCell>
-                    <TableBodyCell
-                        >{jarakNegatif[index].jarak.toFixed(4)}</TableBodyCell
-                    >
-                </TableBody>
-            {/each}
-        </TableBody>
-    </Table>
-
-    <h2 class="text-xl font-semibold mt-6 mb-2">Nilai Preferensi (V)</h2>
-    <Table>
-        <TableHead>
-            <TableBody>
-                <TableBodyCell>Alternatif</TableBodyCell>
-                <TableBodyCell>Nilai Preferensi (V)</TableBodyCell>
-            </TableBody>
-        </TableHead>
-        <TableBody>
-            {#each preferensi as pref}
-                <TableBody>
-                    <TableBodyCell>{pref.nama}</TableBodyCell>
-                    <TableBodyCell>{pref.nilai.toFixed(4)}</TableBodyCell>
-                </TableBody>
-            {/each}
-        </TableBody>
-    </Table>
-
-    <h2 class="text-xl font-semibold mt-6 mb-2">Final answers</h2>
-    <Table>
-        <TableHead>
-            <TableHeadCell>Alternatif</TableHeadCell>
-            <TableHeadCell>Nilai Preferensi (V)</TableHeadCell>
-        </TableHead>
-        <TableBody>
-            {#each kombinasiHasil as komb}
-                <TableBodyRow>
-                    <TableBodyCell>{komb.nama}</TableBodyCell>
-                    <TableBodyCell>{komb.nilai.toFixed(4)}</TableBodyCell>
-                </TableBodyRow>
-            {/each}
-        </TableBody>
-    </Table> -->
 </Layout>
 
 <!-- modal perhitungan -->
@@ -1192,7 +930,7 @@
                 </TableBody>
             </Table>
 
-            <h2
+            <!-- <h2
                 class="text-xl font-semibold mt-6 mb-2 text-black dark:text-white"
             >
                 Ranking
@@ -1214,7 +952,7 @@
                         </TableBodyRow>
                     {/each}
                 </TableBody>
-            </Table>
+            </Table> -->
         </TabItem>
         <TabItem title="Kombinasi Perhitungan">
             <h2

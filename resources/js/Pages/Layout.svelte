@@ -81,18 +81,8 @@
                 children: {
                     Iuran: ["/iuran", "/iuran/detail"],
                     // Pengeluaran: "/pengeluaran",
-                    "Catatan Pembayaran": ["/log-pembayaran"],
-                    "Pengambilan Dana": ["/spending"],
-                },
-            },
-            {
-                name: "Keuangan",
-                icon: ChartMixedDollarOutline,
-                isOpenItems: false,
-                children: {
-                    Iuran: "/iuran",
-                    // Pengeluaran: "/pengeluaran",
-                    "Catatan Pembayaran": "/log-pembayaran",
+                    // "Catatan Pembayaran": ["/log-pembayaran"],
+                    Pengeluaran: ["/pengeluaran"],
                 },
             },
             {
@@ -142,18 +132,8 @@
                 children: {
                     Iuran: ["/iuran"],
                     // Pengeluaran: "/pengeluaran",
-                    "Catatan Pembayaran": ["/log-pembayaran"],
-                    "Pengambilan Dana": ["/spending"],
-                },
-            },
-            {
-                name: "Keuangan",
-                icon: ChartMixedDollarOutline,
-                isOpenItems: false,
-                children: {
-                    Iuran: "/iuran",
-                    // Pengeluaran: "/pengeluaran",
-                    "Catatan Pembayaran": "/log-pembayaran",
+                    // "Catatan Pembayaran": ["/log-pembayaran"],
+                    Pengeluaran: ["/pengeluaran"],
                 },
             },
             {
@@ -203,19 +183,10 @@
                 children: {
                     Iuran: ["/iuran", "/iuran/detail"],
                     // Pengeluaran: "/pengeluaran",
-                    "Catatan Pembayaran": ["/log-pembayaran"],
-                    "Pengambilan Dana": ["/spending"],
+                    // "Catatan Pembayaran": ["/log-pembayaran"],
+                    Pengeluaran: ["/pengeluaran"],
                 },
             },
-            {
-                name: "Keuangan",
-                icon: ChartMixedDollarOutline,
-                isOpenItems: false,
-                children: {
-                    Iuran: ["/iuran", "/iuran/detail"],
-                    // Pengeluaran: "/pengeluaran",
-                    "Catatan Pembayaran": ["/log-pembayaran"],
-                    "Pengambilan Dana": ["/spending"],
                 },
             },
             {
@@ -491,8 +462,8 @@
                 class="cursor-pointer"
             />
         </div>
-        <Dropdown triggeredBy="#notification" class="p-0 max-w-md">
-            <!-- <Listgroup class="border-none">
+        <!-- <Dropdown triggeredBy="#notification" class="p-0 max-w-md"> -->
+        <!-- <Listgroup class="border-none">
                 <h3
                     class="text-center p-3 text-sm font-medium text-black bg-gray-50 dark:bg-gray-700 dark:text-white font-bold rounded-t-lg"
                 >
@@ -520,7 +491,7 @@
                     <p>Lihat Semua</p>
                 </a>
             </Listgroup> -->
-        </Dropdown>
+        <!-- </Dropdown> -->
         <Dropdown triggeredBy="#avatar-menu" class="w-52 z-[100]">
             <DropdownHeader>
                 <span class="block text-sm max-w-full truncate"
@@ -607,7 +578,7 @@
 >
     <main class="h-full lg:ml-64 mt-4 w-full mx-auto" style="margin-top: 5rem">
         <Breadcrumb aria-label="Default breadcrumb example" class="mb-2">
-            <BreadcrumbItem href="/beranda" home>Beranda</BreadcrumbItem>
+            <BreadcrumbItem href="/beranda" home>BERANDA</BreadcrumbItem>
             {#if $url.replaceAll("/", "") != "beranda"}
                 {#if $url.split("/").length > 2}
                     <BreadcrumbItem href={"/" + $url.split("/")[1]}

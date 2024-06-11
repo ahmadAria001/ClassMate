@@ -18,11 +18,13 @@
     import { page } from "@inertiajs/svelte";
     import axiosInstance from "axios";
     import { onMount } from "svelte";
+    import CustomCard from "@C/General/CustomCard.svelte";
     import {
         QuestionCircleSolid,
         UsersGroupOutline,
         FileImportOutline,
         CashOutline,
+        ChevronDownOutline,
     } from "flowbite-svelte-icons";
     import CardInfo from "@C/HomePage/CardInfo.svelte";
 
@@ -230,12 +232,73 @@
         }
     };
 
+    const getSpendigMonthly = async () => {
+        try {
+            const response = await axios.get(`/api/spending/monthly-income`, {
+                headers: {
+                    Accept: "application/json",
+                },
+            });
+            console.log("spending: ", response.data);
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching spending log:", error);
+        }
+    };
+
+    const getTotalDataDues = async () => {
+        try {
+            const response = await axios.get(`/api/dues-payment/rt/${id_rt}`, {
+                headers: {
+                    Accept: "application/json",
+                },
+            });
+
+            // console.log("Dues payment response:", response);
+            const paymentDues = response.data.data;
+            // console.log("paymentDues:", paymentDues);
+
+            if (Array.isArray(paymentDues)) {
+                const totalDues = paymentDues.reduce(
+                    (total: number, dues: any) => {
+                        const amountPaid = parseFloat(dues.amount_paid);
+                        // console.log("amountPaid:", amountPaid);
+                        if (!isNaN(amountPaid)) {
+                            return total + amountPaid;
+                        } else {
+                            console.error(
+                                "Invalid amount_paid:",
+                                dues.amount_paid,
+                            );
+                            return total;
+                        }
+                    },
+                    0,
+                );
+
+                console.log("dues : " + response.data.data);
+                return totalDues;
+            } else {
+                console.error("paymentDues is not an array or is undefined");
+                return 0;
+            }
+        } catch (error) {
+            console.error("Error fetching dues data:", error);
+            return 0;
+        }
+    };
+
     const initData = async () => {
         data = await getData();
     };
 
+    let outcome: any;
     onMount(async () => {
         await initData();
+        outcome = await getSpendigMonthly();
+        console.log("test", outcome);
+
+        // await getTotalDataDues();
         // console.log(data);
     });
 
@@ -295,6 +358,86 @@
             axisBorder: {
                 show: false,
             },
+        },
+    };
+
+    let finance = {
+        chart: {
+            height: "400px",
+            maxWidth: "100%",
+            type: "line",
+            fontFamily: "Inter, sans-serif",
+            dropShadow: {
+                enabled: false,
+            },
+            toolbar: {
+                show: false,
+            },
+        },
+        tooltip: {
+            enabled: true,
+            x: {
+                show: false,
+            },
+        },
+        dataLabels: {
+            enabled: false,
+        },
+        stroke: {
+            width: 6,
+            curve: "smooth",
+        },
+        grid: {
+            show: true,
+            strokeDashArray: 4,
+            padding: {
+                left: 2,
+                right: 2,
+                top: -26,
+            },
+        },
+        series: [
+            {
+                name: "Pemasukan",
+                data: [6500, 6418, 6456, 6526, 6356, 6456],
+                color: "#00A36C",
+            },
+            {
+                name: "Pengeluaran",
+                data: [6456, 6356, 6526, 6332, 6418, 6500],
+                color: "#FF474C",
+            },
+        ],
+        legend: {
+            show: false,
+        },
+        xaxis: {
+            categories: [
+                "01 Feb",
+                "02 Feb",
+                "03 Feb",
+                "04 Feb",
+                "05 Feb",
+                "06 Feb",
+                "07 Feb",
+            ],
+            labels: {
+                show: true,
+                style: {
+                    fontFamily: "Inter, sans-serif",
+                    cssClass:
+                        "text-xs font-normal fill-gray-500 dark:fill-gray-400",
+                },
+            },
+            axisBorder: {
+                show: false,
+            },
+            axisTicks: {
+                show: false,
+            },
+        },
+        yaxis: {
+            show: false,
         },
     };
 </script>
@@ -410,40 +553,51 @@
         </div>
 
         <div class="chart-section">
-            <Card>
-                <div class="flex justify-between items-start w-full">
-                    <div class="flex-col items-center">
-                        <div class="flex items-center mb-1">
+            <div class="flex gap-4 w-full">
+                <CustomCard>
+                    <div class="flex justify-between items-start w-full">
+                        <div class="flex-col items-center">
+                            <div class="flex items-center mb-1">
+                                <h5
+                                    class="text-xl font-bold leading-none text-gray-900 dark:text-white me-1"
+                                >
+                                    Persentase Status Rumah Warga
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="flex justify-end items-center"></div>
+                    </div>
+
+                    <Chart {options} class="py-6 dark:text-white" />
+                </CustomCard>
+                <CustomCard divclass="flex-grow">
+                    <div class="flex justify-between items-center w-full mb-2">
+                        <div class="flex justify-center">
                             <h5
                                 class="text-xl font-bold leading-none text-gray-900 dark:text-white me-1"
                             >
-                                Persentase Status Rumah Warga
+                                Grafik Keuangan
                             </h5>
                         </div>
+                        <!-- <div>
+                            <Button color="light" class="px-3 py-2"
+                                >Last week<ChevronDownOutline
+                                    class="w-2.5 h-2.5 ms-1.5"
+                                /></Button
+                            >
+                            <Dropdown class="w-40">
+                                <DropdownItem>Yesterday</DropdownItem>
+                                <DropdownItem>Today</DropdownItem>
+                                <DropdownItem>Last 7 days</DropdownItem>
+                                <DropdownItem>Last 30 days</DropdownItem>
+                                <DropdownItem>Last 90 days</DropdownItem>
+                            </Dropdown>
+                        </div> -->
                     </div>
-                    <div class="flex justify-end items-center"></div>
-                </div>
-
-                <Chart {options} class="py-6 dark:text-white" />
-
-                <!-- <div
-                    class="grid grid-cols-1 items-center border-gray-200 border-t dark:border-gray-700 justify-between"
-                >
-                    <div class="flex justify-end items-center pt-5">
-                        <Button
-                            class="text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 text-center inline-flex items-center dark:hover:text-white bg-transparent hover:bg-transparent dark:bg-transparent dark:hover:bg-transparent focus:ring-transparent dark:focus:ring-transparent py-0"
-                            >Last 7 days<ChevronDownOutline
-                                class="w-2.5 m-2.5 ms-1.5"
-                            /></Button
-                        >
-                        <Dropdown class="w-40">
-                            <DropdownItem>Hari ini</DropdownItem>
-                            <DropdownItem>1 Tahun Terakhir</DropdownItem>
-                            <DropdownItem>3 Tahun Terakhir</DropdownItem>
-                        </Dropdown>
-                    </div>
-                </div> -->
-            </Card>
+                    <Chart options={finance} />
+                </CustomCard>
+            </div>
+            <div class="div"></div>
         </div>
     {/if}
 </Layout>

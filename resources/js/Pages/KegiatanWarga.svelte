@@ -31,6 +31,7 @@
 
     const rebuild = async () => {
         await initData();
+        filteredData = data.data;
         builder = {};
     };
 

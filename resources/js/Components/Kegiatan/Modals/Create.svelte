@@ -41,16 +41,29 @@
                 _token: $page.props.csrf_token,
             };
 
-            const response = await axios.post("/api/docs/activity", body);
-            console.log(response.data);
+            try {
+                const response = await axios.post("/api/docs/activity", body);
+                console.log(response.data);
 
-            err = response.data;
-            showState = false;
-            dispatch("comp");
+                err = response.data;
+                showState = false;
+                dispatch("comp");
 
-            setTimeout(() => {
-                err = { status: null, message: null };
-            }, 5000);
+                setTimeout(() => {
+                    err = { status: null, message: null };
+                }, 5000);
+            } catch (error) {
+                err = {
+                    message: error?.response?.data?.message,
+                    status: error?.response?.data?.status,
+                };
+
+                setTimeout(() => {
+                    err = { status: null, message: null };
+                }, 5000);
+
+                console.error(error);
+            }
         },
         onError: (values: unknown) => {
             err = {
