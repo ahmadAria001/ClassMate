@@ -4,4 +4,4 @@ use App\Http\Controllers\SpendingController;
 use Illuminate\Support\Facades\Route;
 
 // profile
-Route::get('/spending', SpendingController::class)->name('spending');
+Route::get('/pengeluaran', SpendingController::class)->name('spending');

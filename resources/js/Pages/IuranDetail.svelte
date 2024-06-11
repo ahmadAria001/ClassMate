@@ -20,11 +20,16 @@
         Modal,
         A,
         Toast,
+        Popover,
     } from "flowbite-svelte";
     import { writable } from "svelte/store";
     import Payment from "@C/DetailIuran/Modals/Payment.svelte";
     import { twMerge } from "tailwind-merge";
-    import { CheckCircleSolid, CloseCircleSolid } from "flowbite-svelte-icons";
+    import {
+        CheckCircleSolid,
+        CloseCircleSolid,
+        QuestionCircleSolid,
+    } from "flowbite-svelte-icons";
     import { page } from "@inertiajs/svelte";
 
     const axios = axiosInstance.create();
@@ -429,7 +434,7 @@
     ) => {
         const duesDatas = await getDuesMember(target, dues);
         paymentLog = duesDatas;
-      
+
         if (!stat) return;
 
         if (duesDatas.isMember > 0) {
@@ -576,10 +581,16 @@
                         <TableBody tableBodyClass="divide-y">
                             <TableBodyRow>
                                 <TableBodyCell>Nama</TableBodyCell>
-                                <TableBodyCell
-                                    class="w-full truncate lg:max-w-xs lg:max-w-20"
-                                    >{civilianMdl.fullName}</TableBodyCell
-                                >
+                                <TableBodyCell class="flex">
+                                    <p
+                                        class="w-full truncate max-w-32 md:max-w-full lg:max-w-xs lg:max-w-36"
+                                    >
+                                        {civilianMdl.fullName}
+                                    </p>
+                                    <QuestionCircleSolid
+                                        id={`name-${civilianMdl.id}`}
+                                    />
+                                </TableBodyCell>
                             </TableBodyRow>
                             <TableBodyRow>
                                 <TableBodyCell>KK</TableBodyCell>
@@ -587,9 +598,16 @@
                             </TableBodyRow>
                             <TableBodyRow>
                                 <TableBodyCell>Alamat</TableBodyCell>
-                                <TableBodyCell
-                                    >{civilianMdl.address}</TableBodyCell
-                                >
+                                <TableBodyCell class="flex"
+                                    ><p
+                                        class="w-full truncate max-w-32 md:max-w-full lg:max-w-xs lg:max-w-36"
+                                    >
+                                        {civilianMdl.address}
+                                    </p>
+                                    <QuestionCircleSolid
+                                        id={`address-${civilianMdl.id}`}
+                                    />
+                                </TableBodyCell>
                             </TableBodyRow>
                             <TableBodyRow>
                                 <TableBodyCell
@@ -605,6 +623,22 @@
                                     {/if}
                                 </TableBodyCell>
                             </TableBodyRow>
+                            <Popover
+                                class="w-64 text-sm text-black dark:text-white z-50"
+                                title="Nama"
+                                triggeredBy={`#name-${civilianMdl.id}`}
+                            >
+                                <!-- {item.docs_id.description} -->
+                                {civilianMdl.fullName}
+                            </Popover>
+                            <Popover
+                                class="w-64 text-sm text-black dark:text-white z-50"
+                                title="Alamat"
+                                triggeredBy={`#address-${civilianMdl.id}`}
+                            >
+                                <!-- {item.docs_id.description} -->
+                                {civilianMdl.address}
+                            </Popover>
                         </TableBody>
                     </Table>
                     <div class="text-end mt-2">

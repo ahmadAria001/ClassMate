@@ -96,27 +96,22 @@
             {/if}
         </div>
         <div class="mb-4">
-            <Label for="desc" class="mb-2">Keterangan</Label>
-            <Textarea
-                rows="2"
-                id="desc"
-                name="desc"
-                placeholder="Isi Pengumuman"
-            />
-            {#if $errors.desc}
-                <span class="text-sm text-red-500">{$errors.desc}</span>
-            {/if}
-        </div>
-        <div class="mb-4">
             <Label for="amount" class="mb-2">Jumlah</Label>
             <Input
                 type="number"
                 id="amount"
                 name="amount"
-                placeholder="Isi Pengumuman"
+                placeholder="Jumlah pengeluaran"
             />
             {#if $errors.amount}
                 <span class="text-sm text-red-500">{$errors.amount}</span>
+            {/if}
+        </div>
+        <div class="mb-4">
+            <Label for="desc" class="mb-2">Keterangan</Label>
+            <Textarea rows="2" id="desc" name="desc" placeholder="Keterangan" />
+            {#if $errors.desc}
+                <span class="text-sm text-red-500">{$errors.desc}</span>
             {/if}
         </div>
 

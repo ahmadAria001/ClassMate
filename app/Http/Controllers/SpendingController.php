@@ -59,6 +59,23 @@ class SpendingController extends Controller
         return Response()->json(['data' => $data], 200);
     }
 
+    public function getMonthlyIncomeLastSixMonths()
+    {
+        $currentDate = Carbon::now();
+
+        $sixMonthsAgo = $currentDate->copy()->subMonths(6);
+
+        // ngambil data pengeluaran dalam 6 bulan terakhir dan menjumlahkan perbulan
+        $monthlyIncome = Spending::where('created_at', '>=', $sixMonthsAgo)
+            ->where('created_at', '<=', Carbon::now())
+            ->selectRaw('DATE_FORMAT(FROM_UNIXTIME(created_at), "%Y-%m") as month, SUM(amount) as total_amount')
+            ->groupBy('month')
+            ->orderBy('month', 'asc')
+            ->get();
+
+        return response()->json(['data' => $monthlyIncome], 200);
+    }
+
     public function getPaged($page = 1)
     {
         $take = 5;
