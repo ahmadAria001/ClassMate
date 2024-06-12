@@ -21,13 +21,13 @@ use Laravel\Sanctum\PersonalAccessToken;
 
 Route::get('/', function () {
     return Inertia::render('LandingPage');
-});
+})->name('landingpage');
 Route::get('/lp-pengumuman', function () {
     return Inertia::render('LandingPagePengumuman');
-});
+})->name('landingpage-announcement');;
 Route::get('/lp-profile', function () {
     return Inertia::render('LandingPageProfile');
-});
+})->name('landingpage-profile');;
 
 Route::get('/beranda', function () {
     $token = isset($_COOKIE['token']) ? $_COOKIE['token'] : null;
