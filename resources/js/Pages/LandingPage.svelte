@@ -99,6 +99,7 @@
         const response = await axios.get("/api/rt", {
             headers: {
                 Accept: "application/json",
+                lct: $page.props.location,
             },
         });
 
@@ -113,7 +114,12 @@
 
     const getRW = async () => {
         try {
-            const response = await axios.get(`/api/user/rw/current`);
+            const response = await axios.get(`/api/user/rw/current`, {
+                headers: {
+                    Accept: "application/json",
+                    lct: $page.props.location,
+                },
+            });
             return response.data;
         } catch (error) {
             console.error(error);
@@ -121,7 +127,12 @@
     };
 
     const getCitizenEvents = async () => {
-        const response = await axios.get(`/api/docs/activity/lts`);
+        const response = await axios.get(`/api/docs/activity/lts`, {
+            headers: {
+                Accept: "application/json",
+                lct: $page.props.location,
+            },
+        });
 
         return response.data;
     };

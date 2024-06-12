@@ -2,6 +2,8 @@
     import { Heading } from "flowbite-svelte";
     import Navbar from "@C/LandingPage/Navbar.svelte";
     import Footer from "@C/LandingPage/Footer.svelte";
+
+    import { page } from "@inertiajs/svelte";
     import axiosInstance from "axios";
     import { onMount } from "svelte";
     const axios = axiosInstance.create();
@@ -49,6 +51,7 @@
         const response = await axios.get("/api/rt", {
             headers: {
                 Accept: "application/json",
+                lct: $page.props.location,
             },
         });
 
@@ -63,7 +66,12 @@
 
     const getRW = async () => {
         try {
-            const response = await axios.get(`/api/user/rw/current`);
+            const response = await axios.get(`/api/user/rw/current`, {
+                headers: {
+                    Accept: "application/json",
+                    lct: $page.props.location,
+                },
+            });
             return response.data;
         } catch (error) {
             console.error(error);
@@ -72,7 +80,7 @@
 
     onMount(async () => {
         dataRT = await getRTData();
-        currentRW = await getRW();
+        currentRW = (await getRW()).data;
     });
 </script>
 
@@ -100,7 +108,7 @@
                         class="w-4/5 md:flex md:flex-col md:justify-center md:align-center"
                     >
                         <Heading tag="h4" class="mb-2"
-                            >{currentRW.civilian_id.fullName}</Heading
+                            >{currentRW?.civilian_id?.fullName}</Heading
                         >
                         <Heading tag="h5" class="mb-2">Ketua RW 3</Heading>
                         <p class="text-gray-500">

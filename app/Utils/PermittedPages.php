@@ -7,5 +7,5 @@ use Laravel\Sanctum\PersonalAccessToken;
 
 class PermittedPages
 {
-    public static $pages = ['LandingPage', 'landingpage-announcement', 'landingpage-profile'];
+    public static $pages = ['landingpage', 'landingpage-announcement', 'landingpage-profile'];
 }

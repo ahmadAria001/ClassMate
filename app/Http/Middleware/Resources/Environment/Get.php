@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware\Resources\Environment;
 
+use App\Utils\PermittedPages;
 use Closure;
 use Illuminate\Http\Request;
 use Laravel\Sanctum\PersonalAccessToken;
@@ -16,7 +17,7 @@ class Get
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->route()->getName('LandingPage')) return $next($request);
+        if (in_array($request->header('Lct'), PermittedPages::$pages) && $request->header('Sec-Fetch-Site')) return $next($request);
 
         $token = $request->bearerToken();
 
