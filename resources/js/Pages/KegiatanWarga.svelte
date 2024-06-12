@@ -235,9 +235,9 @@
                             <TableBodyRow>
                                 <TableBodyCell>
                                     <div
-                                        class="flex justify-between align-middle gap-2"
+                                        class="flex justify-between align-middle gap-2 w-full"
                                     >
-                                        <span class="w-full truncate">
+                                        <span class="max-w-32 truncate">
                                             {item.name}
                                         </span>
                                         <QuestionCircleSolid
@@ -286,7 +286,8 @@
                                 title="Deskripsi"
                                 triggeredBy={`#title-${item.id}`}
                             >
-                                {item.docs_id.description}
+                                <!-- {item.docs_id.description} -->
+                                {item.name}
                             </Popover>
                         {/each}
                     {/if}

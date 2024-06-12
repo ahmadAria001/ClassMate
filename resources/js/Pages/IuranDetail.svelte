@@ -194,6 +194,8 @@
 
     let builder = {};
     const rebuild = async () => {
+        console.log("rebuild call");
+
         await initPage();
         builder = {};
     };

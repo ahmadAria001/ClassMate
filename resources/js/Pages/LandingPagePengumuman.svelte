@@ -66,7 +66,7 @@
             <Heading tag="h3" class="mb-2">Pengumuman</Heading>
         </div>
 
-        <div class="w-full mb-8 grid">
+        <!-- <div class="w-full mb-8 grid">
             <Select
                 id="filter"
                 bind:value={selected}
@@ -78,13 +78,14 @@
                     <option {value}>{name}</option>
                 {/each}
             </Select>
-        </div>
+        </div> -->
 
         <div class="group-card w-full pb-24">
             {#each announcements as announcement}
                 <Cards
-                    imageUrl={announcement.attachment ||
-                        "https://redthread.uoregon.edu/files/original/affd16fd5264cab9197da4cd1a996f820e601ee4.png"}
+                    imageUrl={announcement.attachment
+                        ? `/storage/assets/uploads/${announcement.attachment}`
+                        : "https://redthread.uoregon.edu/files/original/affd16fd5264cab9197da4cd1a996f820e601ee4.png"}
                     hrefUrl="/"
                     classCard="mb-3 d-block bg-gray-100"
                     title={announcement.title}
