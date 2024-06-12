@@ -69,6 +69,7 @@
         checkedItems = checkedItems.map(() => target.checked);
         checkedAll = target.checked;
 
+        console.log(unpaidData);
         selected = [];
         if (target.checked) {
             selected = unpaidData;
@@ -105,7 +106,7 @@
             if (selected.includes(paymentLog.data[index])) {
                 selected.splice(index, 1);
             } else {
-                selected.push(paymentLog.data[index]);
+                if (target.checked) selected.push(paymentLog.data[index]);
             }
 
             validatePayment();
@@ -257,6 +258,14 @@
                     dues_member: data.member.id,
                 },
             });
+
+            unpaidData.push({
+                paid_for: Number.parseInt(
+                    (generatedDate.getTime() / 1000).toString(),
+                ),
+                amount_paid: amountPay,
+                dues_member: data.member.id,
+            });
         }
 
         const member_id =
@@ -308,13 +317,6 @@
                             dues_member: member_id,
                         },
                     });
-                    unpaidData.push({
-                        paid_for: Number.parseInt(
-                            (generatedDate.getTime() / 1000).toString(),
-                        ),
-                        amount_paid: amountPay,
-                        dues_member: member_id,
-                    });
 
                     index--;
                 } else {
@@ -328,14 +330,15 @@
                             dues_member: member_id,
                         },
                     });
-                    unpaidData.push({
-                        paid_for: Number.parseInt(
-                            (generatedDate.getTime() / 1000).toString(),
-                        ),
-                        amount_paid: amountPay,
-                        dues_member: member_id,
-                    });
                 }
+
+                unpaidData.push({
+                    paid_for: Number.parseInt(
+                        (generatedDate.getTime() / 1000).toString(),
+                    ),
+                    amount_paid: amountPay,
+                    dues_member: member_id,
+                });
             }
         }
 
