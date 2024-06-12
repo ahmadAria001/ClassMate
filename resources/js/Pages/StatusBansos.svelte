@@ -101,6 +101,19 @@
         updateDataAndPagination();
     };
 
+    const searchFA = async (filter: string = "") => {
+        const response = await axios.get(
+            `/api/bansos/like/${encodeURIComponent(currentPage)}/${encodeURIComponent(filter)}`,
+            {
+                headers: {
+                    Accept: "application/json",
+                },
+            },
+        );
+
+        return response.data;
+    };
+
     const getComplainPaged = async (page: number) => {
         let url = "";
 
@@ -147,7 +160,6 @@
 
     const rebuild = async () => {
         builder = {};
-        await initPage();
     };
 
     // onmount dummy
@@ -160,17 +172,22 @@
     });
 
     let filteredData: any;
-    const handleSearch = (event: any) => {
+    const handleSearch = async (event: any) => {
         const searchValue = event.detail.value.toLowerCase();
         // console.log("Search value in handleSearch in use file:", searchValue);
+
+        currentPage = 1;
         if (searchValue == "") {
-            filteredData = [items];
+            await initPage();
+            filteredData = [...data.data];
+            await rebuild();
+
+            return;
         }
-        filteredData = items.filter((d: any) =>
-            d.problem.toLowerCase().includes(searchValue),
-        );
-        console.log(filteredData);
-        rebuild();
+
+        data = await searchFA(searchValue);
+        filteredData = data.data;
+        await rebuild();
     };
 </script>
 
@@ -245,16 +262,16 @@
                     Showing
                     <span class="font-semibold text-gray-900 dark:text-white">
                         {currentPage < 2
-                            ? data.length == 0
-                                ? 0
-                                : 1
-                            : data.length < 5
-                              ? data.length - data.length + 1
-                              : data.length + 1}
+                            ? 1
+                            : data.length < 5 || data.data.length
+                              ? data.length - data.data.length + 1
+                              : data.data.length * currentPage - 5 + 1}
                         -
                         {data.length < 5
-                            ? data.length
-                            : data.length * currentPage}
+                            ? data.data.length
+                            : data.data.length < 5
+                              ? data.length
+                              : data.data.length * currentPage}
                     </span>
                     of
                     <span class="font-semibold text-gray-900 dark:text-white"
@@ -266,17 +283,17 @@
                         disabled={currentPage < 2}
                         on:click={async () => {
                             currentPage--;
-                            await rebuild();
+                            await initPage();
                         }}><ChevronLeftOutline /></Button
                     >
                     <!-- {#each data.length as pageNumber} -->
                     <Button disabled>{currentPage}</Button>
                     <!-- {/each} -->
                     <Button
-                        disabled={currentPage >= data.length / 5}
+                        disabled={data.data.length < 5}
                         on:click={async () => {
                             currentPage++;
-                            await rebuild();
+                            await initPage();
                         }}><ChevronRightOutline /></Button
                     >
                 </ButtonGroup>

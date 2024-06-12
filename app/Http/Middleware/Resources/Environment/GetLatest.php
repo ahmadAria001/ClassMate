@@ -3,6 +3,7 @@
 namespace App\Http\Middleware\Resources\Environment;
 
 use App\Http\Controllers\NewsController;
+use App\Utils\PermittedPages;
 use Closure;
 use Illuminate\Http\Request;
 use Laravel\Sanctum\PersonalAccessToken;
@@ -17,7 +18,7 @@ class GetLatest
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->url() == '/') return $next($request);
+        if (in_array($request->header('Lct'), PermittedPages::$pages) && $request->header('Sec-Fetch-Site')) return $next($request);
 
         $token = $request->bearerToken();
 
