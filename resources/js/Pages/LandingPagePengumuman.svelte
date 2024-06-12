@@ -6,6 +6,8 @@
     import axiosInstance from "axios";
     import { onMount } from "svelte";
 
+    import { page } from "@inertiajs/svelte";
+
     const axios = axiosInstance.create();
     interface News {
         title: string;
@@ -22,13 +24,14 @@
         const response = await axios.get("/api/news/", {
             headers: {
                 Accept: "application/json",
+                lct: $page.props.location,
             },
         });
 
-        console.log("API Response:", response.data);
+        // console.log("API Response:", response.data);
 
         if (Array.isArray(response.data.data)) {
-            return response.data.data.map((item) => ({
+            return response.data.data.map((item: any) => ({
                 ...item,
                 created_at: item.created_at.slice(0, 10), // ngecut date
             }));
@@ -46,27 +49,13 @@
         }
     });
 
-    let pengumumans = [
-        {
-            img: "https://media.kompas.tv/library/image/content_article/article_img/20231204072833.jpg",
-            title: "Perekrutan Anggota KPPS",
-            desc: "Pengumuman bagi seluruh masyarakat, dengan adanya Pemilihan Umum yang akan segera dilaksanakan, bagi yang berminat untuk menjadi anggota KPPS untuk mengambil form pendaftaran di rumah Ketua RW 03.",
-            date: "13 Maret 2024",
-        },
-        {
-            img: "https://asset.kompas.com/crops/jyzXEDY9vOxsOPbXwe8vm8WpE4A=/34x0:704x447/750x500/data/photo/2021/07/27/60ffc24bc0c75.jpg",
-            title: "Pengajuan Bantuan Sosial",
-            desc: "Pengumuman bagi seluruh masyarakat, dengan dibukanya pengajuan bantuan sosial PKH, bagi yang ingin mengajukan Bantuan Sosial, dimohon untuk mengisi form pengajuan Bantuan Sosial",
-            date: "13 Maret 2024",
-        },
-    ];
-
     let filterTime = [
         { value: "7-day", name: "7 Hari Terakhir" },
         { value: "1-month", name: "1 Bulan Terakhir" },
         { value: "1-year", name: "1 Tahun Terakhir" },
     ];
-    let selected;
+
+    let selected: any;
 </script>
 
 <div class="relative px-8 md:px-16 mt-24">

@@ -58,7 +58,7 @@ class NewsController extends Controller
         if ($filter) {
             $data = News::where('id', $filter)->get()->first();
         } else {
-            $data = News::skip(0)->take(10)->get();
+            $data = News::withoutTrashed()->orderByDesc('created_at')->skip(0)->take(10)->get();
         }
 
         return Response()->json(['data' => $data], 200);

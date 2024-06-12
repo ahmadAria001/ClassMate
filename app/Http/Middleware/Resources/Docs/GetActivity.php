@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware\Resources\Docs;
 
+use App\Utils\PermittedPages;
 use Closure;
 use Illuminate\Http\Request;
 use Laravel\Sanctum\PersonalAccessToken;
@@ -11,6 +12,8 @@ class GetActivity
 {
     public function handle(Request $request, Closure $next): Response
     {
+        if (in_array($request->header('Lct'), PermittedPages::$pages) && $request->header('Sec-Fetch-Site')) return $next($request);
+
         $token = $request->bearerToken();
 
         if (!$token) {
