@@ -66,7 +66,6 @@ class SpendingController extends Controller
 
         $sixMonthsAgo = $currentDate->copy()->subMonths(6);
 
-
         // dd($currentDate->toDate());
         // ngambil data pengeluaran dalam 6 bulan terakhir dan menjumlahkan perbulan
 

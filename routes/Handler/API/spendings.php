@@ -13,6 +13,7 @@ Route::prefix('/spending')->group(fn () => [
 
     Route::get('/', [SpendingController::class, 'get'])->middleware(Get::class),
     Route::get('/{filter}', [SpendingController::class, 'get'])->middleware(Get::class),
+    Route::get('/monthly-income', [SpendingController::class, 'getMonthlyIncomeLastSixMonths'])->middleware(Get::class),
 
     Route::get('/rt/{page}', [SpendingController::class, 'getByRT'])->middleware(Get::class),
     Route::get('/p/{page}', [SpendingController::class, 'getPaged'])->middleware(Get::class),
