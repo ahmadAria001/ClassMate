@@ -703,6 +703,12 @@
         <condition>=</condition>
         <name2/>
       </key>
+      <key>
+        <name>nkk</name>
+        <field>nkk</field>
+        <condition>=</condition>
+        <name2/>
+      </key>
       <value>
         <name>id_dimCivilian</name>
         <rename>civ_id</rename>
@@ -969,14 +975,19 @@
       <method>none</method>
       <schema_name/>
     </partitioning>
-    <send_true_to/>
+    <send_true_to>Select values</send_true_to>
     <send_false_to/>
     <compare>
       <condition>
         <negated>N</negated>
-        <leftvalue>id_FactDues</leftvalue>
-        <function>IS NULL</function>
-        <rightvalue/>
+        <conditions>
+          <condition>
+            <negated>N</negated>
+            <leftvalue>id_FactDues</leftvalue>
+            <function>IS NULL</function>
+            <rightvalue/>
+          </condition>
+        </conditions>
       </condition>
     </compare>
     <attributes/>
@@ -1093,8 +1104,9 @@
       <schema_name/>
     </partitioning>
     <connection>kawandesa_oltp</connection>
-    <sql>select
-c.nik, /*For Civ*/
+    <sql>select 
+c.nik,
+c.nkk, /*For Civ*/
 CASE
    WHEN dpl.paid_for > 2000000000 THEN DATE(FROM_UNIXTIME(dpl.paid_for / 1000)) /*If Milliseconds*/
    ELSE DATE(FROM_UNIXTIME(dpl.paid_for)) /*If Seconds*/
@@ -1129,6 +1141,29 @@ left join rt on d.rt_id = rt.id</sql>
         <precision>-1</precision>
         <origin>Table input</origin>
         <comments>nik</comments>
+        <conversion_Mask/>
+        <decimal_symbol>.</decimal_symbol>
+        <grouping_symbol>,</grouping_symbol>
+        <currency_symbol/>
+        <trim_type>none</trim_type>
+        <case_insensitive>N</case_insensitive>
+        <collator_disabled>Y</collator_disabled>
+        <collator_strength>0</collator_strength>
+        <sort_descending>N</sort_descending>
+        <output_padding>N</output_padding>
+        <date_format_lenient>N</date_format_lenient>
+        <date_format_locale>en_ID</date_format_locale>
+        <date_format_timezone>Asia/Jakarta</date_format_timezone>
+        <lenient_string_to_number>N</lenient_string_to_number>
+      </value-meta>
+      <value-meta>
+        <type>String</type>
+        <storagetype>normal</storagetype>
+        <name>nkk</name>
+        <length>16</length>
+        <precision>-1</precision>
+        <origin>Table input</origin>
+        <comments>nkk</comments>
         <conversion_Mask/>
         <decimal_symbol>.</decimal_symbol>
         <grouping_symbol>,</grouping_symbol>
