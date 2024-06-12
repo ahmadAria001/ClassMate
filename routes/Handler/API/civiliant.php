@@ -13,7 +13,7 @@ Route::prefix('civilian')->group(function () {
     Route::prefix('/archive')->group(fn () => [
         Route::get('/', [CivilianController::class, 'getArchived'])->middleware(CiviliantGet::class),
         Route::get('/{filter}', [CivilianController::class, 'getArchived'])->middleware(CiviliantGet::class),
-        Route::get('/{filter}/{byRT}', [CivilianController::class, 'getArchived'])->middleware(CiviliantGet::class),
+        Route::get('/{filter}/{byRT}/{page}', [CivilianController::class, 'getArchived'])->middleware(CiviliantGet::class),
     ]);
 
     Route::get('/', [CivilianController::class, 'get'])->middleware(CiviliantGet::class);

@@ -1,12 +1,8 @@
 <script lang="ts">
     import Layout from "./Layout.svelte";
     import {
-        A,
-        Button,
         Card,
         Chart,
-        Dropdown,
-        DropdownItem,
         Popover,
         Table,
         TableBody,
@@ -15,16 +11,19 @@
         TableHead,
         TableHeadCell,
     } from "flowbite-svelte";
+
+    import type { ApexOptions } from "apexcharts";
+
     import { page } from "@inertiajs/svelte";
     import axiosInstance from "axios";
     import { onMount } from "svelte";
+
     import CustomCard from "@C/General/CustomCard.svelte";
     import {
         QuestionCircleSolid,
         UsersGroupOutline,
         FileImportOutline,
         CashOutline,
-        ChevronDownOutline,
     } from "flowbite-svelte-icons";
     import CardInfo from "@C/HomePage/CardInfo.svelte";
 
@@ -171,7 +170,7 @@
 
             // Buat hitung total iuran
             const totalDues = countDues.data.reduce(
-                (total: number, dues: number) => {
+                (total: number, dues: any) => {
                     return total + parseFloat(dues.amount_paid);
                 },
                 0,

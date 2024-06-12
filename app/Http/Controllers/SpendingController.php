@@ -66,9 +66,7 @@ class SpendingController extends Controller
 
         $sixMonthsAgo = $currentDate->copy()->subMonths(6);
 
-        // dd($currentDate->toDate());
         // ngambil data pengeluaran dalam 6 bulan terakhir dan menjumlahkan perbulan
-
         $query =  'select
         DATE_FORMAT(FROM_UNIXTIME(created_at), "%Y-%m") as month,
         SUM(amount) as total_amount
@@ -81,15 +79,6 @@ class SpendingController extends Controller
     order by `month` desc; ';
 
         $monthlyIncome = DB::select($query);
-
-        // $q =
-        //     Spending::withoutTrashed()
-        //     ->where('created_at', '>=', $sixMonthsAgo)
-        //     ->where('created_at', '<=', Carbon::now())
-        //     ->selectRaw('DATE_FORMAT(FROM_UNIXTIME(created_at), "%Y-%m") as month, SUM(amount) as total_amount')
-        //     ->groupBy('month')
-        //     ->orderBy('month', 'asc')
-        //     ->toSql();
 
         return response()->json([
             'data' => $monthlyIncome,

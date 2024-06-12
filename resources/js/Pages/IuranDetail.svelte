@@ -336,95 +336,6 @@
         containedDate.map((value) => finalData.push(value.item));
 
         return finalData;
-
-        // for (let index = 0; index < containedDate.length; index++) {
-        //     const paidYear =
-        //         new Date(containedDate[index].item.paid_for * 1000).getMonth() +
-        //             1 >
-        //         11
-        //             ? new Date(
-        //                   containedDate[index].item.paid_for * 1000,
-        //               ).getFullYear() + 1
-        //             : new Date(
-        //                   containedDate[index].item.paid_for * 1000,
-        //               ).getFullYear();
-        //     const paidMont =
-        //         new Date(containedDate[index].item.paid_for * 1000).getMonth() +
-        //             1 >
-        //         11
-        //             ? 0
-        //             : new Date(
-        //                   containedDate[index].item.paid_for * 1000,
-        //               ).getMonth() + 1;
-
-        //     const paidDate = `${paidYear}-${paidMont}-1`;
-
-        //     const hasDate = containedDate.some(
-        //         (value) => value.paidDate == paidDate,
-        //     );
-
-        //     if (!hasDate) {
-        //         if (paidMont > 11 && paidYear >= currentYear) break;
-
-        //         let generatedDate = new Date();
-        //         generatedDate = new Date(generatedDate.setMonth(paidMont));
-        //         generatedDate = new Date(generatedDate.setFullYear(paidYear));
-
-        //         containedDate.splice(index, 0, {
-        //             paidDate: paidDate,
-        //             item: {
-        //                 paid_for: Number.parseInt(
-        //                     (generatedDate.getTime() / 1000).toString(),
-        //                 ),
-        //                 amount_paid: amountPay,
-        //                 dues_member: containedDate[index].item.dues_member.id,
-        //             },
-        //         });
-        //     }
-        // }
-
-        // const paidMont = new Date(lastPaidDate * 1000).getMonth();
-        // const paidYear = new Date(lastPaidDate * 1000).getFullYear();
-        // const currentMont = new Date(Date.now()).getMonth();
-        // const currentYear = new Date(Date.now()).getFullYear();
-
-        // let loopMonth = paidMont + 1;
-        // let loopYear = paidYear;
-
-        // // console.log(new Date(lastPaidDate * 1000).getMonth());
-
-        // while (loopYear <= currentYear) {
-        //     while (
-        //         loopMonth <= currentMont ||
-        //         (loopYear < currentYear && loopMonth <= 11)
-        //     ) {
-        //         let generatedDate = new Date(lastPaidDate * 1000);
-        //         generatedDate = new Date(generatedDate.setMonth(loopMonth));
-        //         generatedDate = new Date(generatedDate.setFullYear(loopYear));
-
-        //         generatedUnpainPayment.push({
-        //             paid_for: generatedDate.getTime() / 1000,
-        //             amount_paid: 0,
-        //             dues_member: member,
-        //         });
-
-        //         if (loopMonth <= 11 && loopYear <= currentYear) {
-        //             loopMonth++;
-        //         } else {
-        //             break;
-        //         }
-        //     }
-
-        //     if (loopYear <= currentYear) {
-        //         loopMonth = 0;
-
-        //         loopYear++;
-        //     } else {
-        //         break;
-        //     }
-        // }
-
-        // return generatedUnpainPayment.reverse();
     };
 
     const generatesPaymentLog = async (
@@ -539,7 +450,7 @@
             });
 
             err = response.data;
-        } catch (error) {
+        } catch (error: any) {
             err = {
                 message: error?.response?.data?.message,
                 status: error?.response?.data?.status,
