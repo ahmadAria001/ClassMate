@@ -21,6 +21,7 @@
     } from "flowbite-svelte-icons";
     import { createEventDispatcher, onMount } from "svelte";
     import { Popover } from "flowbite-svelte";
+    import { string } from "zod";
 
     export let showState = false;
     export let target: string;
@@ -38,7 +39,7 @@
 
     const submitChange = async (values: any) => {
         try {
-            console.log(values);
+            console.log(values.data);
             let body: any;
 
             if (values.attachment) {
@@ -134,36 +135,39 @@
         return data;
     };
 
-    let name: string;
-    let phone: string;
-    let address: string;
-    let description: string;
+    // let name: string;
+    // let phone: string;
+    // let address: string;
+    // let description: string;
     onMount(async () => {
         const response = await getComplaints(target);
-        data = response;
-        console.log("data ", data.data);
-        console.log("data ", data.data[0].created_by);
+        data = response?.data;
 
         if (data) {
-            name = data.data[0].created_by?.civilian_id?.fullName || "";
-            phone = data.data[0].created_by?.civilian_id?.phone || "";
-            address = data.data[0].created_by?.civilian_id?.address || "";
-            description = data.data[0].docs_id?.description || "";
-            console.log(
-                `nama : ${name}\nphone : ${phone}\naddress : ${address}\ndescription : ${description}`,
-            );
+            // name = data.data.created_by?.civilian_id?.fullName || "";
+            // phone = data.data.created_by?.civilian_id?.phone || "";
+            // address = data.data.created_by?.civilian_id?.address || "";
+            // description = data.data.docs_id?.description || "";
+            // console.log(
+            //     `nama : ${name}\nphone : ${phone}\naddress : ${address}\ndescription : ${description}`,
+            // );
 
             if (data.attachment) {
                 await getAsset(data.attachment);
             }
         }
+
+        console.log(data);
     });
 </script>
 
 <Modal
     title="Detail Pengaduan"
     bind:open={showState}
-    on:close={() => (selectedImage = null)}
+    on:close={() => {
+        selectedImage = null;
+        target = String.toString();
+    }}
 >
     {#await initialLoad(target) then item}
         {#if item?.data}
@@ -173,7 +177,7 @@
                     id="full_name"
                     placeholder="Nama Pelapor"
                     readonly
-                    value={item.data[0].created_by.civilian_id.fullName}
+                    value={item.data.created_by.civilian_id.fullName}
                 />
             </div>
             <div class="grid md:grid-cols-2 md:gap-6">
@@ -183,7 +187,7 @@
                         id="no_hp"
                         placeholder="No HP"
                         readonly
-                        value={item.data[0].created_by.civilian_id.phone}
+                        value={item.data.created_by.civilian_id.phone}
                     />
                 </div>
                 <div class="mb-4">
@@ -193,7 +197,7 @@
                             id="address"
                             placeholder="Alamat"
                             readonly
-                            value={item.data[0].created_by.civilian_id.address}
+                            value={item.data.created_by.civilian_id.address}
                         />
                         <div class="flex align-middle w-fit h-full py-2">
                             <QuestionCircleSolid
@@ -208,7 +212,7 @@
                         title="Alamat"
                         triggeredBy={`#pass-hint`}
                     >
-                        {item.data[0].created_by.civilian_id.address}
+                        {item.data.created_by.civilian_id.address}
                     </Popover>
                 </div>
             </div>
@@ -218,9 +222,7 @@
                     id="timeUpload"
                     placeholder="Waktu Dikirim"
                     readonly
-                    value={new Date(
-                        item.data[0].created_at,
-                    ).toLocaleDateString()}
+                    value={new Date(item.data.created_at).toLocaleDateString()}
                 />
             </div>
 
@@ -232,7 +234,7 @@
                     name="description"
                     placeholder="Isi Pengumuman"
                     readonly
-                    value={item.data[0].docs_id.description}
+                    value={item.data.docs_id.description}
                 />
             </div>
             <div class="mb-4">

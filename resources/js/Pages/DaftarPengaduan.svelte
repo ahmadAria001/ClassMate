@@ -63,7 +63,8 @@
 
     let builder = {};
 
-    const rebuild = () => {
+    const rebuild = async () => {
+        await initPage();
         builder = {};
     };
 
@@ -119,8 +120,9 @@
         if (role == "Warga")
             url = `/api/docs/complaint/warga/${encodeURIComponent(page)}`;
         if (role != "RT" && role != "Warga")
-            url = `/api/docs/complaint/${encodeURIComponent(page)}`;
+            url = `/api/docs/complaint/like/${encodeURIComponent(page)}`;
 
+        console.log(url);
         try {
             const response = await axios.get(url, {
                 headers: {
@@ -138,8 +140,9 @@
         if (format.test(encodeURIComponent(id))) return;
 
         try {
+            currentPage = 1;
             const response = await axios.get(
-                `/api/docs/complaint/${encodeURIComponent(id)}`,
+                `/api/docs/complaint/like/${currentPage}/${encodeURIComponent(id)}`,
                 {
                     headers: {
                         Accept: "*/*",
@@ -147,7 +150,7 @@
                 },
             );
 
-            console.log(response.data);
+            // console.log(response.data);
             return response.data;
         } catch (error) {
             console.error(error);
@@ -267,6 +270,7 @@
                                             color="blue"
                                             on:click={() => {
                                                 selected = item.id;
+                                                // console.log(item);
                                                 modalDetailPengaduan = true;
                                             }}>Detail</Button
                                         >
@@ -331,7 +335,7 @@
     </TableSearch>
 </Layout>
 
-{#if selected}
+{#if selected && modalDetailPengaduan}
     <Detail
         bind:showState={modalDetailPengaduan}
         bind:target={selected}

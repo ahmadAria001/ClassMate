@@ -109,11 +109,29 @@ class ComplaintController extends Controller
 
         if ($filter && strlen($filter) > 0) {
             $data = Complaint::withoutTrashed()->with('docs_id', 'created_by.civilian_id', 'updated_by')
+                ->where('id', $filter)->first();
+        } else {
+            $data = Complaint::withoutTrashed()->with('docs_id', 'created_by.civilian_id', 'updated_by')->get();
+        }
+
+        $length = $data->count();
+
+        return Response()->json(['data' => $data, 'length' => $length]);
+    }
+
+    public  function getLike($page = 1, $filter = null)
+    {
+        $data = null;
+        $take = 5;
+
+        if ($filter) {
+            $data = Complaint::withoutTrashed()->with('docs_id', 'created_by.civilian_id', 'updated_by')
                 ->whereHas('created_by.civilian_id', function ($q) use ($filter) {
-                    $q->whereAny(['nik', 'fullName', 'birthplace', 'birthplace', 'birthplace', 'status', 'address', 'religion', 'job'], 'LIKE', "%$filter%");
+                    $q->whereAny(['fullName'], 'LIKE', "%$filter%");
                     // $q->where('fullName', 'LIKE', "%$filter%");
                 })
-                ->orWhereAny(['id', 'complaintStatus'], 'LIKE', "%$filter%");
+                ->skip($page > 1 ? ($page - 1) * $take : 0)
+                ->take($take);
 
             // dd($data);
         } else {
@@ -300,8 +318,6 @@ class ComplaintController extends Controller
             $docs = Docs::withTrashed()
                 ->where('id', $data->docs_id)
                 ->first();
-            error_log($payload);
-            error_log($data);
 
             if ($data) {
                 //Handle Log Update

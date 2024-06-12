@@ -113,8 +113,8 @@
             url = `/api/docs/complaint/rt/${encodeURIComponent(page)}`;
         if (role == "Warga")
             url = `/api/docs/complaint/warga/${encodeURIComponent(page)}`;
-        if (role != "RT" || role != "Warga")
-            url = `/api/docs/complaint/warga/${encodeURIComponent(page)}`;
+        if (role != "RT" && role != "Warga")
+            url = `/api/docs/complaint/like/${encodeURIComponent(page)}/`;
 
         try {
             const response = await axios.get(url, {
