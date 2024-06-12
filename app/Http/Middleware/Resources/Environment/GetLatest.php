@@ -17,6 +17,8 @@ class GetLatest
      */
     public function handle(Request $request, Closure $next): Response
     {
+        if ($request->url() == '/') return $next($request);
+
         $token = $request->bearerToken();
 
         if (!$token) {

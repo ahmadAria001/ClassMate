@@ -118,7 +118,7 @@ class FinancialAssistanceController extends Controller
 
         $data = FinancialAssistance::withoutTrashed()
             ->with('request_by.civilian_id.rt_id', 'created_by.civilian_id', 'updated_by')
-            ->whereHas('created_by', function ($q) use ($user) {
+            ->whereHas('request_by', function ($q) use ($user) {
                 $q->where(
                     'id',
                     $user->id
@@ -127,6 +127,8 @@ class FinancialAssistanceController extends Controller
             ->skip($page > 1 ? ($page - 1) * $take : 0)
             ->take($take)
             ->get();
+
+        error_log($data);
 
         $length = $data->count();
 

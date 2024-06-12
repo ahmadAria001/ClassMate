@@ -107,7 +107,7 @@
         if (role == "RT") url = `/api/bansos/rt/${encodeURIComponent(page)}`;
         if (role == "Warga")
             url = `/api/bansos/warga/${encodeURIComponent(page)}`;
-        if (role != "RT" || role != "Warga")
+        if (role != "RT" && role != "Warga")
             url = `/api/bansos/p/${encodeURIComponent(page)}`;
 
         try {
