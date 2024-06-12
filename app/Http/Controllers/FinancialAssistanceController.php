@@ -162,6 +162,32 @@ class FinancialAssistanceController extends Controller
         return response()->json(['data' => $data, 'length' => $length]);
     }
 
+    public function getLike($page = 1, $filter = null)
+    {
+        $take = 5;
+
+        $data = FinancialAssistance::withoutTrashed()
+            ->with('request_by.civilian_id.rt_id', 'created_by.civilian_id', 'updated_by')
+            ->whereHas('request_by.civilian_id', function ($q) use ($filter) {
+                $q->whereAny(['fullName'], 'LIKE', "%$filter%");
+            })
+            ->orderByDesc('created_at')
+            ->skip($page > 1 ? ($page - 1) * $take : 0)
+            ->take($take)
+            ->get();
+
+        $length = FinancialAssistance::withoutTrashed()
+            ->with('request_by.civilian_id.rt_id', 'created_by.civilian_id', 'updated_by')
+            ->whereHas('request_by.civilian_id', function ($q) use ($filter) {
+                $q->whereAny(['fullName'], 'LIKE', "%$filter%");
+            })
+            ->orderByDesc('created_at')
+            ->get()
+            ->count();
+
+        return response()->json(['data' => $data, 'length' => $length]);
+    }
+
     // #POST
     public function create(Create $req)
     {
