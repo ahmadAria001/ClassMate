@@ -124,7 +124,7 @@ class RtController extends Controller
     {
         $data = RT::withoutTrashed()
             ->with('leader_id.civilian_id')
-            ->get(['id', 'number']);
+            ->get();
         $length = RT::withoutTrashed()->count();
 
         return Response()->json(['data' => $data, 'length' => $length], 200);

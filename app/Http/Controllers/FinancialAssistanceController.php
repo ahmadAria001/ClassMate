@@ -126,8 +126,6 @@ class FinancialAssistanceController extends Controller
             ->take($take)
             ->get();
 
-        error_log($data);
-
         $length = $data->count();
 
         return response()->json(['data' => $data, 'length' => $length]);
