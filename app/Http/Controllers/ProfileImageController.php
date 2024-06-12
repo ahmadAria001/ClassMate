@@ -53,7 +53,7 @@ class ProfileImageController extends Controller
 
         $model = User::withoutTrashed()->where('id', $user)->first();
 
-        $name = Carbon::now() . '_' . $image->hashName();
+        $name = Carbon::now()->timestamp . '_' . $image->hashName();
 
         try {
             if (!Storage::directoryExists('public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads')) {
@@ -65,19 +65,23 @@ class ProfileImageController extends Controller
                 // public_path('storage') . DIRECTORY_SEPARATOR .
                 'public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR;
 
-            $loadedImg = Image::load($image->getRealPath());
-            $compressedImg = $loadedImg
-                ->width(480)
-                ->height(480)
-                ->quality(20)
-                ->save(Storage::path($path) . $name);
+            // $loadedImg = Image::load($image->getRealPath());
+            // $compressedImg = $loadedImg
+            //     ->width(480)
+            //     ->height(480)
+            //     ->quality(20)
+            //     ->save(Storage::path($path) . $name);
 
             // Image::read($image)->resizeDown(480, 480)->toJpeg();
             // Storage::putFileAs($path, $compressedImg, $name);
             // [$width, $height] = getimagesize($image->getFileInfo());
 
-            error_log($name);
-            error_log($compressedImg);
+            // error_log($name);
+            // error_log($compressedImg);
+
+            $storedImg = $image->storePubliclyAs($path . $name);
+
+            error_log($storedImg);
 
             $model->pict = $name;
             $model->save();
