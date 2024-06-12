@@ -188,7 +188,7 @@ class ComplaintController extends Controller
             ->skip($page > 1 ? ($page - 1) * $take : 0)
             ->take($take)
             ->get();
-      
+
         $length = Complaint::withoutTrashed()->count();
 
         return response()->json(['data' => $data, 'length' => $length]);
@@ -225,13 +225,14 @@ class ComplaintController extends Controller
                     // public_path('storage') . DIRECTORY_SEPARATOR .
                     'public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR;
 
-                [$width, $height] = getimagesize($image->getFileInfo());
-                $loadedImg = Image::load($image->getRealPath());
-                $compressedImg = $loadedImg
-                    ->width($width > 1080 ? 1080 : $width)
-                    ->height($height > 1080 ? 1080 : $height)
-                    ->quality(20)
-                    ->save(Storage::path($path) . $name);
+                // [$width, $height] = getimagesize($image->getFileInfo());
+                // $loadedImg = Image::load($image->getRealPath());
+                // $compressedImg = $loadedImg
+                //     ->width($width > 1080 ? 1080 : $width)
+                //     ->height($height > 1080 ? 1080 : $height)
+                //     ->quality(20)
+                //     ->save(Storage::path($path) . $name);
+                $image->storePubliclyAs($path . $name);
             } else {
                 $data = Complaint::firstOrCreate([
                     'docs_id' => $docs->id,
@@ -354,13 +355,14 @@ class ComplaintController extends Controller
                         // public_path('storage') . DIRECTORY_SEPARATOR .
                         'public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR;
 
-                    [$width, $height] = getimagesize($image->getFileInfo());
-                    $loadedImg = Image::load($image->getRealPath());
-                    $compressedImg = $loadedImg
-                        ->width($width > 1080 ? 1080 : $width)
-                        ->height($height > 1080 ? 1080 : $height)
-                        ->quality(20)
-                        ->save(Storage::path($path) . $name);
+                    // [$width, $height] = getimagesize($image->getFileInfo());
+                    // $loadedImg = Image::load($image->getRealPath());
+                    // $compressedImg = $loadedImg
+                    //     ->width($width > 1080 ? 1080 : $width)
+                    //     ->height($height > 1080 ? 1080 : $height)
+                    //     ->quality(20)
+                    //     ->save(Storage::path($path) . $name);
+                    $image->storePubliclyAs($path . $name);
 
                     $data->update(['attachment' => $name]);
                     $data->save();

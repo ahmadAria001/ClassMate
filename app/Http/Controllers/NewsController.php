@@ -97,25 +97,30 @@ class NewsController extends Controller
             if ($payload->has('attachment')) {
                 $image = $req->file('attachment');
 
-                $name = Carbon::now() . '_' . $image->getClientOriginalName();
-                // [$width, $height] = getimagesize($image->getFileInfo());
-
-                if (!Storage::directoryExists('public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads')) {
-                    // File::makeDirectory(, 0755, true, true);
-                    Storage::makeDirectory('public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads');
-                }
-
+                $name = ($image) ? Carbon::now()->timestamp . '_' . $image->getClientOriginalName() : null;
                 $path =
-                    // public_path('storage') . DIRECTORY_SEPARATOR .
                     'public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR;
+                $image->storePubliclyAs($path . $name);
 
-                [$width, $height] = getimagesize($image->getFileInfo());
-                $loadedImg = Image::load($image->getRealPath());
-                $compressedImg = $loadedImg
-                    ->width($width > 1080 ? 1080 : $width)
-                    ->height($height > 1080 ? 1080 : $height)
-                    ->quality(20)
-                    ->save(Storage::path($path) . $name);
+                // $name = Carbon::now() . '_' . $image->getClientOriginalName();
+                // // [$width, $height] = getimagesize($image->getFileInfo());
+
+                // if (!Storage::directoryExists('public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads')) {
+                //     // File::makeDirectory(, 0755, true, true);
+                //     Storage::makeDirectory('public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads');
+                // }
+
+                // $path =
+                //     // public_path('storage') . DIRECTORY_SEPARATOR .
+                //     'public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR;
+
+                // [$width, $height] = getimagesize($image->getFileInfo());
+                // $loadedImg = Image::load($image->getRealPath());
+                // $compressedImg = $loadedImg
+                //     ->width($width > 1080 ? 1080 : $width)
+                //     ->height($height > 1080 ? 1080 : $height)
+                //     ->quality(20)
+                //     ->save(Storage::path($path) . $name);
 
                 $data = news::create([
                     'title' => $payload->get('title'),
@@ -135,16 +140,21 @@ class NewsController extends Controller
                 if ($req->has('attachment')) {
                     $image = $req->file('attachment');
 
-                    $name = Carbon::now() . '_' . $image->getClientOriginalName();
-                    $path = 'public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR;
-                    [$width, $height] = getimagesize($image->getFileInfo());
+                    $name = ($image) ? Carbon::now()->timestamp . '_' . $image->getClientOriginalName() : null;
+                    $path =
+                        'public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR;
+                    $image->storePubliclyAs($path . $name);
 
-                    $loadedImg = Image::load($image->getRealPath());
-                    $compressedImg = $loadedImg
-                        ->width($width > 1080 ? 1080 : $width)
-                        ->height($height > 1080 ? 1080 : $height)
-                        ->quality(20)
-                        ->save(Storage::path($path) . $name);
+                    // $name = Carbon::now() . '_' . $image->getClientOriginalName();
+                    // $path = 'public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR;
+                    // [$width, $height] = getimagesize($image->getFileInfo());
+
+                    // $loadedImg = Image::load($image->getRealPath());
+                    // $compressedImg = $loadedImg
+                    //     ->width($width > 1080 ? 1080 : $width)
+                    //     ->height($height > 1080 ? 1080 : $height)
+                    //     ->quality(20)
+                    //     ->save(Storage::path($path) . $name);
 
                     $data->attachment = $name;
                     $data->save();
@@ -239,17 +249,22 @@ class NewsController extends Controller
                     ]);
                 }
 
-                $name = Carbon::now() . '_' . $image->getClientOriginalName();
-                $path = 'public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR;
-                [$width, $height] = getimagesize($image->getFileInfo());
+                // $name = Carbon::now() . '_' . $image->getClientOriginalName();
+                // $path = 'public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR;
+                // [$width, $height] = getimagesize($image->getFileInfo());
+                $name = ($image) ? Carbon::now()->timestamp . '_' . $image->getClientOriginalName() : null;
 
                 if (!$data->attachment || $image->getClientOriginalName() != $data->attachment) {
-                    $loadedImg = Image::load($image->getRealPath());
-                    $compressedImg = $loadedImg
-                        ->width($width > 1080 ? 1080 : $width)
-                        ->height($height > 1080 ? 1080 : $height)
-                        ->quality(20)
-                        ->save(Storage::path($path) . $name);
+                    $path =
+                        'public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR;
+                    $image->storePubliclyAs($path . $name);
+
+                    // $loadedImg = Image::load($image->getRealPath());
+                    // $compressedImg = $loadedImg
+                    //     ->width($width > 1080 ? 1080 : $width)
+                    //     ->height($height > 1080 ? 1080 : $height)
+                    //     ->quality(20)
+                    //     ->save(Storage::path($path) . $name);
                 }
 
                 $data->update(['attachment' => $name]);

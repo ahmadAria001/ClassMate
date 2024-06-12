@@ -44,7 +44,9 @@ class DocumentationController extends Controller
 
 
             $image = $request->file('contentAttachment');
-            $name = ($image) ? Carbon::now() . '_' . $image->getClientOriginalName() : null;
+            $name = ($image) ? Carbon::now()->timestamp . '_' . $image->getClientOriginalName() : null;
+            $path =
+                'public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR;
 
             $data = Documentation::create([
                 'docs_id' => $docs->id,
@@ -52,12 +54,10 @@ class DocumentationController extends Controller
                 'contentDesc' => $payload->get('contentDesc'),
                 'contentAttachment' => ($image) ? $name : null
             ]);
-            /* Image Upload
-            if($image){
-                $path = public_path('assets.uploads'). $name; // Unix Backslash :PepeHands
-                Image::read($image)->save($path);
+            //  Image Upload
+            if ($image) {
+                $image->storePubliclyAs($path . $name);
             }
-            */
             if ($data->wasRecentlyCreated) {
                 $docs->created_at = Carbon::now()->timestamp;
                 $data->created_at = Carbon::now()->timestamp;
@@ -107,7 +107,10 @@ class DocumentationController extends Controller
 
             if ($data) {
                 $image = $request->file('contentAttachment');
-                $name = ($image) ? Carbon::now() . '_' . $image->getClientOriginalName() : null;
+                $name = ($image) ? Carbon::now()->timestamp . '_' . $image->getClientOriginalName() : null;
+                $path =
+                    'public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR;
+                $image->storePubliclyAs($path . $name);
 
                 //Handle Log Update
                 if (Auth::guard('web')->check()) {

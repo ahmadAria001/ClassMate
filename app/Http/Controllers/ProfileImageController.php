@@ -79,10 +79,7 @@ class ProfileImageController extends Controller
             // error_log($name);
             // error_log($compressedImg);
 
-            $storedImg = $image->storePubliclyAs($path . $name);
-
-            error_log($storedImg);
-
+            $image->storePubliclyAs($path . $name);
             $model->pict = $name;
             $model->save();
 
