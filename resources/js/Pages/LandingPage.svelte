@@ -8,8 +8,13 @@
         TableBodyRow,
         TableHead,
         TableHeadCell,
+        Popover,
     } from "flowbite-svelte";
-    import { ArrowRightOutline, CheckOutline } from "flowbite-svelte-icons";
+    import {
+        ArrowRightOutline,
+        CheckOutline,
+        QuestionCircleSolid,
+    } from "flowbite-svelte-icons";
     import Cards from "@C/LandingPage/CardsAnnouncement.svelte";
     import Navbar from "@C/LandingPage/Navbar.svelte";
     import Footer from "@C/LandingPage/Footer.svelte";
@@ -182,9 +187,9 @@
     };
 </script>
 
+<Navbar />
 <div class="relative px-8 md:px-16 mt-24 md:mt-0">
     <!--  -->
-    <Navbar />
 
     {#if currentRW && dataRT && events && announcements}
         <div class="content">
@@ -280,8 +285,40 @@
                     <TableBody tableBodyClass="divide-y">
                         {#each events as evt}
                             <TableBodyRow>
-                                <TableBodyCell>{evt.name}</TableBodyCell>
-                                <TableBodyCell>{evt.location}</TableBodyCell>
+                                <TableBodyCell>
+                                    <div class="flex">
+                                        <p class="w-full truncate max-w-32">
+                                            {evt.name}
+                                        </p>
+                                        <QuestionCircleSolid
+                                            id={`name-${evt.id}`}
+                                        />
+                                        <Popover
+                                            class="w-64 text-sm text-black dark:text-white z-50"
+                                            title="Deskripsi"
+                                            triggeredBy={`#name-${evt.id}`}
+                                        >
+                                            {evt.name}
+                                        </Popover>
+                                    </div>
+                                </TableBodyCell>
+                                <TableBodyCell>
+                                    <div class="flex">
+                                        <p class="w-full truncate max-w-36">
+                                            {evt.location}
+                                        </p>
+                                        <QuestionCircleSolid
+                                            id={`loct-${evt.id}`}
+                                        />
+                                        <Popover
+                                            class="w-64 text-sm text-black dark:text-white z-50"
+                                            title="Deskripsi"
+                                            triggeredBy={`#loct-${evt.id}`}
+                                        >
+                                            {evt.location}
+                                        </Popover>
+                                    </div>
+                                </TableBodyCell>
                                 <TableBodyCell>
                                     {new Date(
                                         evt.startDate * 1000,

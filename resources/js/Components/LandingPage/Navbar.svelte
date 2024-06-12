@@ -35,9 +35,7 @@
     ];
 </script>
 
-<Navbar
-    class="px-8 md:px-16 py-2.5 fixed w-full z-20 top-0 start-0 border-b container"
->
+<Navbar class="px-8 md:px-16 py-2.5 fixed w-full border-b z-20">
     <NavBrand href="/">
         <img src="assets/icons/KD_logo.svg" alt="KawanDesa Logo" class="h-8" />
     </NavBrand>
