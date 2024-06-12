@@ -117,7 +117,7 @@
         <TableHead>
             <TableHeadCell>Nama Bulan</TableHeadCell>
             <TableHeadCell>Tagihan</TableHeadCell>
-            <TableHeadCell>Status</TableHeadCell>
+            <TableHeadCell class="text-center">Status</TableHeadCell>
             <!-- <TableHeadCell class="text-center"
                                     >Bayar</TableHeadCell
                                 > -->
@@ -165,19 +165,22 @@
                                         </TableBodyCell> -->
                     </TableBodyRow>
                 {/each}
-                <TableBodyRow color="custom" class="bg-gray-900">
+                <TableBodyRow
+                    color="custom"
+                    class="bg-gray-100 dark:bg-gray-900"
+                >
                     <TableBodyCell>
                         <span>Total</span>
                     </TableBodyCell>
+                    <TableBodyCell class=""></TableBodyCell>
                     <TableBodyCell
                         tdClass={twMerge(
-                            "px-6 py-4 whitespace-nowrap font-medium ",
+                            "px-6 py-4 whitespace-nowrap font-medium text-center",
                             "col-span-4 pt-3 grid grid-cols-1",
                         )}
                     >
-                        <Badge color="green">Rp. {total}</Badge>
+                        Rp. {total}
                     </TableBodyCell>
-                    <TableBodyCell class=""></TableBodyCell>
                 </TableBodyRow>
             {/if}
         </TableBody>

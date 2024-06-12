@@ -16,6 +16,8 @@ class Get
      */
     public function handle(Request $request, Closure $next): Response
     {
+        if ($request->route()->getName('LandingPage')) return $next($request);
+
         $token = $request->bearerToken();
 
         if (!$token) {
