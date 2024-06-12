@@ -123,6 +123,7 @@ class RtController extends Controller
     public function getDropDown()
     {
         $data = RT::withoutTrashed()
+            ->with('leader_id.civilian_id')
             ->get(['id', 'number']);
         $length = RT::withoutTrashed()->count();
 
