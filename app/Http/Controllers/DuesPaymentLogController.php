@@ -96,17 +96,18 @@ class DuesPaymentLogController extends Controller
         return Response()->json(['data' => $data, 'lenght' => $length], 200);
     }
 
-    public function getMonthlyIncomeLastSixMonths(Request $req, $isRT = false)
+    public function getMonthlyIncomeLastSixMonths(Request $req)
     {
-        $isRT = filter_var($isRT, FILTER_VALIDATE_BOOLEAN);
         $identity = AccessToken::getToken($req);
 
         if (!$identity) abort(401);
         $model = $identity->tokenable();
         $user = User::withoutTrashed()->with('civilian_id.rt_id')->where('id', $model->get('id')[0]->id)->get()->first();
 
+        $isRT = $user->role == "RT";
+
         $currentDate = Carbon::now();
-        $sixMonthsAgo = $currentDate->copy()->subMonths(6);
+        $sixMonthsAgo = $currentDate->copy()->subMonths(6)->setDay(1);
 
         // ngambil data pengeluaran dalam 6 bulan terakhir dan menjumlahkan perbulan
         $query =  $isRT ?

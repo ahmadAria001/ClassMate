@@ -33,6 +33,8 @@
     let id_rt = $page.props.auth.user.rt_id;
     let announcement: any;
     let citizenActivity: any;
+    let income: any;
+    let spendings: any;
 
     const getNews = async () => {
         const response = await axios.get(`/api/news/lts`, {
@@ -46,6 +48,18 @@
 
     const getCitizenEvents = async () => {
         const response = await axios.get(`/api/docs/activity/lts`);
+
+        return response.data;
+    };
+
+    const getSpendings = async () => {
+        const response = await axios.get(`/api/spending/monthly-income`);
+
+        return response.data;
+    };
+
+    const getIncomes = async () => {
+        const response = await axios.get(`/api/dues-payment/monthly-income`);
 
         return response.data;
     };
@@ -76,6 +90,31 @@
         const year = date.getFullYear();
 
         return `${day} ${monthName} ${year}`;
+    };
+    const formatterMonthYear = (epoc: number) => {
+        const date = new Date(epoc);
+
+        const monthNames = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+        ];
+
+        const monthIndex = date.getMonth();
+        const monthName = monthNames[monthIndex];
+
+        const year = date.getFullYear();
+
+        return `${monthName} ${year}`;
     };
 
     onMount(async () => {
@@ -146,160 +185,6 @@
 
     let data: Data | undefined;
     let colorApex: string;
-
-    const getData = async () => {
-        try {
-            const civilianUrl =
-                role === "RT" || role === "Warga"
-                    ? `/api/civilian/rt/${id_rt}`
-                    : `/api/civilian`;
-            const paymentUrl =
-                role === "RT" || role === "Warga"
-                    ? `/api/dues-payment/rt/${id_rt}`
-                    : `/api/dues-payment`;
-            const [responseCivilian, responseDues, responseDocs] =
-                await Promise.all([
-                    axios.get(civilianUrl),
-                    axios.get(paymentUrl),
-                    axios.get(`/api/docs/complaint/rt/1`),
-                ]);
-
-            const countCivilian = responseCivilian.data;
-            const countDues = responseDues.data;
-            const countDocs = responseDocs.data;
-
-            // Buat hitung total iuran
-            const totalDues = countDues.data.reduce(
-                (total: number, dues: any) => {
-                    return total + parseFloat(dues.amount_paid);
-                },
-                0,
-            );
-
-            // Buat hitung presentase resident
-            const statusCounts = countCivilian.data.reduce(
-                (acc: any, resident: any) => {
-                    acc[resident.residentstatus] =
-                        (acc[resident.residentstatus] || 0) + 1;
-                    return acc;
-                },
-                {},
-            );
-
-            const permanentCount = statusCounts.PermanentResident || 0;
-            const contractCount = statusCounts.ContractResident || 0;
-            const flatCount = statusCounts.Kos || 0;
-            const totalResident = permanentCount + contractCount + flatCount;
-
-            // presentase resident
-            const permanentPercent =
-                totalResident > 0 ? (permanentCount / totalResident) * 100 : 0;
-            const contractPercent =
-                totalResident > 0 ? (contractCount / totalResident) * 100 : 0;
-            const flatPercent =
-                totalResident > 0 ? (flatCount / totalResident) * 100 : 0;
-
-            // console.log(permanentPercent);
-            // console.log(contractPercent);
-            // console.log(flatPercent);
-
-            // perbarui series options
-            options.series = [permanentPercent, contractPercent, flatPercent];
-
-            // console.log(countCivilian);
-            // console.log(countDues);
-            // console.log(countDocs);
-
-            colorApex = document
-                .getElementsByTagName("html")[0]
-                .className.includes("dark")
-                ? "white"
-                : "black";
-
-            options.legend.labels.colors = colorApex;
-
-            // console.log(colorApex);
-
-            return {
-                civilianCount: countCivilian.data.length,
-                totalDues: totalDues,
-                complaintCount: countDocs.data.length,
-            };
-        } catch (error) {
-            console.error(error);
-            return { civilianCount: 0, totalDues: 0, complaintCount: 0 };
-        }
-    };
-
-    const getSpendigMonthly = async () => {
-        try {
-            const response = await axios.get(`/api/spending/monthly-income`, {
-                headers: {
-                    Accept: "application/json",
-                },
-            });
-            console.log("spending: ", response.data);
-            return response.data;
-        } catch (error) {
-            console.error("Error fetching spending log:", error);
-        }
-    };
-
-    const getTotalDataDues = async () => {
-        try {
-            const response = await axios.get(`/api/dues-payment/rt/${id_rt}`, {
-                headers: {
-                    Accept: "application/json",
-                },
-            });
-
-            // console.log("Dues payment response:", response);
-            const paymentDues = response.data.data;
-            // console.log("paymentDues:", paymentDues);
-
-            if (Array.isArray(paymentDues)) {
-                const totalDues = paymentDues.reduce(
-                    (total: number, dues: any) => {
-                        const amountPaid = parseFloat(dues.amount_paid);
-                        // console.log("amountPaid:", amountPaid);
-                        if (!isNaN(amountPaid)) {
-                            return total + amountPaid;
-                        } else {
-                            console.error(
-                                "Invalid amount_paid:",
-                                dues.amount_paid,
-                            );
-                            return total;
-                        }
-                    },
-                    0,
-                );
-
-                console.log("dues : " + response.data.data);
-                return totalDues;
-            } else {
-                console.error("paymentDues is not an array or is undefined");
-                return 0;
-            }
-        } catch (error) {
-            console.error("Error fetching dues data:", error);
-            return 0;
-        }
-    };
-
-    const initData = async () => {
-        data = await getData();
-    };
-
-    let outcome: any;
-    onMount(async () => {
-        await initData();
-        outcome = await getSpendigMonthly();
-        console.log("test", outcome);
-
-        // await getTotalDataDues();
-        // console.log(data);
-    });
 
     const options: Options = {
         series: [],
@@ -439,6 +324,205 @@
             show: false,
         },
     };
+
+    const getData = async () => {
+        try {
+            const civilianUrl =
+                role === "RT" || role === "Warga"
+                    ? `/api/civilian/rt/${id_rt}`
+                    : `/api/civilian`;
+            const paymentUrl =
+                role === "RT" || role === "Warga"
+                    ? `/api/dues-payment/rt/${id_rt}`
+                    : `/api/dues-payment`;
+            const [responseCivilian, responseDues, responseDocs] =
+                await Promise.all([
+                    axios.get(civilianUrl),
+                    axios.get(paymentUrl),
+                    axios.get(`/api/docs/complaint/rt/1`),
+                ]);
+
+            const countCivilian = responseCivilian.data;
+            const countDues = responseDues.data;
+            const countDocs = responseDocs.data;
+
+            // Buat hitung total iuran
+            const totalDues = countDues.data.reduce(
+                (total: number, dues: any) => {
+                    return total + parseFloat(dues.amount_paid);
+                },
+                0,
+            );
+
+            // Buat hitung presentase resident
+            const statusCounts = countCivilian.data.reduce(
+                (acc: any, resident: any) => {
+                    acc[resident.residentstatus] =
+                        (acc[resident.residentstatus] || 0) + 1;
+                    return acc;
+                },
+                {},
+            );
+
+            const permanentCount = statusCounts.PermanentResident || 0;
+            const contractCount = statusCounts.ContractResident || 0;
+            const flatCount = statusCounts.Kos || 0;
+            const totalResident = permanentCount + contractCount + flatCount;
+
+            // presentase resident
+            const permanentPercent =
+                totalResident > 0 ? (permanentCount / totalResident) * 100 : 0;
+            const contractPercent =
+                totalResident > 0 ? (contractCount / totalResident) * 100 : 0;
+            const flatPercent =
+                totalResident > 0 ? (flatCount / totalResident) * 100 : 0;
+
+            // console.log(permanentPercent);
+            // console.log(contractPercent);
+            // console.log(flatPercent);
+
+            // perbarui series options
+            options.series = [permanentPercent, contractPercent, flatPercent];
+
+            // console.log(countCivilian);
+            // console.log(countDues);
+            // console.log(countDocs);
+
+            colorApex = document
+                .getElementsByTagName("html")[0]
+                .className.includes("dark")
+                ? "white"
+                : "black";
+
+            options.legend.labels.colors = colorApex;
+
+            // console.log(colorApex);
+
+            return {
+                civilianCount: countCivilian.data.length,
+                totalDues: totalDues,
+                complaintCount: countDocs.data.length,
+            };
+        } catch (error) {
+            console.error(error);
+            return { civilianCount: 0, totalDues: 0, complaintCount: 0 };
+        }
+    };
+
+    const getSpendigMonthly = async () => {
+        try {
+            const response = await axios.get(`/api/spending/monthly-income`, {
+                headers: {
+                    Accept: "application/json",
+                },
+            });
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching spending log:", error);
+        }
+    };
+
+    const getTotalDataDues = async () => {
+        try {
+            const response = await axios.get(`/api/dues-payment/rt/${id_rt}`, {
+                headers: {
+                    Accept: "application/json",
+                },
+            });
+
+            // console.log("Dues payment response:", response);
+            const paymentDues = response.data.data;
+            // console.log("paymentDues:", paymentDues);
+
+            if (Array.isArray(paymentDues)) {
+                const totalDues = paymentDues.reduce(
+                    (total: number, dues: any) => {
+                        const amountPaid = parseFloat(dues.amount_paid);
+                        // console.log("amountPaid:", amountPaid);
+                        if (!isNaN(amountPaid)) {
+                            return total + amountPaid;
+                        } else {
+                            console.error(
+                                "Invalid amount_paid:",
+                                dues.amount_paid,
+                            );
+                            return total;
+                        }
+                    },
+                    0,
+                );
+
+                console.log("dues : " + response.data.data);
+                return totalDues;
+            } else {
+                console.error("paymentDues is not an array or is undefined");
+                return 0;
+            }
+        } catch (error) {
+            console.error("Error fetching dues data:", error);
+            return 0;
+        }
+    };
+
+    const defineFinancesChart = () => {
+        const dates: any[] = [];
+
+        for (let index = 6; index >= 0; index--) {
+            let date = new Date();
+            date = new Date(date.setMonth(date.getMonth() - index));
+            date = new Date(date.setDate(new Date().getDate()));
+
+            const year = date.getFullYear();
+            const month =
+                date.getMonth() + 1 < 9
+                    ? `0${date.getMonth() + 1}`
+                    : date.getMonth() + 1;
+
+            dates.push(`${year}-${month}`);
+        }
+
+        finance.series[0].data = [];
+        finance.series[1].data = [];
+        finance.xaxis.categories = [];
+
+        dates.map((value: any) =>
+            finance.xaxis.categories.push(formatterMonthYear(value)),
+        );
+
+        dates.map((value) => {
+            // const inc = income.data.find((el: any) => el.month == value);
+            // console.log(inc);
+            finance.series[0].data.push(
+                income.data.some((el: any) => el.month == value)
+                    ? income.data.find((el: any) => el.month == value)
+                          .total_amount
+                    : 0,
+            );
+            finance.series[1].data.push(
+                spendings.data.some((el: any) => el.month == value)
+                    ? spendings.data.find((el: any) => el.month == value)
+                          .total_amount
+                    : 0,
+            );
+        });
+    };
+
+    const initData = async () => {
+        data = await getData();
+        income = await getIncomes();
+        spendings = await getSpendings();
+
+        defineFinancesChart();
+    };
+
+    let outcome: any;
+    onMount(async () => {
+        await initData();
+        outcome = await getSpendigMonthly();
+
+        // await getTotalDataDues();
+        // console.log(data);
+    });
 </script>
 
 <Layout>

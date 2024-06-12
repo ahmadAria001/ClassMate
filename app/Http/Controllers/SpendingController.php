@@ -72,7 +72,7 @@ class SpendingController extends Controller
 
         $currentDate = Carbon::now();
 
-        $sixMonthsAgo = $currentDate->copy()->subMonths(6);
+        $sixMonthsAgo = $currentDate->copy()->subMonths(6)->setDay(1);
 
         // ngambil data pengeluaran dalam 6 bulan terakhir dan menjumlahkan perbulan
         $query = !$isRT ? 'select
@@ -104,6 +104,7 @@ class SpendingController extends Controller
     order by `month` desc;';
 
         $monthlyIncome = DB::select($query);
+        error_log($sixMonthsAgo->toDateString());
 
         return response()->json([
             'data' => $monthlyIncome,
