@@ -11,6 +11,7 @@ use App\Utils\AccessToken;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Laravel\Sanctum\PersonalAccessToken;
 use ReflectionClass;
@@ -65,15 +66,35 @@ class SpendingController extends Controller
 
         $sixMonthsAgo = $currentDate->copy()->subMonths(6);
 
-        // ngambil data pengeluaran dalam 6 bulan terakhir dan menjumlahkan perbulan
-        $monthlyIncome = Spending::where('created_at', '>=', $sixMonthsAgo)
-            ->where('created_at', '<=', Carbon::now())
-            ->selectRaw('DATE_FORMAT(FROM_UNIXTIME(created_at), "%Y-%m") as month, SUM(amount) as total_amount')
-            ->groupBy('month')
-            ->orderBy('month', 'asc')
-            ->get();
 
-        return response()->json(['data' => $monthlyIncome], 200);
+        // dd($currentDate->toDate());
+        // ngambil data pengeluaran dalam 6 bulan terakhir dan menjumlahkan perbulan
+
+        $query =  'select
+        DATE_FORMAT(FROM_UNIXTIME(created_at), "%Y-%m") as month,
+        SUM(amount) as total_amount
+    from `spendings`
+    where
+        `spendings`.`deleted_at` is null
+        and
+        `created_at` >= UNIX_TIMESTAMP("' . $sixMonthsAgo->toDateString() . '")
+    group by `month`
+    order by `month` desc; ';
+
+        $monthlyIncome = DB::select($query);
+
+        // $q =
+        //     Spending::withoutTrashed()
+        //     ->where('created_at', '>=', $sixMonthsAgo)
+        //     ->where('created_at', '<=', Carbon::now())
+        //     ->selectRaw('DATE_FORMAT(FROM_UNIXTIME(created_at), "%Y-%m") as month, SUM(amount) as total_amount')
+        //     ->groupBy('month')
+        //     ->orderBy('month', 'asc')
+        //     ->toSql();
+
+        return response()->json([
+            'data' => $monthlyIncome,
+        ], 200);
     }
 
     public function getPaged($page = 1)
