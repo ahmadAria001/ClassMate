@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
 use Inertia\Inertia;
+use ReflectionClass;
 
 class Login extends Controller
 {
@@ -58,6 +59,7 @@ class Login extends Controller
                         'DuesController:__invoke', 'DuesController:get', 'DuesController:create', 'DuesController:edit', 'DuesController:destroy',
                         'DuesPaymentLogController:__invoke', 'DuesPaymentLogController:get', 'DuesPaymentLogController:create', 'DuesPaymentLogController:edit', 'DuesPaymentLogController:destroy',
                         'CertificateController:__invoke', 'CertificateController:get', 'CertificateController:create', 'CertificateController:edit,CertificateController:destroy',
+                        (new ReflectionClass(\App\Http\Controllers\SpendingController::class))->getShortName() . ':get', (new ReflectionClass(\App\Http\Controllers\SpendingController::class))->getShortName() . ':create', (new ReflectionClass(\App\Http\Controllers\SpendingController::class))->getShortName() . ':edit', (new ReflectionClass(\App\Http\Controllers\SpendingController::class))->getShortName() . ':destroy',
                     ];
                 }
                 if ($user->role === 'RW') {
@@ -76,6 +78,7 @@ class Login extends Controller
                         'DuesController:__invoke', 'DuesController:get', 'DuesController:create', 'DuesController:edit', 'DuesController:destroy',
                         'DuesPaymentLogController:__invoke', 'DuesPaymentLogController:get', 'DuesPaymentLogController:create', 'DuesPaymentLogController:edit', 'DuesPaymentLogController:destroy',
                         'CertificateController:__invoke', 'CertificateController:get', 'CertificateController:create', 'CertificateController:edit,CertificateController:destroy',
+                        (new ReflectionClass(\App\Http\Controllers\SpendingController::class))->getShortName() . ':get', (new ReflectionClass(\App\Http\Controllers\SpendingController::class))->getShortName() . ':create', (new ReflectionClass(\App\Http\Controllers\SpendingController::class))->getShortName() . ':edit', (new ReflectionClass(\App\Http\Controllers\SpendingController::class))->getShortName() . ':destroy',
                     ];
                 }
                 if ($user->role === 'Warga') {

@@ -70,15 +70,11 @@
                 payments: selected,
             };
 
-            console.log(body);
-
             const response = await axios.post(`/api/dues-payment/`, body, {
                 headers: {
                     Accept: "application/json",
                 },
             });
-
-            console.log(response.data);
 
             err = response.data;
             showState = false;
@@ -101,15 +97,16 @@
         if (selected.length > 0) {
             total = selected.length * amountPay;
         }
-
-        console.log(amountPay);
     });
 </script>
 
 <Modal
     title="Detail Pembayaran"
     bind:open={showState}
-    on:close={() => (showState = false)}
+    on:close={() => {
+        showState = false;
+        selected = [];
+    }}
     autoclose
     outsideclose
 >

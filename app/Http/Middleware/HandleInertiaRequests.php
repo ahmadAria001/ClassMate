@@ -44,6 +44,7 @@ class HandleInertiaRequests extends Middleware
     {
         return array_merge(parent::share($request), [
             'appName' => config('app.name'),
+            'location' => $request->route()->getName(),
 
             // Lazily...
             'auth.user' => function () use ($request) {

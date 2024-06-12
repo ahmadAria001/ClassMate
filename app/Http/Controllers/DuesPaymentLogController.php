@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Resources\Dues\CreateLog;
 use App\Http\Requests\Resources\Dues\DeleteLog;
 use App\Http\Requests\Resources\Dues\UpdateLog;
+use App\Models\Civilian;
 use App\Models\Dues;
 use App\Models\DuesMember;
 use App\Models\DuesPaymentLog;
+use App\Models\User;
+use App\Utils\AccessToken;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -91,6 +94,59 @@ class DuesPaymentLogController extends Controller
         $length = $data->count();
 
         return Response()->json(['data' => $data, 'lenght' => $length], 200);
+    }
+
+    public function getMonthlyIncomeLastSixMonths(Request $req, $isRT = false)
+    {
+        $isRT = filter_var($isRT, FILTER_VALIDATE_BOOLEAN);
+        $identity = AccessToken::getToken($req);
+
+        if (!$identity) abort(401);
+        $model = $identity->tokenable();
+        $user = User::withoutTrashed()->with('civilian_id.rt_id')->where('id', $model->get('id')[0]->id)->get()->first();
+
+        $currentDate = Carbon::now();
+        $sixMonthsAgo = $currentDate->copy()->subMonths(6);
+
+        // ngambil data pengeluaran dalam 6 bulan terakhir dan menjumlahkan perbulan
+        $query =  $isRT ?
+            'select
+        DATE_FORMAT(FROM_UNIXTIME(`dpl`.created_at), "%Y-%m") as month,
+        SUM(`dpl`.amount_paid) as total_amount
+    from duesPaymentLog dpl
+    JOIN dues_member dm
+        ON dm.id = dpl.dues_member
+    JOIN dues d
+        ON d.id = dm.`member`
+    where
+        `dpl`.`deleted_at` is null
+        and
+        `dpl`.`created_at` >= UNIX_TIMESTAMP("' . $sixMonthsAgo->toDateString() . '")
+        and
+        d.rt_id = ' . $user->getRelation('civilian_id')->rt_id . '
+    group by `month`
+    order by `month` desc;'
+            :
+            'select
+        DATE_FORMAT(FROM_UNIXTIME(`dpl`.created_at), "%Y-%m") as month,
+        SUM(`dpl`.amount_paid) as total_amount
+    from duesPaymentLog dpl
+    JOIN dues_member dm
+        ON dm.id = dpl.dues_member
+    JOIN dues d
+        ON d.id = dm.`member`
+    where
+        `dpl`.`deleted_at` is null
+        and
+        `dpl`.`created_at` >= UNIX_TIMESTAMP("' . $sixMonthsAgo->toDateString() . '")
+    group by `month`
+    order by `month` desc;';
+
+        $monthlyIncome = DB::select($query);
+
+        return response()->json([
+            'data' => $monthlyIncome,
+        ], 200);
     }
 
     public function create(CreateLog $req)

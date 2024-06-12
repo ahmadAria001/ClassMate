@@ -287,7 +287,6 @@
             const hasDate = containedDate.some(
                 (value) => value.paidDate == paidDate,
             );
-            console.log(hasDate);
 
             if (paidYear > currentYear) break;
 
@@ -299,7 +298,6 @@
                 generatedDate = new Date(generatedDate.setFullYear(paidYear));
 
                 if (index != containedDate.length - 1) {
-                    console.log(index);
                     containedDate.splice(index, 0, {
                         paidDate: paidDate,
                         item: {
@@ -309,6 +307,13 @@
                             amount_paid: amountPay,
                             dues_member: member_id,
                         },
+                    });
+                    unpaidData.push({
+                        paid_for: Number.parseInt(
+                            (generatedDate.getTime() / 1000).toString(),
+                        ),
+                        amount_paid: amountPay,
+                        dues_member: member_id,
                     });
 
                     index--;
@@ -323,6 +328,13 @@
                             dues_member: member_id,
                         },
                     });
+                    unpaidData.push({
+                        paid_for: Number.parseInt(
+                            (generatedDate.getTime() / 1000).toString(),
+                        ),
+                        amount_paid: amountPay,
+                        dues_member: member_id,
+                    });
                 }
             }
         }
@@ -332,10 +344,100 @@
                 new Date(first.paidDate) < new Date(comparator.paidDate),
         );
 
+        // unpaidData = containedDate;
         const finalData: any[] = [];
         containedDate.map((value) => finalData.push(value.item));
 
         return finalData;
+
+        // for (let index = 0; index < containedDate.length; index++) {
+        //     const paidYear =
+        //         new Date(containedDate[index].item.paid_for * 1000).getMonth() +
+        //             1 >
+        //         11
+        //             ? new Date(
+        //                   containedDate[index].item.paid_for * 1000,
+        //               ).getFullYear() + 1
+        //             : new Date(
+        //                   containedDate[index].item.paid_for * 1000,
+        //               ).getFullYear();
+        //     const paidMont =
+        //         new Date(containedDate[index].item.paid_for * 1000).getMonth() +
+        //             1 >
+        //         11
+        //             ? 0
+        //             : new Date(
+        //                   containedDate[index].item.paid_for * 1000,
+        //               ).getMonth() + 1;
+
+        //     const paidDate = `${paidYear}-${paidMont}-1`;
+
+        //     const hasDate = containedDate.some(
+        //         (value) => value.paidDate == paidDate,
+        //     );
+
+        //     if (!hasDate) {
+        //         if (paidMont > 11 && paidYear >= currentYear) break;
+
+        //         let generatedDate = new Date();
+        //         generatedDate = new Date(generatedDate.setMonth(paidMont));
+        //         generatedDate = new Date(generatedDate.setFullYear(paidYear));
+
+        //         containedDate.splice(index, 0, {
+        //             paidDate: paidDate,
+        //             item: {
+        //                 paid_for: Number.parseInt(
+        //                     (generatedDate.getTime() / 1000).toString(),
+        //                 ),
+        //                 amount_paid: amountPay,
+        //                 dues_member: containedDate[index].item.dues_member.id,
+        //             },
+        //         });
+        //     }
+        // }
+
+        // const paidMont = new Date(lastPaidDate * 1000).getMonth();
+        // const paidYear = new Date(lastPaidDate * 1000).getFullYear();
+        // const currentMont = new Date(Date.now()).getMonth();
+        // const currentYear = new Date(Date.now()).getFullYear();
+
+        // let loopMonth = paidMont + 1;
+        // let loopYear = paidYear;
+
+        // // console.log(new Date(lastPaidDate * 1000).getMonth());
+
+        // while (loopYear <= currentYear) {
+        //     while (
+        //         loopMonth <= currentMont ||
+        //         (loopYear < currentYear && loopMonth <= 11)
+        //     ) {
+        //         let generatedDate = new Date(lastPaidDate * 1000);
+        //         generatedDate = new Date(generatedDate.setMonth(loopMonth));
+        //         generatedDate = new Date(generatedDate.setFullYear(loopYear));
+
+        //         generatedUnpainPayment.push({
+        //             paid_for: generatedDate.getTime() / 1000,
+        //             amount_paid: 0,
+        //             dues_member: member,
+        //         });
+
+        //         if (loopMonth <= 11 && loopYear <= currentYear) {
+        //             loopMonth++;
+        //         } else {
+        //             break;
+        //         }
+        //     }
+
+        //     if (loopYear <= currentYear) {
+        //         loopMonth = 0;
+
+        //         loopYear++;
+        //     } else {
+        //         break;
+        //     }
+        // }
+
+        // return generatedUnpainPayment.reverse();
     };
 
     const generatesPaymentLog = async (
@@ -450,6 +552,11 @@
             });
 
             err = response.data;
+
+            rebuild();
+            setTimeout(() => {
+                err = { status: null, message: null };
+            }, 5000);
         } catch (error: any) {
             err = {
                 message: error?.response?.data?.message,
@@ -478,112 +585,118 @@
 
 <Layout>
     <div class="flex justify-between flex-col lg:flex-row">
-        <div>
-            <div
-                class="bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md flex flex-col w-full lg:max-w-md p-4"
-            >
-                <p
-                    class="p-2 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800 z-10"
+        {#key builder}
+            <div>
+                <div
+                    class="bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md flex flex-col w-full lg:max-w-md p-4"
                 >
-                    Informasi Warga
-                </p>
-                {#if civilianMdl}
-                    <Table striped={true} divClass="rounded-lg overflow-hidden">
-                        <TableBody tableBodyClass="divide-y">
-                            <TableBodyRow>
-                                <TableBodyCell>Nama</TableBodyCell>
-                                <TableBodyCell class="flex">
-                                    <p
-                                        class="w-full truncate max-w-32 md:max-w-full lg:max-w-xs lg:max-w-36"
+                    <p
+                        class="p-2 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800 z-10"
+                    >
+                        Informasi Warga
+                    </p>
+                    {#if civilianMdl}
+                        <Table
+                            striped={true}
+                            divClass="rounded-lg overflow-hidden"
+                        >
+                            <TableBody tableBodyClass="divide-y">
+                                <TableBodyRow>
+                                    <TableBodyCell>Nama</TableBodyCell>
+                                    <TableBodyCell class="flex">
+                                        <p
+                                            class="w-full truncate max-w-32 md:max-w-full lg:max-w-xs lg:max-w-36"
+                                        >
+                                            {civilianMdl.fullName}
+                                        </p>
+                                        <QuestionCircleSolid
+                                            id={`name-${civilianMdl.id}`}
+                                        />
+                                    </TableBodyCell>
+                                </TableBodyRow>
+                                <TableBodyRow>
+                                    <TableBodyCell>KK</TableBodyCell>
+                                    <TableBodyCell
+                                        >{civilianMdl.nkk}</TableBodyCell
                                     >
-                                        {civilianMdl.fullName}
-                                    </p>
-                                    <QuestionCircleSolid
-                                        id={`name-${civilianMdl.id}`}
-                                    />
-                                </TableBodyCell>
-                            </TableBodyRow>
-                            <TableBodyRow>
-                                <TableBodyCell>KK</TableBodyCell>
-                                <TableBodyCell>{civilianMdl.nkk}</TableBodyCell>
-                            </TableBodyRow>
-                            <TableBodyRow>
-                                <TableBodyCell>Alamat</TableBodyCell>
-                                <TableBodyCell class="flex"
-                                    ><p
-                                        class="w-full truncate max-w-32 md:max-w-full lg:max-w-xs lg:max-w-36"
+                                </TableBodyRow>
+                                <TableBodyRow>
+                                    <TableBodyCell>Alamat</TableBodyCell>
+                                    <TableBodyCell class="flex"
+                                        ><p
+                                            class="w-full truncate max-w-32 md:max-w-full lg:max-w-xs lg:max-w-36"
+                                        >
+                                            {civilianMdl.address}
+                                        </p>
+                                        <QuestionCircleSolid
+                                            id={`address-${civilianMdl.id}`}
+                                        />
+                                    </TableBodyCell>
+                                </TableBodyRow>
+                                <TableBodyRow>
+                                    <TableBodyCell
+                                        >Status Kependudukan</TableBodyCell
                                     >
-                                        {civilianMdl.address}
-                                    </p>
-                                    <QuestionCircleSolid
-                                        id={`address-${civilianMdl.id}`}
-                                    />
-                                </TableBodyCell>
-                            </TableBodyRow>
-                            <TableBodyRow>
-                                <TableBodyCell
-                                    >Status Kependudukan</TableBodyCell
+                                    <TableBodyCell>
+                                        {#if civilianMdl.residentstatus == "PermanentResident"}
+                                            <Badge color="green">Tetap</Badge>
+                                        {:else if civilianMdl.residentstatus == "ContractResident"}
+                                            <Badge color="indigo">Kontrak</Badge
+                                            >
+                                        {:else if civilianMdl.residentstatus == "Kos"}
+                                            <Badge color="yellow">Kos</Badge>
+                                        {/if}
+                                    </TableBodyCell>
+                                </TableBodyRow>
+                                <Popover
+                                    class="w-64 text-sm text-black dark:text-white z-50"
+                                    title="Nama"
+                                    triggeredBy={`#name-${civilianMdl.id}`}
                                 >
-                                <TableBodyCell>
-                                    {#if civilianMdl.residentstatus == "PermanentResident"}
-                                        <Badge color="green">Tetap</Badge>
-                                    {:else if civilianMdl.residentstatus == "ContractResident"}
-                                        <Badge color="indigo">Kontrak</Badge>
-                                    {:else if civilianMdl.residentstatus == "Kos"}
-                                        <Badge color="yellow">Kos</Badge>
-                                    {/if}
-                                </TableBodyCell>
-                            </TableBodyRow>
-                            <Popover
-                                class="w-64 text-sm text-black dark:text-white z-50"
-                                title="Nama"
-                                triggeredBy={`#name-${civilianMdl.id}`}
-                            >
-                                <!-- {item.docs_id.description} -->
-                                {civilianMdl.fullName}
-                            </Popover>
-                            <Popover
-                                class="w-64 text-sm text-black dark:text-white z-50"
-                                title="Alamat"
-                                triggeredBy={`#address-${civilianMdl.id}`}
-                            >
-                                <!-- {item.docs_id.description} -->
-                                {civilianMdl.address}
-                            </Popover>
-                        </TableBody>
-                    </Table>
-                    <div class="text-end mt-2">
-                        <Button color="blue" href="/iuran">Kembali</Button>
-                    </div>
-                {/if}
+                                    <!-- {item.docs_id.description} -->
+                                    {civilianMdl.fullName}
+                                </Popover>
+                                <Popover
+                                    class="w-64 text-sm text-black dark:text-white z-50"
+                                    title="Alamat"
+                                    triggeredBy={`#address-${civilianMdl.id}`}
+                                >
+                                    <!-- {item.docs_id.description} -->
+                                    {civilianMdl.address}
+                                </Popover>
+                            </TableBody>
+                        </Table>
+                        <div class="text-end mt-2">
+                            <Button color="blue" href="/iuran">Kembali</Button>
+                        </div>
+                    {/if}
+                </div>
             </div>
-        </div>
-        <div
-            class="bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md flex flex-col w-full flex-grow mt-4 lg:mt-0 lg:ml-4"
-        >
-            <div class="flex justify-between p-5">
-                <p
-                    class="text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800 z-10"
-                >
-                    Detail Iuran Warga
-                </p>
+            <div
+                class="bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md flex flex-col w-full flex-grow mt-4 lg:mt-0 lg:ml-4"
+            >
+                <div class="flex justify-between p-5">
+                    <p
+                        class="text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800 z-10"
+                    >
+                        Detail Iuran Warga
+                    </p>
 
-                <!-- Tombol bayar sesuai yang di centang -->
-                <!-- {#if duesTypes}
+                    <!-- Tombol bayar sesuai yang di centang -->
+                    <!-- {#if duesTypes}
                     {#if duesTypes.status}
                     {/if}
                     {/if} -->
-                <Button
-                    class={hiddenAction}
-                    on:click={() => {
-                        clickOutsideModal = true;
-                    }}
-                    disabled={$isAnyChecked === false && validatePayment()}
-                    >Bayar</Button
-                >
-            </div>
-            <Tabs class="px-4">
-                {#key builder}
+                    <Button
+                        class={hiddenAction}
+                        on:click={() => {
+                            clickOutsideModal = true;
+                        }}
+                        disabled={$isAnyChecked === false && validatePayment()}
+                        >Bayar</Button
+                    >
+                </div>
+                <Tabs class="px-4">
                     {#if civilian != ""}
                         {#if duesTypes}
                             {#each duesTypes as d}
@@ -738,16 +851,16 @@
                             {/each}
                         {/if}
                     {/if}
-                {/key}
-            </Tabs>
-        </div>
+                </Tabs>
+            </div>
+        {/key}
     </div>
 </Layout>
 
 {#if selected && clickOutsideModal}
     <Payment
         bind:showState={clickOutsideModal}
-        on:comp={rebuild}
+        on:comp={async () => rebuild()}
         bind:selected
         bind:amountPay
     />
