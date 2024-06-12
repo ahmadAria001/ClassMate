@@ -366,8 +366,11 @@
                 nama: alt.nama,
                 status: alt.status,
                 nilai:
-                    jarakNegatif[index].jarak /
-                    (jarakNegatif[index].jarak + jarakPositif[index].jarak),
+                    jarakNegatif.length > 1
+                        ? jarakNegatif[index].jarak /
+                          (jarakNegatif[index].jarak +
+                              jarakPositif[index].jarak)
+                        : 1,
             };
         });
 
@@ -403,8 +406,10 @@
         if (role == "Warga") return;
 
         if (role == "RT") url = `/api/bansos/rt/${encodeURIComponent(page)}`;
-        if (role != "RT" || role != "Warga")
+        if (role != "RT" && role != "Warga")
             url = `/api/bansos/p/${encodeURIComponent(page)}`;
+
+        console.log(url);
 
         try {
             const response = await axios.get(url, {
@@ -565,7 +570,7 @@
             <Button color="blue" on:click={() => (calcModal = true)}
                 >Detail Perhitungan</Button
             >
-            <Button color="light">Pilih Cepat</Button>
+            <!-- <Button color="light">Pilih Cepat</Button> -->
         </div>
         <Table>
             <TableHead>
@@ -662,7 +667,7 @@
                         >{data.length}</span
                     >
                 </span>
-                <ButtonGroup>
+                <!-- <ButtonGroup>
                     <Button
                         disabled={currentPage < 2}
                         on:click={async () => {
@@ -670,9 +675,7 @@
                             await initData();
                         }}><ChevronLeftOutline /></Button
                     >
-                    <!-- {#each data.length as pageNumber} -->
                     <Button disabled>{currentPage}</Button>
-                    <!-- {/each} -->
                     <Button
                         disabled={data.data.length < 5}
                         on:click={async () => {
@@ -680,7 +683,7 @@
                             await initData();
                         }}><ChevronRightOutline /></Button
                     >
-                </ButtonGroup>
+                </ButtonGroup> -->
             {/if}
         </div>
     </TableSearch>

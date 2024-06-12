@@ -498,6 +498,9 @@
                 <span class="block truncate text-sm font-medium"
                     ><b>{role}</b></span
                 >
+                <span class="block truncate text-sm font-medium"
+                    ><b>RT. {$page.props.auth.user.rt_num}</b></span
+                >
             </DropdownHeader>
             <DropdownItem href="/profile">Profile</DropdownItem>
             <DropdownItem on:click={async () => await logout()}

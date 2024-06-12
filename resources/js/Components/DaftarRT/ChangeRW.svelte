@@ -48,7 +48,7 @@
     };
 
     const getCivils = async () => {
-        const response = await axios.get("/api/user");
+        const response = await axios.get("/api/user/ddrw");
 
         return response.data;
     };

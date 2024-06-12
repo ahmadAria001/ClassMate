@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Resources\RT\Create;
 use App\Http\Requests\Resources\RT\Delete;
 use App\Http\Requests\Resources\RT\Update;
+use App\Models\Civilian;
 use App\Models\RT;
 use App\Models\User;
 use Carbon\Carbon;
@@ -240,8 +241,22 @@ class RtController extends Controller
                     $model = $pat->tokenable();
 
                     $data->created_by = $model->get('id')[0]->id;
+
+                    $civ = Civilian::withoutTrashed()->where('id', $payload->get('leader_id'))->first();
+                    $civ->update([
+                        'rt_id' => $data->id,
+                        'updated_by' => $model->get('id')[0]->id,
+                    ]);
+                    $civ->save();
                 } else {
                     $data->created_by = Auth::id();
+
+                    $civ = Civilian::withoutTrashed()->where('id', $payload->get('leader_id'))->first();
+                    $civ->update([
+                        'rt_id' => $data->id,
+                        'updated_by' => Auth::id(),
+                    ]);
+                    $civ->save();
                 }
 
                 $data->save();
@@ -288,6 +303,13 @@ class RtController extends Controller
                         'role' => 'RT',
                         'updated_by' => Auth::id(),
                     ]);
+
+                    $civ = Civilian::withoutTrashed()->where('id', $leader->civilian_id)->first();
+                    $civ->update([
+                        'rt_id' => $data->id,
+                        'updated_by' => Auth::id(),
+                    ]);
+                    $civ->save();
                 } else {
                     $token = $req->bearerToken();
 
@@ -318,6 +340,13 @@ class RtController extends Controller
                         'role' => 'RT',
                         'updated_by' => $model->get('id')[0]->id,
                     ]);
+
+                    $civ = Civilian::withoutTrashed()->where('id', $leader->civilian_id)->first();
+                    $civ->update([
+                        'rt_id' => $data->id,
+                        'updated_by' => $model->get('id')[0]->id,
+                    ]);
+                    $civ->save();
                 }
 
                 if ($old_leader) {

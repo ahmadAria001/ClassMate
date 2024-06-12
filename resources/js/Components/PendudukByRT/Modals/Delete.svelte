@@ -99,9 +99,14 @@
                 class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200"
             />
             <h3
-                class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400"
+                class="mb-5 flex gap-2 text-lg font-normal text-gray-500 dark:text-gray-400"
             >
-                Apa alasan data warga 'nama' dihapus?
+                Apa alasan data warga <p
+                    class="max-w-[35%] max-md:max-w-[20%] w-fit truncate"
+                >
+                    <b>'{data.data.fullName}'</b>
+                </p>
+                dihapus?
             </h3>
             <Select
                 class="my-2"

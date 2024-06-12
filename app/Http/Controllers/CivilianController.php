@@ -110,7 +110,10 @@ class CivilianController extends Controller
         $byRT = filter_var($byRT, FILTER_VALIDATE_BOOLEAN);
 
         $identity = AccessToken::getToken($req);
-        $user = User::withoutTrashed()->with('civilian_id.rt_id')->where('id', $identity->get('id')[0]->id)->get()->first();
+
+        if (!$identity) abort(401);
+        $model = $identity->tokenable();
+        $user = User::withoutTrashed()->with('civilian_id.rt_id')->where('id', $model->get('id')[0]->id)->get()->first();
 
         $take = 10;
 
