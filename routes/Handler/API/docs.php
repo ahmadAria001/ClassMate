@@ -71,6 +71,8 @@ Route::prefix('/docs')->group(function () {
         Route::get('/', [ActivityController::class, 'get'])->middleware(GetActivity::class);
         Route::get('/lts', [ActivityController::class, 'getlts'])->middleware(GetActivity::class);
 
+        Route::get('/like/{page}/{filter}', [ActivityController::class, 'getLike'])->middleware(GetComplaint::class);
+
         Route::get('/{filter}', [ActivityController::class, 'get'])->middleware(GetActivity::class);
         Route::get('/p/{page}', [ActivityController::class, 'getPaged'])->middleware(GetActivity::class);
 

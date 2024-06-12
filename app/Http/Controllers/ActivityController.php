@@ -86,6 +86,27 @@ class ActivityController extends Controller
         return response()->json(['data' => $data, 'length' => $length]);
     }
 
+    public function getLike($page = 1, $filter = null)
+    {
+        $take = 5;
+
+        $data = Activity::withoutTrashed()
+            ->with('docs_id', 'created_by.civilian_id.rt_id', 'updated_by')
+            ->whereAny(['name', 'location'], 'LIKE', "%$filter%")
+            ->orderByDesc('created_at')
+            ->skip($page > 1 ? ($page - 1) * $take : 0)
+            ->take($take)
+            ->get();
+
+        $length = Activity::withoutTrashed()
+            ->with('docs_id', 'created_by.civilian_id.rt_id', 'updated_by')
+            ->whereAny(['name', 'location'], 'LIKE', "%$filter%")
+            ->get()
+            ->count();
+
+        return response()->json(['data' => $data, 'length' => $length]);
+    }
+
     public function create(CreateActivity $request)
     {
         $payload = $request->safe()->collect();

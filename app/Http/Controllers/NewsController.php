@@ -87,6 +87,25 @@ class NewsController extends Controller
         return response()->json(['data' => $data, 'length' => $length]);
     }
 
+    public function getLike($page = 1, $filter = null)
+    {
+        $take = 5;
+
+        $data = News::withoutTrashed()
+            ->whereAny(['title', 'desc'], 'LIKE', "%$filter%")
+            ->orderByDesc('created_at')
+            ->skip($page > 1 ? ($page - 1) * $take : 0)
+            ->take($take)
+            ->get();
+
+        $length = News::withoutTrashed()
+            ->whereAny(['title', 'desc'], 'LIKE', "%$filter%")
+            ->get()
+            ->count();
+
+        return response()->json(['data' => $data, 'length' => $length]);
+    }
+
     public function create(Create $req)
     {
         $payload = $req->safe()->collect();

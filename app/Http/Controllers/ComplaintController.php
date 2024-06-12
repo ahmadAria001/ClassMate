@@ -128,19 +128,27 @@ class ComplaintController extends Controller
             $data = Complaint::withoutTrashed()->with('docs_id', 'created_by.civilian_id', 'updated_by')
                 ->whereHas('created_by.civilian_id', function ($q) use ($filter) {
                     $q->whereAny(['fullName'], 'LIKE', "%$filter%");
-                    // $q->where('fullName', 'LIKE', "%$filter%");
                 })
                 ->skip($page > 1 ? ($page - 1) * $take : 0)
-                ->take($take);
+                ->take($take)->get();
 
-            // dd($data);
+            $length = Complaint::withoutTrashed()->with('docs_id', 'created_by.civilian_id', 'updated_by')
+                ->whereHas('created_by.civilian_id', function ($q) use ($filter) {
+                    $q->whereAny(['fullName'], 'LIKE', "%$filter%");
+                })->get()->count();
         } else {
-            $data = Complaint::withoutTrashed()->with('docs_id', 'created_by.civilian_id', 'updated_by');
+            $data = Complaint::withoutTrashed()
+                ->with('docs_id', 'created_by.civilian_id', 'updated_by')
+                ->skip($page > 1 ? ($page - 1) * $take : 0)
+                ->take($take)->get();
+            $length = Complaint::withoutTrashed()
+                ->with('docs_id', 'created_by.civilian_id', 'updated_by')
+                ->get()
+                ->count();
         }
 
-        $length = $data->count();
 
-        return Response()->json(['data' => $data->get(), 'length' => $length]);
+        return Response()->json(['data' => $data, 'length' => $length]);
     }
 
     public function getPaged($page = 1)
@@ -180,7 +188,16 @@ class ComplaintController extends Controller
             ->take($take)
             ->get();
 
-        $length = $data->count();
+        $length = Complaint::withoutTrashed()
+            ->with('docs_id', 'created_by.civilian_id', 'updated_by')
+            ->whereHas('created_by', function ($q) use ($user) {
+                $q->where(
+                    'id',
+                    $user->id
+                );
+            })
+            ->get()
+            ->count();
 
         return response()->json(['data' => $data, 'length' => $length]);
     }

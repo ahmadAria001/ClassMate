@@ -61,7 +61,6 @@
     export const rebuild = async () => {
         console.log("rebuild called");
 
-        await initData();
         builder = {};
         filteredData = data.data;
     };
@@ -120,9 +119,9 @@
         return response.data;
     };
 
-    const getNewsData = async (id: string = "") => {
+    const searchNews = async (filter: string = "") => {
         const response = await axios.get(
-            `/api/news/${encodeURIComponent(id)}`,
+            `/api/news/like/${encodeURIComponent(currentPage)}/${encodeURIComponent(filter)}`,
             {
                 headers: {
                     Accept: "application/json",
@@ -135,6 +134,7 @@
 
     const initData = async () => {
         data = await getNewsLanding();
+        console.log(data);
     };
 
     $: startRange = currentPosition + 1;
@@ -162,17 +162,26 @@
     });
 
     let filteredData: any;
-    const handleSearch = (event: any) => {
+    const handleSearch = async (event: any) => {
         const searchValue = event.detail.value.toLowerCase();
         // console.log("Search value in handleSearch in use file:", searchValue);
-        if (searchValue == "") {
-            filteredData = [data.data];
+
+        if (new String(searchValue).length < 1) {
+            await initData();
+            await rebuild();
+            filteredData = [...data.data];
+
+            return;
         }
+
+        currentPage = 1;
+        data = await searchNews(searchValue);
+
         filteredData = data.data.filter((d: any) =>
             d.title.toLowerCase().includes(searchValue),
         );
         console.log(filteredData);
-        rebuild();
+        await rebuild();
     };
 </script>
 
@@ -269,6 +278,7 @@
                         on:click={async () => {
                             currentPage--;
                             await initData();
+                            await rebuild();
                         }}><ChevronLeftOutline /></Button
                     >
                     <!-- {#each data.length as pageNumber} -->
@@ -279,6 +289,7 @@
                         on:click={async () => {
                             currentPage++;
                             await initData();
+                            await rebuild();
                         }}><ChevronRightOutline /></Button
                     >
                 </ButtonGroup>
