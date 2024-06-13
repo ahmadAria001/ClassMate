@@ -21,6 +21,12 @@ use Illuminate\Support\Facades\Hash;
 
 class TestDataSeeder extends Seeder
 {
+    private $RTPath = '/database/seeders/RT.sql';
+    private $civilianPath = '/database/seeders/CIVILIAN.sql';
+    private $DUES = '/database/seeders/DUES.sql';
+    private $DUESMemberPath = '/database/seeders/DUES MEMBER.sql';
+    private $DUESPayment = '/database/seeders/DUESPAYMENT.sql';
+
     /**
      * Run the database seeds.
      */
@@ -32,62 +38,66 @@ class TestDataSeeder extends Seeder
         // }
         // return;
         // RT
-        for ($i = 1; $i <= 9; $i++) {
-            RT::create([
-                'number' => $i,
-                'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
-                'created_by' => $i,
-            ]);
-        }
+        // for ($i = 1; $i <= 9; $i++) {
+        //     RT::create([
+        //         'number' => $i,
+        //         'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
+        //         'created_by' => $i,
+        //     ]);
+        // }
 
-        $createdCivilian = [];
+        if (DB::unprepared(file_get_contents(base_path($this->RTPath)))) $this->command->info('RT table seeded!');
+        if (DB::unprepared(file_get_contents(base_path($this->civilianPath)))) $this->command->info('CIVILIAN table seeded!');
 
-        for ($i = 1; $i <= 9; $i++) {
-            if ($i < 8) {
-                array_push(
-                    $createdCivilian,
-                    Civilian::firstOrCreate([
-                        'nik' => $i,
-                        'fullName' => $faker->name(),
-                        'residentstatus' => $faker->randomElement(['ContractResident', 'PermanentResident']),
-                        'birthplace' => $faker->city(),
-                        'birthdate' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
-                        'nkk' => $i,
-                        'isFamilyHead' => true,
-                        'rt_id' => $i,
-                        'address' => $faker->address(),
-                        'status' => $faker->randomElement(['Aktif', 'Meninggal', 'Pindah']),
-                        'phone' => preg_replace('/[^0-9]/', ' ', $faker->phoneNumber()),
-                        'religion' => $faker->randomElement(['Islam', 'Katolik', 'Hindu', 'Budha', 'Konghuan']),
-                        'job' => $faker->randomElement(['Pengangguran', 'Mahasiswa', 'Petani', 'PNS', 'Sum Ting']),
-                        'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
-                        'created_by' => $i,
-                    ])
-                );
-            } else {
-                array_push(
-                    $createdCivilian,
-                    Civilian::firstOrCreate([
-                        'nik' => $i,
-                        'fullName' => 'admin',
-                        'residentstatus' => 'PermanentResident',
-                        'birthplace' => 'MLG',
-                        'birthdate' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
-                        'nkk' => $i,
-                        'isFamilyHead' => true,
-                        'rt_id' => $i,
-                        'address' => $faker->address(),
-                        'status' => $faker->randomElement(['Aktif', 'Meninggal', 'Pindah']),
-                        'phone' => preg_replace('/[^0-9]/', ' ', $faker->phoneNumber()),
-                        'religion' => $faker->randomElement(['Islam', 'Katolik', 'Hindu', 'Budha', 'Konghuan']),
-                        'job' => $faker->randomElement(['Pengangguran', 'Mahasiswa', 'Petani', 'PNS', 'Sum Ting']),
 
-                        'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
-                        'created_by' => 1,
-                    ])
-                );
-            }
-        }
+        // $createdCivilian = [];
+
+        // for ($i = 1; $i <= 9; $i++) {
+        //     if ($i < 8) {
+        //         array_push(
+        //             $createdCivilian,
+        //             Civilian::firstOrCreate([
+        //                 'nik' => $i,
+        //                 'fullName' => $faker->name(),
+        //                 'residentstatus' => $faker->randomElement(['ContractResident', 'PermanentResident']),
+        //                 'birthplace' => $faker->city(),
+        //                 'birthdate' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
+        //                 'nkk' => $i,
+        //                 'isFamilyHead' => true,
+        //                 'rt_id' => $i,
+        //                 'address' => $faker->address(),
+        //                 'status' => $faker->randomElement(['Aktif', 'Meninggal', 'Pindah']),
+        //                 'phone' => preg_replace('/[^0-9]/', ' ', $faker->phoneNumber()),
+        //                 'religion' => $faker->randomElement(['Islam', 'Katolik', 'Hindu', 'Budha', 'Konghuan']),
+        //                 'job' => $faker->randomElement(['Pengangguran', 'Mahasiswa', 'Petani', 'PNS', 'Sum Ting']),
+        //                 'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
+        //                 'created_by' => $i,
+        //             ])
+        //         );
+        //     } else {
+        //         array_push(
+        //             $createdCivilian,
+        //             Civilian::firstOrCreate([
+        //                 'nik' => $i,
+        //                 'fullName' => 'admin',
+        //                 'residentstatus' => 'PermanentResident',
+        //                 'birthplace' => 'MLG',
+        //                 'birthdate' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
+        //                 'nkk' => $i,
+        //                 'isFamilyHead' => true,
+        //                 'rt_id' => $i,
+        //                 'address' => $faker->address(),
+        //                 'status' => $faker->randomElement(['Aktif', 'Meninggal', 'Pindah']),
+        //                 'phone' => preg_replace('/[^0-9]/', ' ', $faker->phoneNumber()),
+        //                 'religion' => $faker->randomElement(['Islam', 'Katolik', 'Hindu', 'Budha', 'Konghuan']),
+        //                 'job' => $faker->randomElement(['Pengangguran', 'Mahasiswa', 'Petani', 'PNS', 'Sum Ting']),
+
+        //                 'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
+        //                 'created_by' => 1,
+        //             ])
+        //         );
+        //     }
+        // }
 
         for ($i = 1; $i <= 8; $i++) {
             if ($i < 7) {
@@ -120,98 +130,108 @@ class TestDataSeeder extends Seeder
         }
 
         // Define data arrays
-        $statusArray = [
-            'Aktif' => 0.60,
-            'Meninggal' => 0.12,
-            'Pindah' => 0.28
-        ];
-        $residentStatusArray = ['ContractResident', 'PermanentResident', 'Kos'];
-        $religionArray = [
-            'Islam' => 0.86,
-            'Protestan' => 0.07,
-            'Katolik' => 0.03,
-            'Hindu' => 0.02,
-            'Buddha' => 0.01,
-            'Khonghucu' => 0.01,
-        ];
-        $jobArray = [
-            'Polisi', 'Guru', 'Dokter', 'Pedagang', 'Petani', 'Nelayan', 'Pengusaha', 'Karyawan Swasta',
-            'Pegawai Negeri', 'Sopir', 'Buruh', 'Montir', 'Wiraswasta', 'Arsitek', 'Aktor', 'Seniman'
-        ];
-        $cities = ['Jakarta', 'Surabaya', 'Bandung', 'Medan', 'Malang', 'Semarang', 'Makassar', 'Denpasar', 'Yogyakarta', 'Palembang'];
+        // $statusArray = [
+        //     'Aktif' => 0.60,
+        //     'Meninggal' => 0.12,
+        //     'Pindah' => 0.28
+        // ];
+        // $residentStatusArray = ['ContractResident', 'PermanentResident', 'Kos'];
+        // $religionArray = [
+        //     'Islam' => 0.86,
+        //     'Protestan' => 0.07,
+        //     'Katolik' => 0.03,
+        //     'Hindu' => 0.02,
+        //     'Buddha' => 0.01,
+        //     'Khonghucu' => 0.01,
+        // ];
+        // $jobArray = [
+        //     'Polisi', 'Guru', 'Dokter', 'Pedagang', 'Petani', 'Nelayan', 'Pengusaha', 'Karyawan Swasta',
+        //     'Pegawai Negeri', 'Sopir', 'Buruh', 'Montir', 'Wiraswasta', 'Arsitek', 'Aktor', 'Seniman'
+        // ];
+        // $cities = ['Jakarta', 'Surabaya', 'Bandung', 'Medan', 'Malang', 'Semarang', 'Makassar', 'Denpasar', 'Yogyakarta', 'Palembang'];
 
-        $residents = [];
-        $nkkPool = [];
-        $addressPool = [];
+        // $residents = [];
+        // $nkkPool = [];
+        // $addressPool = [];
 
-        for ($i = 1; $i <= 1000; $i++) {
-            if ($i % rand(2, 7) == 1) {
-                $nkk = $faker->unique()->numerify('################');
-                $address = $faker->address;
-                $nkkPool[$nkk] = $nkk;
-                $addressPool[$nkk] = $address;
-            } else {
-                $nkk = $nkkPool[array_rand($nkkPool)];
-                $address = $addressPool[$nkk];
-            }
+        // for ($i = 1; $i <= 1000; $i++) {
+        //     if ($i % rand(2, 7) == 1) {
+        //         $nkk = $faker->unique()->numerify('################');
+        //         $address = $faker->address;
+        //         $nkkPool[$nkk] = $nkk;
+        //         $addressPool[$nkk] = $address;
+        //     } else {
+        //         $nkk = $nkkPool[array_rand($nkkPool)];
+        //         $address = $addressPool[$nkk];
+        //     }
 
-            $gender = $faker->randomElement(['male', 'female']);
-            $birthDate = Carbon::createFromDate($faker->dateTimeBetween('1971-01-01', '2024-12-31'))->getTimestamp();
-            $birthYear = Carbon::parse($birthDate)->format('Y');
-            $birthMonth = Carbon::parse($birthDate)->format('m');
-            $birthDay = Carbon::parse($birthDate)->format('d');
-            $nikDay = $gender == 'male' ? $birthDay : $birthDay + 40;
-            $nikPrefix = '3576' . $faker->numerify('##');
-            $nikSuffix = $faker->numerify('####');
-            $nik = $nikPrefix . $nikDay . $birthMonth . substr($birthYear, -2) . $nikSuffix;
+        //     $gender = $faker->randomElement(['male', 'female']);
+        //     $birthDate = Carbon::createFromDate($faker->dateTimeBetween('1971-01-01', '2024-12-31'))->getTimestamp();
+        //     $birthYear = Carbon::parse($birthDate)->format('Y');
+        //     $birthMonth = Carbon::parse($birthDate)->format('m');
+        //     $birthDay = Carbon::parse($birthDate)->format('d');
+        //     $nikDay = $gender == 'male' ? $birthDay : $birthDay + 40;
+        //     $nikPrefix = '3576' . $faker->numerify('##');
+        //     $nikSuffix = $faker->numerify('####');
+        //     $nik = $nikPrefix . $nikDay . $birthMonth . substr($birthYear, -2) . $nikSuffix;
 
-            // Generate religion based on specified proportions
-            $religion = $faker->randomElement(
-                array_merge(
-                    array_fill(0, 86, 'Islam'),
-                    array_fill(0, 7, 'Protestan'),
-                    array_fill(0, 3, 'Katolik'),
-                    array_fill(0, 2, 'Hindu'),
-                    array_fill(0, 1, 'Buddha'),
-                    array_fill(0, 1, 'Khonghucu')
-                )
-            );
+        //     // Generate religion based on specified proportions
+        //     $religion = $faker->randomElement(
+        //         array_merge(
+        //             array_fill(0, 86, 'Islam'),
+        //             array_fill(0, 7, 'Protestan'),
+        //             array_fill(0, 3, 'Katolik'),
+        //             array_fill(0, 2, 'Hindu'),
+        //             array_fill(0, 1, 'Buddha'),
+        //             array_fill(0, 1, 'Khonghucu')
+        //         )
+        //     );
 
-            $residents[] = [
-                'nik' => $nik,
-                'fullName' => $faker->name($gender),
-                'birthplace' => $faker->randomElement($cities),
-                'birthdate' => $birthDate,
-                'residentstatus' => $faker->randomElement($residentStatusArray),
-                'nkk' => $nkk,
-                'isFamilyHead' => ($i % 4 == 0), // 25% of residents are family heads
-                'rt_id' => rand(1, 6),
-                'address' => $address,
-                'status' => $faker->randomElement(
-                    array_merge(
-                        array_fill(0, 60, 'Aktif'),
-                        array_fill(0, 12, 'Meninggal'),
-                        array_fill(0, 28, 'Pindah')
-                    )
-                ),
-                'phone' => preg_replace('/[^0-9]/', ' ', $faker->phoneNumber()),
-                'religion' => $religion,
-                'job' => $faker->randomElement($jobArray),
-                'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
-                'created_by' => rand(1, 6),
-            ];
+        //     $residents[] = [
+        //         'nik' => $nik,
+        //         'fullName' => $faker->name($gender),
+        //         'birthplace' => $faker->randomElement($cities),
+        //         'birthdate' => $birthDate,
+        //         'residentstatus' => $faker->randomElement($residentStatusArray),
+        //         'nkk' => $nkk,
+        //         'isFamilyHead' => ($i % 4 == 0), // 25% of residents are family heads
+        //         'rt_id' => rand(1, 6),
+        //         'address' => $address,
+        //         'status' => $faker->randomElement(
+        //             array_merge(
+        //                 array_fill(0, 60, 'Aktif'),
+        //                 array_fill(0, 12, 'Meninggal'),
+        //                 array_fill(0, 28, 'Pindah')
+        //             )
+        //         ),
+        //         'phone' => preg_replace('/[^0-9]/', ' ', $faker->phoneNumber()),
+        //         'religion' => $religion,
+        //         'job' => $faker->randomElement($jobArray),
+        //         'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
+        //         'created_by' => rand(1, 6),
+        //     ];
+        // }
+
+        // Civilian::insert($residents);
+        // // dd($residents);
+        // for ($i = 1; $i <= 5; $i++) {
+        //     News::create([
+        //         'title' => $faker->sentence(),
+        //         'desc' => $faker->sentences(2, true),
+        //         'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
+        //         'created_by' => $i,
+        //     ]);
+        // }
+
+        try {
+            if (DB::unprepared(file_get_contents(base_path($this->DUES)))) $this->command->info('DUES table seeded!');
+            if (DB::unprepared(file_get_contents(base_path($this->DUESMemberPath)))) $this->command->info('DUES MEMBER table seeded!');
+            if (DB::unprepared(file_get_contents(base_path($this->DUESPayment)))) $this->command->info('DUES PAYMENT table seeded!');
+        } catch (\Throwable $th) {
+            error_log($th->getFile() . ' Line ' . $th->getLine());
+            error_log($th->getTraceAsString());
         }
 
-        Civilian::insert($residents);
-        // dd($residents);
-        for ($i = 1; $i <= 5; $i++) {
-            News::create([
-                'title' => $faker->sentence(),
-                'desc' => $faker->sentences(2, true),
-                'created_at' => Carbon::createFromDate($faker->dateTime())->getTimestamp(),
-                'created_by' => $i,
-            ]);
-        }
 
         for ($i = 1; $i <= 5; $i++) {
             FinancialAssistance::create([
@@ -289,9 +309,9 @@ class TestDataSeeder extends Seeder
             ]);
         }
 
-        if (!(DB::unprepared($this->duesQuery))) error_log('Something went wrong with Dues Query');
-        if (!(DB::unprepared($this->duesMemberQuery))) error_log('Something went wrong with Member Query');
-        if (!(DB::unprepared($this->duesPaymentLogQuery))) error_log('Something went wrong with DPL Query');
+        // if (!(DB::unprepared($this->duesQuery))) error_log('Something went wrong with Dues Query');
+        // if (!(DB::unprepared($this->duesMemberQuery))) error_log('Something went wrong with Member Query');
+        // if (!(DB::unprepared($this->duesPaymentLogQuery))) error_log('Something went wrong with DPL Query');
     }
 
     private $duesQuery  = "
