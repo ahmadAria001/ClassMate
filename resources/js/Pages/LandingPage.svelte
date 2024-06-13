@@ -96,7 +96,7 @@
     };
 
     const getRTData = async (): Promise<RT[]> => {
-        const response = await axios.get("/api/rt", {
+        const response = await axios.get("/api/rt/dd", {
             headers: {
                 Accept: "application/json",
                 lct: $page.props.location,
@@ -120,6 +120,8 @@
                     lct: $page.props.location,
                 },
             });
+            console.log("from fetch: " + response.data);
+
             return response.data;
         } catch (error) {
             console.error(error);
@@ -144,6 +146,8 @@
             currentRW = (await getRW()).data;
             events = (await getCitizenEvents()).data;
             // console.log(dataRT);
+            console.log(currentRW);
+
             // console.log(announcements);
         } catch (error) {
             console.error("Error fetching data:", error);
@@ -202,55 +206,53 @@
 <div class="relative px-8 md:px-16 mt-24 md:mt-0">
     <!--  -->
 
-    {#if currentRW && dataRT && events && announcements}
-        <div class="content">
-            <div
-                class="hero grid grid-cols-1 md:grid-cols-2 gap-4 mb-32 min-h-screen"
-            >
-                <div class="flex flex-col items-center justify-center md:px-4">
+    <div class="content">
+        <div
+            class="hero grid grid-cols-1 md:grid-cols-2 gap-4 mb-32 min-h-screen"
+        >
+            <div class="flex flex-col items-center justify-center md:px-4">
+                <img
+                    src="assets/icons/KD_logo.svg"
+                    alt=""
+                    class="h-16 md:h-24 mb-5 self-start"
+                />
+                <Heading tag="h3" class="mb-4"
+                    >Selamat Datang di Kawan Desa</Heading
+                >
+                <p>
+                    Platform digital yang menghubungkan hati dan pikiran warga
+                    desa dalam satu kesatuan harmonis. Di sini, kita bukan hanya
+                    sekadar tetangga, tapi juga sahabat yang saling mendukung
+                    dan memperkuat. Temukan segala informasi terkini seputar
+                    kegiatan di lingkungan RT dan RW, mulai dari pengumuman
+                    penting hingga agenda kebersamaan yang akan mempererat tali
+                    persaudaraan di antara kita.
+                </p>
+                <p>
+                    Jadilah bagian dari perubahan positif di desa kita. Ayo
+                    bergabung dengan Kawan Desa, tempat di mana setiap suara
+                    didengar, setiap langkah diperhitungkan, dan setiap mimpi
+                    memiliki tempat untuk tumbuh bersama. Bersama Kawan Desa,
+                    mari ciptakan desa yang menjadi kebanggaan kita semua!
+                </p>
+            </div>
+            <div class="flex items-center justify-center">
+                <div class="grid grid-cols-2 gap-4 p-12">
                     <img
-                        src="assets/icons/KD_logo.svg"
+                        src="https://static.promediateknologi.id/crop/0x0:0x0/0x0/webp/photo/p2/81/2023/07/19/kirab-budaya-balearjosari-harto-5-3783515462.jpg"
                         alt=""
-                        class="h-16 md:h-24 mb-5 self-start"
+                        class="rounded-lg object-none w-48 h-72 justify-self-end"
                     />
-                    <Heading tag="h3" class="mb-4"
-                        >Selamat Datang di Kawan Desa</Heading
-                    >
-                    <p>
-                        Platform digital yang menghubungkan hati dan pikiran
-                        warga desa dalam satu kesatuan harmonis. Di sini, kita
-                        bukan hanya sekadar tetangga, tapi juga sahabat yang
-                        saling mendukung dan memperkuat. Temukan segala
-                        informasi terkini seputar kegiatan di lingkungan RT dan
-                        RW, mulai dari pengumuman penting hingga agenda
-                        kebersamaan yang akan mempererat tali persaudaraan di
-                        antara kita.
-                    </p>
-                    <p>
-                        Jadilah bagian dari perubahan positif di desa kita. Ayo
-                        bergabung dengan Kawan Desa, tempat di mana setiap suara
-                        didengar, setiap langkah diperhitungkan, dan setiap
-                        mimpi memiliki tempat untuk tumbuh bersama. Bersama
-                        Kawan Desa, mari ciptakan desa yang menjadi kebanggaan
-                        kita semua!
-                    </p>
-                </div>
-                <div class="flex items-center justify-center">
-                    <div class="grid grid-cols-2 gap-4 p-12">
-                        <img
-                            src="https://static.promediateknologi.id/crop/0x0:0x0/0x0/webp/photo/p2/81/2023/07/19/kirab-budaya-balearjosari-harto-5-3783515462.jpg"
-                            alt=""
-                            class="rounded-lg object-none w-48 h-72 justify-self-end"
-                        />
-                        <img
-                            src="https://assets.kompasiana.com/items/album/2021/07/02/img20210627092423-60de9c4706310e1b4024efb2.jpg?t=o&v=770"
-                            alt=""
-                            class="rounded-lg mt-4 object-none w-48 h-72"
-                        />
-                    </div>
+                    <img
+                        src="https://assets.kompasiana.com/items/album/2021/07/02/img20210627092423-60de9c4706310e1b4024efb2.jpg?t=o&v=770"
+                        alt=""
+                        class="rounded-lg mt-4 object-none w-48 h-72"
+                    />
                 </div>
             </div>
+        </div>
 
+        {#if announcements}
             <div class="announcement mb-24">
                 <div class="text-center mb-8">
                     <Heading tag="h3" class="mb-2">Pengumuman</Heading>
@@ -275,8 +277,10 @@
                     {/each}
                 </div>
             </div>
-        </div>
+        {/if}
+    </div>
 
+    {#if events}
         <div class="event-calendar mb-24">
             <div class="text-center mb-8">
                 <Heading tag="h3" class="">Kalendar Acara</Heading>
@@ -352,6 +356,9 @@
                 </Table>
             </div>
         </div>
+    {/if}
+
+    {#if dataRT && currentRW}
         <div class="list-admins mb-24">
             <div class="text-center mb-8">
                 <Heading tag="h3" class="mb-2">Daftar Pengurus RW 03</Heading>
@@ -404,7 +411,7 @@
                                     : ""}</Heading
                             >
                             <p class="text-gray-500">
-                                Ketua RT {rt.number}
+                                Ketua RT {rt.number} / RW 3
                                 <!-- / RW {rt.leader_id || 3} -->
                             </p>
                         </div>
@@ -412,36 +419,36 @@
                 {/each}
             </div>
         </div>
-        <div
-            class="advantage grid grid-cols-1 lg:grid-cols-[40%_auto] items-center pb-24"
-        >
-            <div class="adv-text">
-                <Heading tag="h3" class="mb-3"
-                    >Keunggulan <br /> Kawan Desa</Heading
-                >
-                <p class="text-gray-500 lg:w-3/5">
-                    Platform kolaboratif dan inovatif untuk kemajuan desa,
-                    mendukung partisipasi aktif warga dengan layanan berkualitas
-                </p>
-            </div>
-            <div
-                class="point-adv grid md:grid-cols-2 grid-cols-1 mt-8 lg:mt-0 gap-4"
-            >
-                {#each poins as poin}
-                    <div>
-                        <div class="p-2 bg-gray-100 inline-block rounded-xl">
-                            <CheckOutline
-                                strokeWidth="3"
-                                size="lg"
-                                class="font-bold text-blue-800"
-                            />
-                        </div>
-                        <Heading tag="h4">{poin.title}</Heading>
-                        <p class="text-gray-500">{poin.desc}</p>
-                    </div>
-                {/each}
-            </div>
-        </div>
     {/if}
+
+    <div
+        class="advantage grid grid-cols-1 lg:grid-cols-[40%_auto] items-center pb-24"
+    >
+        <div class="adv-text">
+            <Heading tag="h3" class="mb-3">Keunggulan <br /> Kawan Desa</Heading
+            >
+            <p class="text-gray-500 lg:w-3/5">
+                Platform kolaboratif dan inovatif untuk kemajuan desa, mendukung
+                partisipasi aktif warga dengan layanan berkualitas
+            </p>
+        </div>
+        <div
+            class="point-adv grid md:grid-cols-2 grid-cols-1 mt-8 lg:mt-0 gap-4"
+        >
+            {#each poins as poin}
+                <div>
+                    <div class="p-2 bg-gray-100 inline-block rounded-xl">
+                        <CheckOutline
+                            strokeWidth="3"
+                            size="lg"
+                            class="font-bold text-blue-800"
+                        />
+                    </div>
+                    <Heading tag="h4">{poin.title}</Heading>
+                    <p class="text-gray-500">{poin.desc}</p>
+                </div>
+            {/each}
+        </div>
+    </div>
     <Footer />
 </div>
