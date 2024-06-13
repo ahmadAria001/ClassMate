@@ -115,15 +115,23 @@
         updateDataAndPagination();
     };
 
+    const role = $page.props.auth.user.role;
+
     const getSpendigLog = async () => {
-        const response = await axios.get(
-            `/api/spending/p/${encodeURIComponent(currentPage)}`,
-            {
-                headers: {
-                    Accept: "application/json",
-                },
+        let url = "";
+
+        if (role == "RT")
+            url = `/api/spending/rt/${encodeURIComponent(currentPage)}`;
+        if (role != "RT" && role != "Warga")
+            url = `/api/spending/p/${encodeURIComponent(currentPage)}`;
+
+        if (url == "") return;
+
+        const response = await axios.get(url, {
+            headers: {
+                Accept: "application/json",
             },
-        );
+        });
 
         return response.data;
     };
@@ -147,19 +155,6 @@
             console.error("Error fetching spending data:", error);
             return 0;
         }
-    };
-
-    const getNewsData = async (id: string = "") => {
-        const response = await axios.get(
-            `/api/news/${encodeURIComponent(id)}`,
-            {
-                headers: {
-                    Accept: "application/json",
-                },
-            },
-        );
-
-        return response.data;
     };
 
     const getTotalDataDues = async () => {

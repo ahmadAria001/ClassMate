@@ -88,7 +88,8 @@ class SpendingController extends Controller
             :
             'select
         DATE_FORMAT(FROM_UNIXTIME(spd.created_at), "%Y-%m") as month,
-        SUM(spd.amount) as total_amount
+        SUM(spd.amount) as total_amount,
+        c.rt_id
     from `spendings` spd
     LEFT JOIN users u
     	ON u.id = spd.created_by
