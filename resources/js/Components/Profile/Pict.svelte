@@ -7,11 +7,14 @@
     import { twMerge } from "tailwind-merge";
 
     export let data: any;
-    let showModal: boolean = false;
 
     const dispatch = createEventDispatcher();
     const user = $page.props.auth.user;
+
+    let showModal: boolean = false;
     let builder = {};
+
+    console.log(user);
 
     export const rebuild = () => {
         builder = {};

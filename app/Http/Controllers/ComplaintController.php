@@ -223,7 +223,7 @@ class ComplaintController extends Controller
             ->skip($page > 1 ? ($page - 1) * $take : 0)
             ->take($take)
             ->get();
-
+      
         $length = Complaint::withoutTrashed()->count();
 
         return response()->json(['data' => $data, 'length' => $length]);

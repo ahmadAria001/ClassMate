@@ -188,6 +188,17 @@
                 },
             },
             {
+                name: "Keuangan",
+                icon: ChartMixedDollarOutline,
+                isOpenItems: false,
+                children: {
+                    Iuran: ["/iuran", "/iuran/detail"],
+                    // Pengeluaran: "/pengeluaran",
+                    "Catatan Pembayaran": ["/log-pembayaran"],
+                    "Pengambilan Dana": ["/spending"],
+                },
+            },
+            {
                 name: "Pengaduan",
                 icon: FileSolid,
                 isOpenItems: false,
