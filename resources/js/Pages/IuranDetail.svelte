@@ -20,11 +20,16 @@
         Modal,
         A,
         Toast,
+        Popover,
     } from "flowbite-svelte";
     import { writable } from "svelte/store";
     import Payment from "@C/DetailIuran/Modals/Payment.svelte";
     import { twMerge } from "tailwind-merge";
-    import { CheckCircleSolid, CloseCircleSolid } from "flowbite-svelte-icons";
+    import {
+        CheckCircleSolid,
+        CloseCircleSolid,
+        QuestionCircleSolid,
+    } from "flowbite-svelte-icons";
     import { page } from "@inertiajs/svelte";
 
     const axios = axiosInstance.create();
@@ -64,6 +69,7 @@
         checkedItems = checkedItems.map(() => target.checked);
         checkedAll = target.checked;
 
+        console.log(unpaidData);
         selected = [];
         if (target.checked) {
             selected = unpaidData;
@@ -100,7 +106,7 @@
             if (selected.includes(paymentLog.data[index])) {
                 selected.splice(index, 1);
             } else {
-                selected.push(paymentLog.data[index]);
+                if (target.checked) selected.push(paymentLog.data[index]);
             }
 
             validatePayment();
@@ -188,6 +194,8 @@
 
     let builder = {};
     const rebuild = async () => {
+        console.log("rebuild call");
+
         await initPage();
         builder = {};
     };
@@ -252,6 +260,14 @@
                     dues_member: data.member.id,
                 },
             });
+
+            unpaidData.push({
+                paid_for: Number.parseInt(
+                    (generatedDate.getTime() / 1000).toString(),
+                ),
+                amount_paid: amountPay,
+                dues_member: data.member.id,
+            });
         }
 
         const member_id =
@@ -282,7 +298,6 @@
             const hasDate = containedDate.some(
                 (value) => value.paidDate == paidDate,
             );
-            console.log(hasDate);
 
             if (paidYear > currentYear) break;
 
@@ -294,7 +309,6 @@
                 generatedDate = new Date(generatedDate.setFullYear(paidYear));
 
                 if (index != containedDate.length - 1) {
-                    console.log(index);
                     containedDate.splice(index, 0, {
                         paidDate: paidDate,
                         item: {
@@ -319,6 +333,14 @@
                         },
                     });
                 }
+
+                unpaidData.push({
+                    paid_for: Number.parseInt(
+                        (generatedDate.getTime() / 1000).toString(),
+                    ),
+                    amount_paid: amountPay,
+                    dues_member: member_id,
+                });
             }
         }
 
@@ -327,6 +349,7 @@
                 new Date(first.paidDate) < new Date(comparator.paidDate),
         );
 
+        // unpaidData = containedDate;
         const finalData: any[] = [];
         containedDate.map((value) => finalData.push(value.item));
 
@@ -429,7 +452,7 @@
     ) => {
         const duesDatas = await getDuesMember(target, dues);
         paymentLog = duesDatas;
-      
+
         if (!stat) return;
 
         if (duesDatas.isMember > 0) {
@@ -534,7 +557,12 @@
             });
 
             err = response.data;
-        } catch (error) {
+
+            rebuild();
+            setTimeout(() => {
+                err = { status: null, message: null };
+            }, 5000);
+        } catch (error: any) {
             err = {
                 message: error?.response?.data?.message,
                 status: error?.response?.data?.status,
@@ -562,83 +590,118 @@
 
 <Layout>
     <div class="flex justify-between flex-col lg:flex-row">
-        <div>
-            <div
-                class="bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md flex flex-col w-full lg:max-w-md p-4"
-            >
-                <p
-                    class="p-2 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800 z-10"
+        {#key builder}
+            <div>
+                <div
+                    class="bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md flex flex-col w-full lg:max-w-md p-4"
                 >
-                    Informasi Warga
-                </p>
-                {#if civilianMdl}
-                    <Table striped={true} divClass="rounded-lg overflow-hidden">
-                        <TableBody tableBodyClass="divide-y">
-                            <TableBodyRow>
-                                <TableBodyCell>Nama</TableBodyCell>
-                                <TableBodyCell
-                                    class="w-full truncate lg:max-w-xs lg:max-w-20"
-                                    >{civilianMdl.fullName}</TableBodyCell
+                    <p
+                        class="p-2 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800 z-10"
+                    >
+                        Informasi Warga
+                    </p>
+                    {#if civilianMdl}
+                        <Table
+                            striped={true}
+                            divClass="rounded-lg overflow-hidden"
+                        >
+                            <TableBody tableBodyClass="divide-y">
+                                <TableBodyRow>
+                                    <TableBodyCell>Nama</TableBodyCell>
+                                    <TableBodyCell class="flex">
+                                        <p
+                                            class="w-full truncate max-w-32 md:max-w-full lg:max-w-xs lg:max-w-36"
+                                        >
+                                            {civilianMdl.fullName}
+                                        </p>
+                                        <QuestionCircleSolid
+                                            id={`name-${civilianMdl.id}`}
+                                        />
+                                    </TableBodyCell>
+                                </TableBodyRow>
+                                <TableBodyRow>
+                                    <TableBodyCell>KK</TableBodyCell>
+                                    <TableBodyCell
+                                        >{civilianMdl.nkk}</TableBodyCell
+                                    >
+                                </TableBodyRow>
+                                <TableBodyRow>
+                                    <TableBodyCell>Alamat</TableBodyCell>
+                                    <TableBodyCell class="flex"
+                                        ><p
+                                            class="w-full truncate max-w-32 md:max-w-full lg:max-w-xs lg:max-w-36"
+                                        >
+                                            {civilianMdl.address}
+                                        </p>
+                                        <QuestionCircleSolid
+                                            id={`address-${civilianMdl.id}`}
+                                        />
+                                    </TableBodyCell>
+                                </TableBodyRow>
+                                <TableBodyRow>
+                                    <TableBodyCell
+                                        >Status Kependudukan</TableBodyCell
+                                    >
+                                    <TableBodyCell>
+                                        {#if civilianMdl.residentstatus == "PermanentResident"}
+                                            <Badge color="green">Tetap</Badge>
+                                        {:else if civilianMdl.residentstatus == "ContractResident"}
+                                            <Badge color="indigo">Kontrak</Badge
+                                            >
+                                        {:else if civilianMdl.residentstatus == "Kos"}
+                                            <Badge color="yellow">Kos</Badge>
+                                        {/if}
+                                    </TableBodyCell>
+                                </TableBodyRow>
+                                <Popover
+                                    class="w-64 text-sm text-black dark:text-white z-50"
+                                    title="Nama"
+                                    triggeredBy={`#name-${civilianMdl.id}`}
                                 >
-                            </TableBodyRow>
-                            <TableBodyRow>
-                                <TableBodyCell>KK</TableBodyCell>
-                                <TableBodyCell>{civilianMdl.nkk}</TableBodyCell>
-                            </TableBodyRow>
-                            <TableBodyRow>
-                                <TableBodyCell>Alamat</TableBodyCell>
-                                <TableBodyCell
-                                    >{civilianMdl.address}</TableBodyCell
+                                    <!-- {item.docs_id.description} -->
+                                    {civilianMdl.fullName}
+                                </Popover>
+                                <Popover
+                                    class="w-64 text-sm text-black dark:text-white z-50"
+                                    title="Alamat"
+                                    triggeredBy={`#address-${civilianMdl.id}`}
                                 >
-                            </TableBodyRow>
-                            <TableBodyRow>
-                                <TableBodyCell
-                                    >Status Kependudukan</TableBodyCell
-                                >
-                                <TableBodyCell>
-                                    {#if civilianMdl.residentstatus == "PermanentResident"}
-                                        <Badge color="green">Tetap</Badge>
-                                    {:else if civilianMdl.residentstatus == "ContractResident"}
-                                        <Badge color="indigo">Kontrak</Badge>
-                                    {:else if civilianMdl.residentstatus == "Kos"}
-                                        <Badge color="yellow">Kos</Badge>
-                                    {/if}
-                                </TableBodyCell>
-                            </TableBodyRow>
-                        </TableBody>
-                    </Table>
-                    <div class="text-end mt-2">
-                        <Button color="blue" href="/iuran">Kembali</Button>
-                    </div>
-                {/if}
+                                    <!-- {item.docs_id.description} -->
+                                    {civilianMdl.address}
+                                </Popover>
+                            </TableBody>
+                        </Table>
+                        <div class="text-end mt-2">
+                            <Button color="blue" href="/iuran">Kembali</Button>
+                        </div>
+                    {/if}
+                </div>
             </div>
-        </div>
-        <div
-            class="bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md flex flex-col w-full flex-grow mt-4 lg:mt-0 lg:ml-4"
-        >
-            <div class="flex justify-between p-5">
-                <p
-                    class="text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800 z-10"
-                >
-                    Detail Iuran Warga
-                </p>
+            <div
+                class="bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg border border-gray-200 dark:border-gray-700 divide-gray-200 dark:divide-gray-700 shadow-md flex flex-col w-full flex-grow mt-4 lg:mt-0 lg:ml-4"
+            >
+                <div class="flex justify-between p-5">
+                    <p
+                        class="text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800 z-10"
+                    >
+                        Detail Iuran Warga
+                    </p>
 
-                <!-- Tombol bayar sesuai yang di centang -->
-                <!-- {#if duesTypes}
+                    <!-- Tombol bayar sesuai yang di centang -->
+                    <!-- {#if duesTypes}
                     {#if duesTypes.status}
                     {/if}
                     {/if} -->
-                <Button
-                    class={hiddenAction}
-                    on:click={() => {
-                        clickOutsideModal = true;
-                    }}
-                    disabled={$isAnyChecked === false && validatePayment()}
-                    >Bayar</Button
-                >
-            </div>
-            <Tabs class="px-4">
-                {#key builder}
+                    <Button
+                        class={hiddenAction}
+                        on:click={() => {
+                            clickOutsideModal = true;
+                        }}
+                        disabled={$isAnyChecked === false && validatePayment()}
+                        >Bayar</Button
+                    >
+                </div>
+                <Tabs class="px-4">
                     {#if civilian != ""}
                         {#if duesTypes}
                             {#each duesTypes as d}
@@ -687,7 +750,8 @@
                                             <TableHeadCell
                                                 >Tagihan</TableHeadCell
                                             >
-                                            <TableHeadCell>Status</TableHeadCell
+                                            <TableHeadCell class="text-center"
+                                                >Status</TableHeadCell
                                             >
                                             <!-- <TableHeadCell class="text-center"
                                     >Bayar</TableHeadCell
@@ -793,16 +857,16 @@
                             {/each}
                         {/if}
                     {/if}
-                {/key}
-            </Tabs>
-        </div>
+                </Tabs>
+            </div>
+        {/key}
     </div>
 </Layout>
 
 {#if selected && clickOutsideModal}
     <Payment
         bind:showState={clickOutsideModal}
-        on:comp={rebuild}
+        on:comp={async () => rebuild()}
         bind:selected
         bind:amountPay
     />

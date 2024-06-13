@@ -97,8 +97,6 @@ class FinancialAssistanceController extends Controller
 
         $data = FinancialAssistance::withoutTrashed()
             ->with('request_by.civilian_id.rt_id', 'created_by.civilian_id', 'updated_by')
-            ->skip($page > 1 ? ($page - 1) * $take : 0)
-            ->take($take)
             ->get();
 
         $length = FinancialAssistance::withoutTrashed()->count();
@@ -118,7 +116,7 @@ class FinancialAssistanceController extends Controller
 
         $data = FinancialAssistance::withoutTrashed()
             ->with('request_by.civilian_id.rt_id', 'created_by.civilian_id', 'updated_by')
-            ->whereHas('created_by', function ($q) use ($user) {
+            ->whereHas('request_by', function ($q) use ($user) {
                 $q->where(
                     'id',
                     $user->id
@@ -145,17 +143,42 @@ class FinancialAssistanceController extends Controller
 
         $data = FinancialAssistance::withoutTrashed()
             ->with('request_by.civilian_id.rt_id', 'created_by.civilian_id', 'updated_by')
+            ->where('status', '=', 2)
             ->whereHas('request_by.civilian_id', function ($q) use ($user) {
                 $q->where(
-                    'id',
+                    'rt_id',
                     $user->getRelation('civilian_id')->rt_id
                 );
             })
+            ->get();
+
+        $length = FinancialAssistance::withoutTrashed()->count();
+
+        return response()->json(['data' => $data, 'length' => $length]);
+    }
+
+    public function getLike($page = 1, $filter = null)
+    {
+        $take = 5;
+
+        $data = FinancialAssistance::withoutTrashed()
+            ->with('request_by.civilian_id.rt_id', 'created_by.civilian_id', 'updated_by')
+            ->whereHas('request_by.civilian_id', function ($q) use ($filter) {
+                $q->whereAny(['fullName'], 'LIKE', "%$filter%");
+            })
+            ->orderByDesc('created_at')
             ->skip($page > 1 ? ($page - 1) * $take : 0)
             ->take($take)
             ->get();
 
-        $length = FinancialAssistance::withoutTrashed()->count();
+        $length = FinancialAssistance::withoutTrashed()
+            ->with('request_by.civilian_id.rt_id', 'created_by.civilian_id', 'updated_by')
+            ->whereHas('request_by.civilian_id', function ($q) use ($filter) {
+                $q->whereAny(['fullName'], 'LIKE', "%$filter%");
+            })
+            ->orderByDesc('created_at')
+            ->get()
+            ->count();
 
         return response()->json(['data' => $data, 'length' => $length]);
     }

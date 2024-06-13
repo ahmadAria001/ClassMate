@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\Civilian;
+use App\Models\RT;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
@@ -44,6 +45,7 @@ class HandleInertiaRequests extends Middleware
     {
         return array_merge(parent::share($request), [
             'appName' => config('app.name'),
+            'location' => $request->route()->getName(),
 
             // Lazily...
             'auth.user' => function () use ($request) {
@@ -86,6 +88,10 @@ class HandleInertiaRequests extends Middleware
                     $user = Civilian::with('rt_id')->where('id', '=', $model->get()->first()->civilian_id)->first();
                     $rt = $user->rt_id;
 
+                    $rtNum = RT::withoutTrashed()->where('id', $rt)->first();
+                    error_log($rt);
+                    error_log($rtNum);
+
                     return [
                         'username' => $model->get('username')->first()->username,
                         'role' => $model->get('role')->first()->role,
@@ -93,6 +99,7 @@ class HandleInertiaRequests extends Middleware
                         'fullName' => $user->fullName,
                         'nik' => $user->nik,
                         'rt_id' => $rt,
+                        'rt_num' => $rtNum->number,
                         'intro' => $model->get()->first()->intro,
                         'pict' => asset('storage' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . $model->get('pict')->first()->pict),
                         // . DIRECTORY_SEPARATOR . 'public'

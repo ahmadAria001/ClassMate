@@ -34,9 +34,12 @@ Route::prefix('/dues')->group(fn () => [
 ]);
 
 Route::prefix('/dues-payment')->group(fn () => [
+    Route::get('/monthly-income', [DuesPaymentLogController::class, 'getMonthlyIncomeLastSixMonths'])->middleware(GetDues::class),
+
     Route::get('/', [DuesPaymentLogController::class, 'get'])->middleware(GetLog::class),
     Route::get('/{filter}', [DuesPaymentLogController::class, 'get'])->middleware(GetLog::class),
     Route::get('/rt/{rt_id}', [DuesPaymentLogController::class, 'getDuesRT'])->middleware(GetDues::class),
+
 
     Route::post('/', [DuesPaymentLogController::class, 'create'])->middleware(CreateLog::class),
     Route::put('/', [DuesPaymentLogController::class, 'edit'])->middleware(UpdateLog::class),

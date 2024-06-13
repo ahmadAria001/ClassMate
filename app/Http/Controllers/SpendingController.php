@@ -11,6 +11,7 @@ use App\Utils\AccessToken;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Laravel\Sanctum\PersonalAccessToken;
 use ReflectionClass;
@@ -57,6 +58,57 @@ class SpendingController extends Controller
         }
 
         return Response()->json(['data' => $data], 200);
+    }
+
+    public function getMonthlyIncomeLastSixMonths(Request $req)
+    {
+        $identity = AccessToken::getToken($req);
+
+        if (!$identity) abort(401);
+        $model = $identity->tokenable();
+        $user = User::withoutTrashed()->with('civilian_id.rt_id')->where('id', $model->get('id')[0]->id)->get()->first();
+
+        $isRT = $user->role == "RT";
+
+        $currentDate = Carbon::now();
+        $sixMonthsAgo = $currentDate->copy()->setMonth(12)->setDay(1)->setYear(2021)->subYear(1)->subMonths(12);
+
+        // ngambil data pengeluaran dalam 6 bulan terakhir dan menjumlahkan perbulan
+        $query = !$isRT ? 'select
+        DATE_FORMAT(FROM_UNIXTIME(created_at), "%Y-%m") as month,
+        SUM(amount) as total_amount
+    from `spendings`
+    where
+        `spendings`.`deleted_at` is null
+        and
+        `created_at` >= UNIX_TIMESTAMP("' . $sixMonthsAgo->toDateString() . '")
+    group by `month`
+    order by `month` desc;'
+            :
+            'select
+        DATE_FORMAT(FROM_UNIXTIME(spd.created_at), "%Y-%m") as month,
+        SUM(spd.amount) as total_amount,
+        c.rt_id
+    from `spendings` spd
+    LEFT JOIN users u
+    	ON u.id = spd.created_by
+    LEFT JOIN civilian c
+    	ON c.id = u.civilian_id
+    where
+        `spd`.`deleted_at` is null
+        and
+        spd.`created_at` >= UNIX_TIMESTAMP("' . $sixMonthsAgo->toDateString() . '")
+        and
+        c.rt_id = ' . $user->getRelation('civilian_id')->rt_id . '
+    group by `month`
+    order by `month` desc;';
+
+        $monthlyIncome = DB::select($query);
+        error_log($sixMonthsAgo->toDateString());
+
+        return response()->json([
+            'data' => $monthlyIncome,
+        ], 200);
     }
 
     public function getPaged($page = 1)

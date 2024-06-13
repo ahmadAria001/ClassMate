@@ -41,16 +41,19 @@
     import { page } from "@inertiajs/svelte";
 
     const axios = axiosInstance.create({ withCredentials: true });
+    const itemsPerPage = 10;
+    const showPage = 5;
+
     let modalDetailArchive = false;
     let searchTerm = "";
     let currentPosition = 0;
-    const itemsPerPage = 10;
-    const showPage = 5;
     let totalPages = 0;
     let pagesToShow: any[] = [];
     let totalItems: number = items.length;
     let startPage: number;
     let endPage: number;
+
+    let currentPage = 1;
 
     let selected: string | null = null;
 
@@ -97,34 +100,20 @@
         let uriEncoded: string | null = null;
 
         if (byRT && !id)
-            uriEncoded = `/api/civilian/archive/${$page.props.auth.user.rt_id}/1`;
+            uriEncoded = `/api/civilian/archive/null/true/${currentPage}`;
         if ($page.props.auth.user.role != "RT" && !id)
-            uriEncoded = `/api/civilian/archive`;
+            uriEncoded = `/api/civilian/archive/null/false/${currentPage}`;
         if (id && !byRT)
-            uriEncoded = `/api/civilian/archive/${encodeURI(id)}/0`;
+            uriEncoded = `/api/civilian/archive/${encodeURI(id)}/false/${currentPage}`;
+
+        if (id && byRT)
+            uriEncoded = `/api/civilian/archive/${id}/true/${currentPage}`;
 
         if (!uriEncoded) return;
 
         const response = await axios.get(uriEncoded);
         return response.data;
     };
-
-    const goToPage = (pageNumber: number) => {
-        currentPosition = (pageNumber - 1) * itemsPerPage;
-        updateDataAndPagination();
-    };
-
-    $: startRange = currentPosition + 1;
-    $: endRange = Math.min(currentPosition + itemsPerPage, totalItems);
-
-    $: currentPageItems = items.slice(
-        currentPosition,
-        currentPosition + itemsPerPage,
-    );
-    $: filteredItems = items.filter(
-        (item) =>
-            item.name.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1,
-    );
 
     let builder = {};
     export const rebuild = async () => {
@@ -137,29 +126,41 @@
     if (role === "RT") {
         roleType = true;
     }
-    onMount(async () => {
+
+    const initPage = async () => {
         try {
             // Call renderPagination when the component initially mounts
             renderPagination(items.length);
             data = await getCivilsArchive(null, roleType);
-            filteredData = data;
-            console.log(filteredData);
+            filteredData = data.data;
         } catch (error) {
             console.error("Error fetching data:", error);
         }
+    };
+
+    onMount(async () => {
+        await initPage();
     });
 
     let filteredData: any;
-    const handleSearch = (event: any) => {
+    const handleSearch = async (event: any) => {
         const searchValue = event.detail.value.toLowerCase();
         // console.log("Search value in handleSearch in use file:", searchValue);
         if (searchValue == "") {
-            filteredData = [...data];
+            filteredData = [...data.data];
         }
-        filteredData = data.filter((d: any) =>
-            d.fullName.toLowerCase().includes(searchValue),
+
+        currentPage = 1;
+
+        data = await getCivilsArchive(
+            encodeURIComponent(searchValue),
+            roleType,
         );
-        // console.log(filteredData);
+
+        filteredData = data.data.filter((d: any) =>
+            d.fullName.toLowerCase().includes(searchValue.toLowerCase()),
+        );
+        console.log(filteredData);
         rebuild();
     };
 
@@ -186,110 +187,69 @@
             <TableBody>
                 {#key builder}
                     {#if filteredData}
-                        {#each filteredData as item, idx}
-                            <TableBodyRow>
-                                <TableBodyCell>{item.fullName}</TableBodyCell>
-                                <TableBodyCell>{item.address}</TableBodyCell>
-                                <!-- <TableBodyCell>{item.job}</TableBodyCell> -->
-                                {#if item.status == "Meninggal"}
-                                    <TableBodyCell class="text-center">
-                                        <Badge color="red">{item.status}</Badge>
-                                    </TableBodyCell>
-                                {:else if item.status == "Pindah"}
-                                    <TableBodyCell class="text-center">
-                                        <Badge color="yellow"
-                                            >{item.status}</Badge
+                        {#if filteredData.length > 0}
+                            {#each filteredData as item, idx}
+                                <TableBodyRow>
+                                    <TableBodyCell
+                                        >{item.fullName}</TableBodyCell
+                                    >
+                                    <TableBodyCell>{item.address}</TableBodyCell
+                                    >
+                                    <!-- <TableBodyCell>{item.job}</TableBodyCell> -->
+                                    {#if item.status == "Meninggal"}
+                                        <TableBodyCell class="text-center">
+                                            <Badge color="red"
+                                                >{item.status}</Badge
+                                            >
+                                        </TableBodyCell>
+                                    {:else if item.status == "Pindah"}
+                                        <TableBodyCell class="text-center">
+                                            <Badge color="yellow"
+                                                >{item.status}</Badge
+                                            >
+                                        </TableBodyCell>
+                                    {/if}
+                                    <TableBodyCell>
+                                        <Button
+                                            color="blue"
+                                            on:click={() => {
+                                                selected = item.id;
+                                                modalDetailArchive = true;
+                                            }}>Detail</Button
                                         >
                                     </TableBodyCell>
-                                {/if}
-                                <TableBodyCell>
-                                    <Button
-                                        color="blue"
-                                        on:click={() => {
-                                            selected = item.id;
-                                            console.log(item);
-                                            modalDetailArchive = true;
-                                        }}>Detail</Button
-                                    >
+                                </TableBodyRow>
+                            {/each}
+                        {:else}
+                            <TableBodyRow>
+                                <TableBodyCell colspan="4">
+                                    <div class="flex justify-center">
+                                        <div class="block">
+                                            <span
+                                                class="flex justify-center text-gray-400 text-lg"
+                                                >Tidak ada data untuk
+                                                ditampilkan</span
+                                            >
+                                        </div>
+                                    </div>
                                 </TableBodyCell>
                             </TableBodyRow>
-                        {/each}
+                        {/if}
+                    {:else}
+                        <TableBodyRow>
+                            <TableBodyCell colspan="4">
+                                <div class="flex justify-center">
+                                    <div class="block">
+                                        <span
+                                            class="flex justify-center text-gray-400 text-lg"
+                                            >Tidak ada data untuk ditampilkan</span
+                                        >
+                                    </div>
+                                </div>
+                            </TableBodyCell>
+                        </TableBodyRow>
                     {/if}
                 {/key}
-                <!-- {#if $page.props.auth.user.role === "RT"}
-                    {#await getCivilsArchive(null, true) then data}
-                        {#if Object.keys(data).length > 0}
-                            {#each data as item, idx}
-                                <TableBodyRow>
-                                    <TableBodyCell
-                                        >{item.fullName}</TableBodyCell
-                                    >
-                                    <TableBodyCell>{item.address}</TableBodyCell
-                                    >
-                                    {#if item.status == "Meninggal"}
-                                        <TableBodyCell>
-                                            <Badge color="red"
-                                                >{item.status}</Badge
-                                            >
-                                        </TableBodyCell>
-                                    {:else if item.status == "Pindah"}
-                                        <TableBodyCell>
-                                            <Badge color="yellow"
-                                                >{item.status}</Badge
-                                            >
-                                        </TableBodyCell>
-                                    {/if}
-                                    <TableBodyCell>
-                                        <Button
-                                            color="blue"
-                                            on:click={() => {
-                                                selected = item.id;
-                                                console.log(item);
-                                                modalDetailArchive = true;
-                                            }}>Detail</Button
-                                        >
-                                    </TableBodyCell>
-                                </TableBodyRow>
-                            {/each}
-                        {/if}
-                    {/await}
-                {:else}
-                    {#await getCivilsArchive(null, false) then data}
-                        {#if Object.keys(data).length > 0}
-                            {#each data as item, idx}
-                                <TableBodyRow>
-                                    <TableBodyCell
-                                        >{item.fullName}</TableBodyCell
-                                    >
-                                    <TableBodyCell>{item.address}</TableBodyCell
-                                    >
-                                    {#if item.status == "Meninggal"}
-                                        <TableBodyCell class="text-center">
-                                            <Badge color="red"
-                                                >{item.status}</Badge
-                                            >
-                                        </TableBodyCell>
-                                    {:else if item.status == "Pindah"}
-                                        <TableBodyCell class="text-center">
-                                            <Badge color="yellow"
-                                                >{item.status}</Badge
-                                            >
-                                        </TableBodyCell>
-                                    {/if}
-                                    <TableBodyCell>
-                                        <Button
-                                            color="blue"
-                                            on:click={() => {
-                                                selected = item.id;
-                                                modalDetailArchive = true;
-                                            }}>Detail</Button
-                                        >
-                                    </TableBodyCell>
-                                </TableBodyRow>
-                            {/each}
-                        {/if}
-                    {/await}
-                {/if} -->
             </TableBody>
         </Table>
 
@@ -428,33 +388,49 @@
             class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0 p-4"
             aria-label="Table navigation"
         >
-            <span class="text-sm font-normal text-gray-500 dark:text-gray-400">
-                Showing
-                <span class="font-semibold text-gray-900 dark:text-white"
-                    >{startRange}-{endRange}</span
+            {#if filteredData}
+                <span
+                    class="text-sm font-normal text-gray-500 dark:text-gray-400"
                 >
-                of
-                <span class="font-semibold text-gray-900 dark:text-white"
-                    >{totalItems}</span
-                >
-            </span>
-            <ButtonGroup>
-                <Button
-                    on:click={loadPreviousPage}
-                    disabled={currentPosition === 0}
-                    ><ChevronLeftOutline /></Button
-                >
-                {#each pagesToShow as pageNumber}
-                    <Button on:click={() => goToPage(pageNumber)}
-                        >{pageNumber}</Button
+                    Showing
+                    <span class="font-semibold text-gray-900 dark:text-white">
+                        {currentPage < 2
+                            ? 1
+                            : filteredData.length < 10
+                              ? data.length - data.data.length + 1
+                              : data.data.length * currentPage - 10 + 1}
+                        -
+                        {data.length < 10
+                            ? data.data.length
+                            : data.data.length < 10
+                              ? data.length
+                              : data.data.length * currentPage}
+                    </span>
+                    of
+                    <span class="font-semibold text-gray-900 dark:text-white"
+                        >{data.length}</span
                     >
-                {/each}
-                <Button
-                    on:click={loadNextPage}
-                    disabled={totalPages === endPage}
-                    ><ChevronRightOutline /></Button
-                >
-            </ButtonGroup>
+                </span>
+                <ButtonGroup>
+                    <Button
+                        disabled={currentPage < 2}
+                        on:click={async () => {
+                            currentPage--;
+                            await initPage();
+                        }}><ChevronLeftOutline /></Button
+                    >
+                    <!-- {#each data.length as pageNumber} -->
+                    <Button disabled>{currentPage}</Button>
+                    <!-- {/each} -->
+                    <Button
+                        disabled={data.data.length < 10}
+                        on:click={async () => {
+                            currentPage++;
+                            await initPage();
+                        }}><ChevronRightOutline /></Button
+                    >
+                </ButtonGroup>
+            {/if}
         </div>
     </TableSearch>
 </Layout>

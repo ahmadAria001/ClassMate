@@ -17,7 +17,6 @@
 
     import { createEventDispatcher, onMount } from "svelte";
     import { page } from "@inertiajs/svelte";
-    import { writable } from "svelte/store";
 
     const dispatch = createEventDispatcher();
     const axios = axiosInstance.create({ withCredentials: true });
@@ -40,7 +39,7 @@
     };
 
     const getCivils = async () => {
-        const response = await axios.get("/api/user");
+        const response = await axios.get("/api/user/dd");
 
         return response.data;
     };

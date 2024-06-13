@@ -16,11 +16,14 @@
         Table,
     } from "flowbite-svelte";
     import TableSearch from "@C/General/TableSearch.svelte";
+    import { page } from "@inertiajs/svelte";
     import {
+        ChartLineDownOutline,
+        ChartLineUpOutline,
         ChevronLeftOutline,
         ChevronRightOutline,
     } from "flowbite-svelte-icons";
-
+    import CardInfo from "@C/HomePage/CardInfo.svelte";
     import Detail from "@C/Spending/Modals/Detail.svelte";
     import Create from "@C/Spending/Modals/Create.svelte";
     import Delete from "@C/Spending/Modals/Delete.svelte";
@@ -56,6 +59,11 @@
     let currentPage = 1;
     let selected = "";
     let data: any;
+    let duesIncome: any;
+    let totalDues: any;
+    let paymentDues: any;
+    let totalOutcome: any;
+    let id_rt = $page.props.auth.user.rt_id;
 
     let builder = {};
     export const rebuild = async () => {
@@ -107,34 +115,94 @@
         updateDataAndPagination();
     };
 
+    const role = $page.props.auth.user.role;
+
     const getSpendigLog = async () => {
-        const response = await axios.get(
-            `/api/spending/p/${encodeURIComponent(currentPage)}`,
-            {
-                headers: {
-                    Accept: "application/json",
-                },
+        let url = "";
+
+        if (role == "RT")
+            url = `/api/spending/rt/${encodeURIComponent(currentPage)}`;
+        if (role != "RT" && role != "Warga")
+            url = `/api/spending/p/${encodeURIComponent(currentPage)}`;
+
+        if (url == "") return;
+
+        const response = await axios.get(url, {
+            headers: {
+                Accept: "application/json",
             },
-        );
+        });
 
         return response.data;
     };
 
-    const getNewsData = async (id: string = "") => {
-        const response = await axios.get(
-            `/api/news/${encodeURIComponent(id)}`,
-            {
+    const getTotalSpending = async () => {
+        try {
+            const response = await getSpendigLog();
+            const spendingData = response.data;
+
+            if (Array.isArray(spendingData)) {
+                const totalSpending = spendingData.reduce((total, spending) => {
+                    return total + parseFloat(spending.amount);
+                }, 0);
+
+                return totalSpending;
+            } else {
+                console.error("Data is not an array or is undefined");
+                return 0;
+            }
+        } catch (error) {
+            console.error("Error fetching spending data:", error);
+            return 0;
+        }
+    };
+
+    const getTotalDataDues = async () => {
+        try {
+            const response = await axios.get(`/api/dues-payment/rt/${id_rt}`, {
                 headers: {
                     Accept: "application/json",
                 },
-            },
-        );
+            });
 
-        return response.data;
+            // console.log("Dues payment response:", response);
+            const paymentDues = response.data.data;
+            // console.log("paymentDues:", paymentDues);
+
+            if (Array.isArray(paymentDues)) {
+                const totalDues = paymentDues.reduce(
+                    (total: number, dues: any) => {
+                        const amountPaid = parseFloat(dues.amount_paid);
+                        // console.log("amountPaid:", amountPaid);
+                        if (!isNaN(amountPaid)) {
+                            return total + amountPaid;
+                        } else {
+                            console.error(
+                                "Invalid amount_paid:",
+                                dues.amount_paid,
+                            );
+                            return total;
+                        }
+                    },
+                    0,
+                );
+
+                return totalDues;
+            } else {
+                console.error("paymentDues is not an array or is undefined");
+                return 0;
+            }
+        } catch (error) {
+            console.error("Error fetching dues data:", error);
+            return 0;
+        }
     };
 
     const initData = async () => {
         data = await getSpendigLog();
+        duesIncome = await getTotalDataDues();
+        totalOutcome = await getTotalSpending();
+        console.log(data);
     };
 
     $: startRange = currentPosition + 1;
@@ -177,6 +245,22 @@
 </script>
 
 <Layout>
+    <div
+        class="info-card grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-8"
+    >
+        <CardInfo
+            title="Pemasukan"
+            value={duesIncome}
+            icon={ChartLineUpOutline}
+            iconBgClass="bg-green-700 dark:bg-green-500"
+        />
+        <CardInfo
+            title="Pengeluaran"
+            value={totalOutcome}
+            icon={ChartLineDownOutline}
+            iconBgClass="bg-red-700 dark:bg-red-500"
+        />
+    </div>
     <TableSearch on:search={handleSearch}>
         <div
             slot="header"
@@ -185,7 +269,7 @@
             <Button
                 on:click={() => {
                     addAnnoucement = true;
-                }}>+ Tambah Pengumuman</Button
+                }}>+ Tambah Pengeluaran</Button
             >
         </div>
         <Table>

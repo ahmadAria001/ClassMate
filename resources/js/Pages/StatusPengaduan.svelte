@@ -113,8 +113,8 @@
             url = `/api/docs/complaint/rt/${encodeURIComponent(page)}`;
         if (role == "Warga")
             url = `/api/docs/complaint/warga/${encodeURIComponent(page)}`;
-        if (role != "RT" || role != "Warga")
-            url = `/api/docs/complaint/warga/${encodeURIComponent(page)}`;
+        if (role != "RT" && role != "Warga")
+            url = `/api/docs/complaint/like/${encodeURIComponent(page)}/`;
 
         try {
             const response = await axios.get(url, {
@@ -146,6 +146,8 @@
 
     const initPage = async () => {
         data = await getComplainPaged(currentPage);
+        filteredData = data.data;
+        console.log(data);
     };
 
     $: startRange = currentPosition + 1;
@@ -164,7 +166,6 @@
             renderPagination(items.length);
 
             await initPage();
-            filteredData = data.data;
         } catch (error) {
             console.error("Error fetching data:", error);
         }
@@ -255,33 +256,47 @@
             class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0 p-4"
             aria-label="Table navigation"
         >
-            <span class="text-sm font-normal text-gray-500 dark:text-gray-400">
-                Showing
-                <span class="font-semibold text-gray-900 dark:text-white"
-                    >{startRange}-{endRange}</span
+            {#if filteredData}
+                <span
+                    class="text-sm font-normal text-gray-500 dark:text-gray-400"
                 >
-                of
-                <span class="font-semibold text-gray-900 dark:text-white"
-                    >{totalItems}</span
-                >
-            </span>
-            <ButtonGroup>
-                <Button
-                    on:click={loadPreviousPage}
-                    disabled={currentPosition === 0}
-                    ><ChevronLeftOutline /></Button
-                >
-                {#each pagesToShow as pageNumber}
-                    <Button on:click={() => goToPage(pageNumber)}
-                        >{pageNumber}</Button
+                    Showing
+                    <span class="font-semibold text-gray-900 dark:text-white">
+                        {currentPage < 2
+                            ? 1
+                            : filteredData.length < 5
+                              ? data.length - filteredData.length + 1
+                              : filteredData.length + 1}
+                        -
+                        {filteredData.length < 5
+                            ? data.length
+                            : filteredData.length * currentPage}
+                    </span>
+                    of
+                    <span class="font-semibold text-gray-900 dark:text-white"
+                        >{data.length}</span
                     >
-                {/each}
-                <Button
-                    on:click={loadNextPage}
-                    disabled={totalPages === endPage}
-                    ><ChevronRightOutline /></Button
-                >
-            </ButtonGroup>
+                </span>
+                <ButtonGroup>
+                    <Button
+                        disabled={currentPage < 2}
+                        on:click={async () => {
+                            currentPage--;
+                            await initPage();
+                        }}><ChevronLeftOutline /></Button
+                    >
+                    <!-- {#each data.length as pageNumber} -->
+                    <Button disabled>{currentPage}</Button>
+                    <!-- {/each} -->
+                    <Button
+                        disabled={currentPage >= data.length / 5}
+                        on:click={async () => {
+                            currentPage++;
+                            await initPage();
+                        }}><ChevronRightOutline /></Button
+                    >
+                </ButtonGroup>
+            {/if}
         </div>
     </TableSearch>
 </Layout>

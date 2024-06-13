@@ -14,6 +14,7 @@ Route::prefix('/news')->group(fn () => [
     Route::get('/', [NewsController::class, 'get'])->middleware(Get::class),
     Route::get('/{filter}', [NewsController::class, 'get'])->middleware(Get::class),
     Route::get('/p/{page}', [NewsController::class, 'getPaged'])->middleware(Get::class),
+    Route::get('/like/{page}/{filter}', [NewsController::class, 'getLike'])->middleware(Get::class),
 
 
     Route::post('/', [NewsController::class, 'create'])->middleware(Create::class),

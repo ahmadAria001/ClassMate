@@ -45,9 +45,13 @@ Route::prefix('/docs')->group(function () {
     Route::prefix('/complaint')->group(function () {
         Route::get('/', [ComplaintController::class, 'get'])->middleware([GetComplaint::class]);
         Route::get('/{filter}', [ComplaintController::class, 'get'])->middleware(GetComplaint::class);
+
         Route::get('/warga/{page}', [ComplaintController::class, 'getByWarga'])->middleware(GetComplaint::class);
         Route::get('/rt/{page}', [ComplaintController::class, 'getByRT'])->middleware(GetComplaint::class);
         Route::get('/p/{page}', [ComplaintController::class, 'getPaged'])->middleware(GetComplaint::class);
+
+        Route::get('/like/{page}', [ComplaintController::class, 'getLike'])->middleware(GetComplaint::class);
+        Route::get('/like/{page}/{filter}', [ComplaintController::class, 'getLike'])->middleware(GetComplaint::class);
 
         Route::post('/', [ComplaintController::class, 'create'])->middleware(CreateComplaint::class);
         Route::put('/', [ComplaintController::class, 'edit'])->middleware(UpdateComplaint::class);
@@ -66,6 +70,8 @@ Route::prefix('/docs')->group(function () {
     Route::prefix('/activity')->group(function () {
         Route::get('/', [ActivityController::class, 'get'])->middleware(GetActivity::class);
         Route::get('/lts', [ActivityController::class, 'getlts'])->middleware(GetActivity::class);
+
+        Route::get('/like/{page}/{filter}', [ActivityController::class, 'getLike'])->middleware(GetComplaint::class);
 
         Route::get('/{filter}', [ActivityController::class, 'get'])->middleware(GetActivity::class);
         Route::get('/p/{page}', [ActivityController::class, 'getPaged'])->middleware(GetActivity::class);

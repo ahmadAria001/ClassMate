@@ -1,12 +1,8 @@
 <script lang="ts">
     import Layout from "./Layout.svelte";
     import {
-        A,
-        Button,
         Card,
         Chart,
-        Dropdown,
-        DropdownItem,
         Popover,
         Table,
         TableBody,
@@ -15,9 +11,14 @@
         TableHead,
         TableHeadCell,
     } from "flowbite-svelte";
+
+    import type { ApexOptions } from "apexcharts";
+
     import { page } from "@inertiajs/svelte";
     import axiosInstance from "axios";
     import { onMount } from "svelte";
+
+    import CustomCard from "@C/General/CustomCard.svelte";
     import {
         QuestionCircleSolid,
         UsersGroupOutline,
@@ -32,6 +33,8 @@
     let id_rt = $page.props.auth.user.rt_id;
     let announcement: any;
     let citizenActivity: any;
+    let income: any;
+    let spendings: any;
 
     const getNews = async () => {
         const response = await axios.get(`/api/news/lts`, {
@@ -45,6 +48,18 @@
 
     const getCitizenEvents = async () => {
         const response = await axios.get(`/api/docs/activity/lts`);
+
+        return response.data;
+    };
+
+    const getSpendings = async () => {
+        const response = await axios.get(`/api/spending/monthly-income`);
+
+        return response.data;
+    };
+
+    const getIncomes = async () => {
+        const response = await axios.get(`/api/dues-payment/monthly-income`);
 
         return response.data;
     };
@@ -75,6 +90,31 @@
         const year = date.getFullYear();
 
         return `${day} ${monthName} ${year}`;
+    };
+    const formatterMonthYear = (epoc: number) => {
+        const date = new Date(epoc);
+
+        const monthNames = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+        ];
+
+        const monthIndex = date.getMonth();
+        const monthName = monthNames[monthIndex];
+
+        const year = date.getFullYear();
+
+        return `${monthName} ${year}`;
     };
 
     onMount(async () => {
@@ -146,6 +186,145 @@
     let data: Data | undefined;
     let colorApex: string;
 
+    const options: Options = {
+        series: [],
+        colors: ["#1C64F2", "#16BDCA", "#9061F9"],
+        chart: {
+            height: 420,
+            width: "100%",
+            type: "pie",
+        },
+        stroke: {
+            colors: ["white"],
+            lineCap: "",
+        },
+        plotOptions: {
+            pie: {
+                labels: {
+                    show: true,
+                },
+                size: "100%",
+                dataLabels: {
+                    offset: -25,
+                },
+            },
+        },
+        labels: ["Permananen", "Kontrak", "Kos"],
+        dataLabels: {
+            enabled: true,
+            style: {
+                fontFamily: "Inter, sans-serif",
+            },
+        },
+        legend: {
+            position: "bottom",
+            fontFamily: "Inter, sans-serif",
+            labels: {
+                colors: "",
+            },
+        },
+        yaxis: {
+            labels: {
+                formatter: function (value) {
+                    return value + "%";
+                },
+            },
+        },
+        xaxis: {
+            labels: {
+                formatter: function (value) {
+                    return value + "%";
+                },
+            },
+            axisTicks: {
+                show: false,
+            },
+            axisBorder: {
+                show: false,
+            },
+        },
+    };
+
+    let finance = {
+        chart: {
+            height: "400px",
+            maxWidth: "100%",
+            type: "line",
+            fontFamily: "Inter, sans-serif",
+            dropShadow: {
+                enabled: false,
+            },
+            toolbar: {
+                show: false,
+            },
+        },
+        tooltip: {
+            enabled: true,
+            x: {
+                show: false,
+            },
+        },
+        dataLabels: {
+            enabled: false,
+        },
+        stroke: {
+            width: 6,
+            curve: "smooth",
+        },
+        grid: {
+            show: true,
+            strokeDashArray: 4,
+            padding: {
+                left: 2,
+                right: 2,
+                top: -26,
+            },
+        },
+        series: [
+            {
+                name: "Pemasukan",
+                data: [6500, 6418, 6456, 6526, 6356, 6456],
+                color: "#00A36C",
+            },
+            {
+                name: "Pengeluaran",
+                data: [6456, 6356, 6526, 6332, 6418, 6500],
+                color: "#FF474C",
+            },
+        ],
+        legend: {
+            show: false,
+        },
+        xaxis: {
+            categories: [
+                "01 Feb",
+                "02 Feb",
+                "03 Feb",
+                "04 Feb",
+                "05 Feb",
+                "06 Feb",
+                "07 Feb",
+            ],
+            labels: {
+                show: true,
+                style: {
+                    fontFamily: "Inter, sans-serif",
+                    cssClass:
+                        "text-xs font-normal fill-gray-500 dark:fill-gray-400",
+                },
+            },
+            axisBorder: {
+                show: false,
+            },
+            axisTicks: {
+                show: false,
+            },
+        },
+        yaxis: {
+            show: false,
+        },
+    };
+
     const getData = async () => {
         try {
             const civilianUrl =
@@ -169,7 +348,7 @@
 
             // Buat hitung total iuran
             const totalDues = countDues.data.reduce(
-                (total: number, dues: number) => {
+                (total: number, dues: any) => {
                     return total + parseFloat(dues.amount_paid);
                 },
                 0,
@@ -230,73 +409,121 @@
         }
     };
 
+    const getSpendigMonthly = async () => {
+        try {
+            const response = await axios.get(`/api/spending/monthly-income`, {
+                headers: {
+                    Accept: "application/json",
+                },
+            });
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching spending log:", error);
+        }
+    };
+
+    const getTotalDataDues = async () => {
+        try {
+            const response = await axios.get(`/api/dues-payment/rt/${id_rt}`, {
+                headers: {
+                    Accept: "application/json",
+                },
+            });
+
+            // console.log("Dues payment response:", response);
+            const paymentDues = response.data.data;
+            // console.log("paymentDues:", paymentDues);
+
+            if (Array.isArray(paymentDues)) {
+                const totalDues = paymentDues.reduce(
+                    (total: number, dues: any) => {
+                        const amountPaid = parseFloat(dues.amount_paid);
+                        // console.log("amountPaid:", amountPaid);
+                        if (!isNaN(amountPaid)) {
+                            return total + amountPaid;
+                        } else {
+                            console.error(
+                                "Invalid amount_paid:",
+                                dues.amount_paid,
+                            );
+                            return total;
+                        }
+                    },
+                    0,
+                );
+
+                console.log("dues : " + response.data.data);
+                return totalDues;
+            } else {
+                console.error("paymentDues is not an array or is undefined");
+                return 0;
+            }
+        } catch (error) {
+            console.error("Error fetching dues data:", error);
+            return 0;
+        }
+    };
+
+    const defineFinancesChart = () => {
+        const dates: any[] = [];
+
+        for (let index = 12 * 2; index >= 0; index--) {
+            let date = new Date();
+            date = new Date(date.setFullYear(2021));
+            date = new Date(date.setMonth(12 - index));
+            date = new Date(date.setDate(new Date().getDate()));
+
+            const year = date.getFullYear();
+            const month =
+                date.getMonth() + 1 < 10
+                    ? `0${date.getMonth() + 1}`
+                    : date.getMonth() + 1;
+
+            dates.push(`${year}-${month}`);
+        }
+
+        finance.series[0].data = [];
+        finance.series[1].data = [];
+        finance.xaxis.categories = [];
+
+        dates.map((value: any) =>
+            finance.xaxis.categories.push(formatterMonthYear(value)),
+        );
+
+        dates.map((value) => {
+            // const inc = income.data.find((el: any) => el.month == value);
+            // console.log(inc);
+            finance.series[0].data.push(
+                income.data.some((el: any) => el.month == value)
+                    ? income.data.find((el: any) => el.month == value)
+                          .total_amount
+                    : 0,
+            );
+            finance.series[1].data.push(
+                spendings.data.some((el: any) => el.month == value)
+                    ? spendings.data.find((el: any) => el.month == value)
+                          .total_amount
+                    : 0,
+            );
+        });
+    };
+
     const initData = async () => {
         data = await getData();
+        income = await getIncomes();
+        spendings = await getSpendings();
+
+        defineFinancesChart();
     };
 
+    let outcome: any;
     onMount(async () => {
         await initData();
+        outcome = await getSpendigMonthly();
+
+        // await getTotalDataDues();
         // console.log(data);
     });
-
-    const options: Options = {
-        series: [],
-        colors: ["#1C64F2", "#16BDCA", "#9061F9"],
-        chart: {
-            height: 420,
-            width: "100%",
-            type: "pie",
-        },
-        stroke: {
-            colors: ["white"],
-            lineCap: "",
-        },
-        plotOptions: {
-            pie: {
-                labels: {
-                    show: true,
-                },
-                size: "100%",
-                dataLabels: {
-                    offset: -25,
-                },
-            },
-        },
-        labels: ["Permananen", "Kontrak", "Kos"],
-        dataLabels: {
-            enabled: true,
-            style: {
-                fontFamily: "Inter, sans-serif",
-            },
-        },
-        legend: {
-            position: "bottom",
-            fontFamily: "Inter, sans-serif",
-            labels: {
-                colors: "",
-            },
-        },
-        yaxis: {
-            labels: {
-                formatter: function (value) {
-                    return value + "%";
-                },
-            },
-        },
-        xaxis: {
-            labels: {
-                formatter: function (value) {
-                    return value + "%";
-                },
-            },
-            axisTicks: {
-                show: false,
-            },
-            axisBorder: {
-                show: false,
-            },
-        },
-    };
 </script>
 
 <Layout>
@@ -410,40 +637,51 @@
         </div>
 
         <div class="chart-section">
-            <Card>
-                <div class="flex justify-between items-start w-full">
-                    <div class="flex-col items-center">
-                        <div class="flex items-center mb-1">
+            <div class="max-md:block flex gap-4 w-full">
+                <CustomCard>
+                    <div class="flex justify-between items-start w-full">
+                        <div class="flex-col items-center">
+                            <div class="flex items-center mb-1">
+                                <h5
+                                    class="text-xl font-bold leading-none text-gray-900 dark:text-white me-1"
+                                >
+                                    Persentase Status Rumah Warga
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="flex justify-end items-center"></div>
+                    </div>
+
+                    <Chart {options} class="py-6 dark:text-white" />
+                </CustomCard>
+                <CustomCard divclass="flex-grow max-md:mt-2">
+                    <div class="flex justify-between items-center w-full mb-2">
+                        <div class="flex justify-center">
                             <h5
                                 class="text-xl font-bold leading-none text-gray-900 dark:text-white me-1"
                             >
-                                Persentase Status Rumah Warga
+                                Grafik Keuangan
                             </h5>
                         </div>
+                        <!-- <div>
+                            <Button color="light" class="px-3 py-2"
+                                >Last week<ChevronDownOutline
+                                    class="w-2.5 h-2.5 ms-1.5"
+                                /></Button
+                            >
+                            <Dropdown class="w-40">
+                                <DropdownItem>Yesterday</DropdownItem>
+                                <DropdownItem>Today</DropdownItem>
+                                <DropdownItem>Last 7 days</DropdownItem>
+                                <DropdownItem>Last 30 days</DropdownItem>
+                                <DropdownItem>Last 90 days</DropdownItem>
+                            </Dropdown>
+                        </div> -->
                     </div>
-                    <div class="flex justify-end items-center"></div>
-                </div>
-
-                <Chart {options} class="py-6 dark:text-white" />
-
-                <!-- <div
-                    class="grid grid-cols-1 items-center border-gray-200 border-t dark:border-gray-700 justify-between"
-                >
-                    <div class="flex justify-end items-center pt-5">
-                        <Button
-                            class="text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 text-center inline-flex items-center dark:hover:text-white bg-transparent hover:bg-transparent dark:bg-transparent dark:hover:bg-transparent focus:ring-transparent dark:focus:ring-transparent py-0"
-                            >Last 7 days<ChevronDownOutline
-                                class="w-2.5 m-2.5 ms-1.5"
-                            /></Button
-                        >
-                        <Dropdown class="w-40">
-                            <DropdownItem>Hari ini</DropdownItem>
-                            <DropdownItem>1 Tahun Terakhir</DropdownItem>
-                            <DropdownItem>3 Tahun Terakhir</DropdownItem>
-                        </Dropdown>
-                    </div>
-                </div> -->
-            </Card>
+                    <Chart options={finance} />
+                </CustomCard>
+            </div>
+            <div class="div"></div>
         </div>
     {/if}
 </Layout>

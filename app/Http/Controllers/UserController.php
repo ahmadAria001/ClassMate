@@ -60,6 +60,20 @@ class UserController extends Controller
         return Response()->json(['data' => $data], 200);
     }
 
+    public function getDD()
+    {
+        $data = User::withoutTrashed()->with('civilian_id.rt_id')->where('role', '!=', 'RT')->where('role', '!=', 'RW')->where('role', '!=', 'Admin')->get();
+
+        return Response()->json(['data' => $data], 200);
+    }
+
+    public function getDDRW()
+    {
+        $data = User::withoutTrashed()->with('civilian_id.rt_id')->where('role', '!=', 'RW')->where('role', '!=', 'Admin')->get();
+
+        return Response()->json(['data' => $data], 200);
+    }
+
     public function getRW()
     {
         $data =  User::withoutTrashed()->with('civilian_id.rt_id')->where('role', '=', "RW")->get();

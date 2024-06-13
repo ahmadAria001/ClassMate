@@ -8,13 +8,20 @@
         TableBodyRow,
         TableHead,
         TableHeadCell,
+        Popover,
     } from "flowbite-svelte";
-    import { ArrowRightOutline, CheckOutline } from "flowbite-svelte-icons";
+    import {
+        ArrowRightOutline,
+        CheckOutline,
+        QuestionCircleSolid,
+    } from "flowbite-svelte-icons";
     import Cards from "@C/LandingPage/CardsAnnouncement.svelte";
     import Navbar from "@C/LandingPage/Navbar.svelte";
     import Footer from "@C/LandingPage/Footer.svelte";
     import axiosInstance from "axios";
     import { onMount } from "svelte";
+
+    import { page } from "@inertiajs/svelte";
 
     const axios = axiosInstance.create();
 
@@ -65,18 +72,21 @@
 
     let dataRT: RT[] = [];
     let announcements: NewsArray = [];
+    let currentRW: any;
+    let events: any;
 
     const getNews = async (): Promise<NewsArray> => {
         const response = await axios.get("/api/news/lts", {
             headers: {
                 Accept: "application/json",
+                lct: $page.props.location,
             },
         });
 
         // console.log("API News Response:", response.data);
 
         if (Array.isArray(response.data.data)) {
-            return response.data.data.map((item) => ({
+            return response.data.data.map((item: any) => ({
                 ...item,
                 created_at: item.created_at.slice(0, 10), // Truncate date
             }));
@@ -86,9 +96,10 @@
     };
 
     const getRTData = async (): Promise<RT[]> => {
-        const response = await axios.get("/api/rt", {
+        const response = await axios.get("/api/rt/dd", {
             headers: {
                 Accept: "application/json",
+                lct: $page.props.location,
             },
         });
 
@@ -101,137 +112,48 @@
         }
     };
 
+    const getRW = async () => {
+        try {
+            const response = await axios.get(`/api/user/rw/current`, {
+                headers: {
+                    Accept: "application/json",
+                    lct: $page.props.location,
+                },
+            });
+            console.log("from fetch: " + response.data);
+
+            return response.data;
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const getCitizenEvents = async () => {
+        const response = await axios.get(`/api/docs/activity/lts`, {
+            headers: {
+                Accept: "application/json",
+                lct: $page.props.location,
+            },
+        });
+
+        return response.data;
+    };
+
     onMount(async () => {
         try {
             announcements = await getNews();
             dataRT = await getRTData();
+            currentRW = (await getRW()).data;
+            events = (await getCitizenEvents()).data;
             // console.log(dataRT);
+            console.log(currentRW);
+
             // console.log(announcements);
         } catch (error) {
             console.error("Error fetching data:", error);
         }
     });
 
-    let pengumumans = [
-        {
-            img: "https://media.kompas.tv/library/image/content_article/article_img/20231204072833.jpg",
-            title: "Perekrutan Anggota KPPS",
-            desc: "Pengumuman bagi seluruh masyarakat, dengan adanya Pemilihan Umum yang akan segera dilaksanakan, bagi yang berminat untuk menjadi anggota KPPS untuk mengambil form pendaftaran di rumah Ketua RW 03.",
-            date: "13 Maret 2024",
-        },
-        {
-            img: "https://asset.kompas.com/crops/jyzXEDY9vOxsOPbXwe8vm8WpE4A=/34x0:704x447/750x500/data/photo/2021/07/27/60ffc24bc0c75.jpg",
-            title: "Pengajuan Bantuan Sosial",
-            desc: "Pengumuman bagi seluruh masyarakat, dengan dibukanya pengajuan bantuan sosial PKH, bagi yang ingin mengajukan Bantuan Sosial, dimohon untuk mengisi form pengajuan Bantuan Sosial",
-            date: "13 Maret 2024",
-        },
-    ];
-    let activitys = [
-        {
-            activityName: "Kerja Bakti",
-            location: "Jl. Rambutan - Jl. Mangga",
-            time: "08.00 - 10.00",
-            date: "23 April 2024",
-        },
-        {
-            activityName: "Rapat Karang Taruna",
-            location: "Rumah Adit, Jl. Manggis No.8",
-            time: "19.00 - 21.00",
-            date: "24 April 2024",
-        },
-    ];
-    let admins = [
-        {
-            name: "Wisnu",
-            photoProfile: "https://jatim.kemenkumham.go.id/images/Wisnu.jpg",
-            head: "RW 03",
-            position: "",
-            number: "085777123456",
-            address: "Jl.Pahlawan No.510",
-            greetings:
-                "Salam sejahtera! Saya Wisnu, dengan keinginan kuat untuk membangun komunitas yang lebih baik dan harmonis bagi semua warga.",
-        },
-        {
-            name: "Subianto",
-            photoProfile: "https://jatim.kemenkumham.go.id/images/Subianta.jpg",
-            head: "RW 03",
-            position: "RT 01",
-            number: "085777123456",
-            address: "Jl.Pahlawan No.510",
-            greetings:
-                "Salam sejahtera! Saya Wisnu, dengan keinginan kuat untuk membangun komunitas yang lebih baik dan harmonis bagi semua warga.",
-        },
-        {
-            name: "Jaya",
-            photoProfile: "https://jatim.kemenkumham.go.id/images/Jaya.jpg",
-            head: "RW 03",
-            position: "RT 02",
-            number: "085777123456",
-            address: "Jl.Pahlawan No.510",
-            greetings:
-                "Salam sejahtera! Saya Wisnu, dengan keinginan kuat untuk membangun komunitas yang lebih baik dan harmonis bagi semua warga.",
-        },
-        {
-            name: "Gungun",
-            photoProfile: "https://jatim.kemenkumham.go.id/images/gungun.jpg",
-            head: "RW 03",
-            position: "RT 03",
-            number: "085777123456",
-            address: "Jl.Pahlawan No.510",
-            greetings:
-                "Salam sejahtera! Saya Wisnu, dengan keinginan kuat untuk membangun komunitas yang lebih baik dan harmonis bagi semua warga.",
-        },
-        {
-            name: "Indah",
-            photoProfile: "https://jatim.kemenkumham.go.id/images/Indah.jpg",
-            head: "RW 03",
-            position: "RT 04",
-            number: "085777123456",
-            address: "Jl.Pahlawan No.510",
-            greetings:
-                "Salam sejahtera! Saya Wisnu, dengan keinginan kuat untuk membangun komunitas yang lebih baik dan harmonis bagi semua warga.",
-        },
-        {
-            name: "Ufi",
-            photoProfile: "https://jatim.kemenkumham.go.id/images/Ufi.jpg",
-            head: "RW 03",
-            position: "RT 05",
-            number: "085777123456",
-            address: "Jl.Pahlawan No.510",
-            greetings:
-                "Salam sejahtera! Saya Wisnu, dengan keinginan kuat untuk membangun komunitas yang lebih baik dan harmonis bagi semua warga.",
-        },
-        {
-            name: "Ratno",
-            photoProfile: "https://jatim.kemenkumham.go.id/images/Ratno.jpg",
-            head: "RW 03",
-            position: "RT 06",
-            number: "085777123456",
-            address: "Jl.Pahlawan No.510",
-            greetings:
-                "Salam sejahtera! Saya Wisnu, dengan keinginan kuat untuk membangun komunitas yang lebih baik dan harmonis bagi semua warga.",
-        },
-        {
-            name: "Meirina",
-            photoProfile: "https://jatim.kemenkumham.go.id/images/Meirina.jpg",
-            head: "RW 03",
-            position: "RT 07",
-            number: "085777123456",
-            address: "Jl.Pahlawan No.510",
-            greetings:
-                "Salam sejahtera! Saya Wisnu, dengan keinginan kuat untuk membangun komunitas yang lebih baik dan harmonis bagi semua warga.",
-        },
-        {
-            name: "Adi",
-            photoProfile: "https://jatim.kemenkumham.go.id/images/Adi.jpg",
-            head: "RW 03",
-            position: "RT 08",
-            number: "085777123456",
-            address: "Jl.Pahlawan No.510",
-            greetings:
-                "Salam sejahtera! Saya Wisnu, dengan keinginan kuat untuk membangun komunitas yang lebih baik dan harmonis bagi semua warga.",
-        },
-    ];
     let poins = [
         {
             title: "Pemantuan Proaktif",
@@ -250,11 +172,39 @@
             desc: "RT dan RW bekerja sama dalam mengubah data penduduk, membuat surat keterangan, serta menanggapi laporan warga untuk menciptakan lingkungan yang harmonis dan responsif terhadap kebutuhan masyarakat",
         },
     ];
+
+    const dateFormatter = (epoc: number) => {
+        const date = new Date(epoc);
+
+        const monthNames = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+        ];
+
+        const day = date.getDate();
+
+        const monthIndex = date.getMonth();
+        const monthName = monthNames[monthIndex];
+
+        const year = date.getFullYear();
+
+        return `${day} ${monthName} ${year}`;
+    };
 </script>
 
+<Navbar />
 <div class="relative px-8 md:px-16 mt-24 md:mt-0">
     <!--  -->
-    <Navbar />
 
     <div class="content">
         <div
@@ -302,139 +252,175 @@
             </div>
         </div>
 
-        <div class="announcement mb-24">
+        {#if announcements}
+            <div class="announcement mb-24">
+                <div class="text-center mb-8">
+                    <Heading tag="h3" class="mb-2">Pengumuman</Heading>
+                    <A
+                        href="lp-pengumuman"
+                        class="inline-block flex justify-center items-center"
+                        >Lihat Selengkapnya &ensp; <ArrowRightOutline /></A
+                    >
+                </div>
+                <div class="group-card w-full">
+                    {#each announcements as announcement}
+                        <Cards
+                            imageUrl={announcement.attachment
+                                ? `/storage/assets/uploads/${announcement.attachment}`
+                                : "https://redthread.uoregon.edu/files/original/affd16fd5264cab9197da4cd1a996f820e601ee4.png"}
+                            hrefUrl="/"
+                            classCard="mb-3 d-block"
+                            title={announcement.title}
+                            description={announcement.desc}
+                            date={announcement.created_at}
+                        />
+                    {/each}
+                </div>
+            </div>
+        {/if}
+    </div>
+
+    {#if events}
+        <div class="event-calendar mb-24">
             <div class="text-center mb-8">
-                <Heading tag="h3" class="mb-2">Pengumuman</Heading>
+                <Heading tag="h3" class="">Kalendar Acara</Heading>
+            </div>
+            <div class="calendar-table md:flex md:justify-center">
+                <Table
+                    shadow
+                    hoverable={true}
+                    divClass="relative overflow-x-auto md:w-3/4"
+                >
+                    <TableHead class="uppercase">
+                        <TableHeadCell>Nama Kegiatan</TableHeadCell>
+                        <TableHeadCell>Lokasi</TableHeadCell>
+                        <TableHeadCell>Waktu</TableHeadCell>
+                        <TableHeadCell>Tanggal</TableHeadCell>
+                    </TableHead>
+                    <TableBody tableBodyClass="divide-y">
+                        {#each events as evt}
+                            <TableBodyRow>
+                                <TableBodyCell>
+                                    <div class="flex">
+                                        <p class="w-full truncate max-w-32">
+                                            {evt.name}
+                                        </p>
+                                        <QuestionCircleSolid
+                                            id={`name-${evt.id}`}
+                                        />
+                                        <Popover
+                                            class="w-64 text-sm text-black dark:text-white z-50"
+                                            title="Deskripsi"
+                                            triggeredBy={`#name-${evt.id}`}
+                                        >
+                                            {evt.name}
+                                        </Popover>
+                                    </div>
+                                </TableBodyCell>
+                                <TableBodyCell>
+                                    <div class="flex">
+                                        <p class="w-full truncate max-w-36">
+                                            {evt.location}
+                                        </p>
+                                        <QuestionCircleSolid
+                                            id={`loct-${evt.id}`}
+                                        />
+                                        <Popover
+                                            class="w-64 text-sm text-black dark:text-white z-50"
+                                            title="Deskripsi"
+                                            triggeredBy={`#loct-${evt.id}`}
+                                        >
+                                            {evt.location}
+                                        </Popover>
+                                    </div>
+                                </TableBodyCell>
+                                <TableBodyCell>
+                                    {new Date(
+                                        evt.startDate * 1000,
+                                    ).toLocaleTimeString(undefined, {
+                                        hour12: false,
+                                    })} - {new Date(
+                                        evt.endDate * 1000,
+                                    ).toLocaleTimeString(undefined, {
+                                        hour12: false,
+                                    })}
+                                </TableBodyCell>
+                                <TableBodyCell>
+                                    {dateFormatter(evt.startDate * 1000)} - {dateFormatter(
+                                        evt.endDate * 1000,
+                                    )}</TableBodyCell
+                                >
+                            </TableBodyRow>
+                        {/each}
+                    </TableBody>
+                </Table>
+            </div>
+        </div>
+    {/if}
+
+    {#if dataRT && currentRW}
+        <div class="list-admins mb-24">
+            <div class="text-center mb-8">
+                <Heading tag="h3" class="mb-2">Daftar Pengurus RW 03</Heading>
                 <A
-                    href="lp-pengumuman"
+                    href="lp-profile"
                     class="inline-block flex justify-center items-center"
                     >Lihat Selengkapnya &ensp; <ArrowRightOutline /></A
                 >
             </div>
-            <div class="group-card w-full">
-                <!-- {#each pengumumans.slice(0, 2) as pengumuman}
-                    <Cards
-                        imageUrl={pengumuman.img}
-                        hrefUrl="/"
-                        classCard="mb-3 d-block bg-gray-100"
-                        title={pengumuman.title}
-                        description={pengumuman.desc}
-                        date={pengumuman.date}
-                    />
-                {/each} -->
-                {#each announcements as announcement}
-                    <Cards
-                        imageUrl={announcement.attachment ||
-                            "https://redthread.uoregon.edu/files/original/affd16fd5264cab9197da4cd1a996f820e601ee4.png"}
-                        hrefUrl="/"
-                        classCard="mb-3 d-block"
-                        title={announcement.title}
-                        description={announcement.desc}
-                        date={announcement.created_at}
-                    />
-                {/each}
-            </div>
-        </div>
-    </div>
-
-    <div class="event-calendar mb-24">
-        <div class="text-center mb-8">
-            <Heading tag="h3" class="">Kalendar Acara</Heading>
-        </div>
-        <div class="calendar-table md:flex md:justify-center">
-            <Table
-                shadow
-                hoverable={true}
-                divClass="relative overflow-x-auto md:w-3/4"
-            >
-                <TableHead class="uppercase">
-                    <TableHeadCell>Nama Kegiatan</TableHeadCell>
-                    <TableHeadCell>Lokasi</TableHeadCell>
-                    <TableHeadCell>Waktu</TableHeadCell>
-                    <TableHeadCell>Tanggal</TableHeadCell>
-                </TableHead>
-                <TableBody tableBodyClass="divide-y">
-                    {#each activitys as activity}
-                        <TableBodyRow>
-                            <TableBodyCell
-                                >{activity.activityName}</TableBodyCell
-                            >
-                            <TableBodyCell>{activity.location}</TableBodyCell>
-                            <TableBodyCell>{activity.time}</TableBodyCell>
-                            <TableBodyCell>{activity.date}</TableBodyCell>
-                        </TableBodyRow>
-                    {/each}
-                </TableBody>
-            </Table>
-        </div>
-    </div>
-    <div class="list-admins mb-24">
-        <div class="text-center mb-8">
-            <Heading tag="h3" class="mb-2">Daftar Pengurus RW 03</Heading>
-            <A
-                href="lp-profile"
-                class="inline-block flex justify-center items-center"
-                >Lihat Selengkapnya &ensp; <ArrowRightOutline /></A
-            >
-        </div>
-        <div class="flex md:flex-row flex-col mb-10">
-            <img
-                src={admins[0].photoProfile}
-                alt=""
-                class="max-w-md md:w-4/5 object-cover rounded-lg max-h-96 object-top"
-            />
-            <div
-                class="desc-profile p-4 md:p-8 md:flex md:justify-center md:align-center"
-            >
+            <div class="flex md:flex-row flex-col mb-10">
+                <img
+                    src={currentRW.pict
+                        ? `/storage/assets/uploads/${currentRW.pict}`
+                        : "https://redthread.uoregon.edu/files/original/affd16fd5264cab9197da4cd1a996f820e601ee4.png"}
+                    alt=""
+                    class="max-w-md md:w-4/5 object-cover rounded-lg max-h-96 object-top"
+                />
                 <div
-                    class="w-4/5 md:flex md:flex-col md:justify-center md:align-center"
+                    class="desc-profile p-4 md:p-8 md:flex md:justify-center md:align-center"
                 >
-                    <Heading tag="h4" class="mb-2">{admins[0].name}</Heading>
-                    <Heading tag="h5" class="mb-2"
-                        >Ketua {admins[0].head}</Heading
+                    <div
+                        class="w-4/5 md:flex md:flex-col md:justify-center md:align-center"
                     >
-                    <p class="text-gray-500">{admins[0].greetings}</p>
-                </div>
-            </div>
-        </div>
-        <div
-            class="list-rt grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-8"
-        >
-            <!-- {#each admins.slice(1) as admin}
-                <div class="rounded-lg shadow-lg p-2 md:p-4">
-                    <img
-                        src={admin.photoProfile}
-                        alt=""
-                        class="w-full object-cover rounded-lg mb-3 max-h-64 object-top"
-                    />
-                    <Heading tag="h5" class="mb-2">{admin.name}</Heading>
-                    <p class="text-gray-500 mb-2">
-                        Ketua {admin.position} / {admin.head}
-                    </p>
-                </div>
-            {/each} -->
-            <!-- data from database -->
-            {#each dataRT as rt}
-                <div class="rounded-lg shadow-lg p-2 md:p-4">
-                    <img
-                        src={rt.civils[0]?.leader_id
-                            ? rt.civils[0].leader_id
-                            : "https://redthread.uoregon.edu/files/original/affd16fd5264cab9197da4cd1a996f820e601ee4.png"}
-                        alt="Profile Image"
-                        class="w-full object-cover rounded-lg mb-3 max-h-64 object-top"
-                    />
-                    <div class="mt-2">
-                        <Heading tag="h5" class="mb-2"
-                            >RT {rt.civils[0].fullName}</Heading
+                        <Heading tag="h4" class="mb-2"
+                            >{currentRW.civilian_id.fullName}</Heading
                         >
+                        <Heading tag="h5" class="mb-2">Ketua RW 3</Heading>
                         <p class="text-gray-500">
-                            Ketua RT {rt.number} / RW {rt.leader_id || 3}
+                            {currentRW.intro ? currentRW.intro : ""}
                         </p>
                     </div>
                 </div>
-            {/each}
+            </div>
+            <div
+                class="list-rt grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-8"
+            >
+                {#each dataRT as rt}
+                    <div class="rounded-lg shadow-lg p-2 md:p-4">
+                        <img
+                            src={rt.leader_id?.pict
+                                ? `/storage/assets/uploads/${rt.leader_id?.pict}`
+                                : "https://redthread.uoregon.edu/files/original/affd16fd5264cab9197da4cd1a996f820e601ee4.png"}
+                            alt="Profile Image"
+                            class="w-full object-cover rounded-lg mb-3 max-h-64 object-top"
+                        />
+                        <div class="mt-2">
+                            <Heading tag="h5" class="mb-2"
+                                >RT {rt.leader_id
+                                    ? rt.leader_id?.civilian_id.fullName
+                                    : ""}</Heading
+                            >
+                            <p class="text-gray-500">
+                                Ketua RT {rt.number} / RW 3
+                                <!-- / RW {rt.leader_id || 3} -->
+                            </p>
+                        </div>
+                    </div>
+                {/each}
+            </div>
         </div>
-    </div>
+    {/if}
+
     <div
         class="advantage grid grid-cols-1 lg:grid-cols-[40%_auto] items-center pb-24"
     >

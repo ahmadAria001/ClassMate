@@ -21,6 +21,7 @@
     } from "flowbite-svelte-icons";
     import { createEventDispatcher, onMount } from "svelte";
     import { Popover } from "flowbite-svelte";
+    import { string } from "zod";
 
     export let showState = false;
     export let target: string;
@@ -38,7 +39,7 @@
 
     const submitChange = async (values: any) => {
         try {
-            console.log(values);
+            console.log(values.data);
             let body: any;
 
             if (values.attachment) {
@@ -134,119 +135,142 @@
         return data;
     };
 
+    // let name: string;
+    // let phone: string;
+    // let address: string;
+    // let description: string;
     onMount(async () => {
         const response = await getComplaints(target);
-        data = await response.data;
+        data = response?.data;
 
-        await getAsset(data.attachment);
+        if (data) {
+            // name = data.data.created_by?.civilian_id?.fullName || "";
+            // phone = data.data.created_by?.civilian_id?.phone || "";
+            // address = data.data.created_by?.civilian_id?.address || "";
+            // description = data.data.docs_id?.description || "";
+            // console.log(
+            //     `nama : ${name}\nphone : ${phone}\naddress : ${address}\ndescription : ${description}`,
+            // );
+
+            if (data.attachment) {
+                await getAsset(data.attachment);
+            }
+        }
+
+        console.log(data);
     });
 </script>
 
 <Modal
     title="Detail Pengaduan"
     bind:open={showState}
-    on:close={() => (selectedImage = null)}
+    on:close={() => {
+        selectedImage = null;
+        target = String.toString();
+    }}
 >
     {#await initialLoad(target) then item}
-        <div class="mb-4">
-            <Label for="full_name" class="mb-2">Nama Pelapor</Label>
-            <Input
-                id="full_name"
-                placeholder="Nama Pelapor"
-                readonly
-                value={item.data.created_by.civilian_id.fullName}
-            />
-        </div>
-        <div class="grid md:grid-cols-2 md:gap-6">
+        {#if item?.data}
             <div class="mb-4">
-                <Label for="no_hp" class="mb-2">No HP</Label>
+                <Label for="full_name" class="mb-2">Nama Pelapor</Label>
                 <Input
-                    id="no_hp"
-                    placeholder="No HP"
+                    id="full_name"
+                    placeholder="Nama Pelapor"
                     readonly
-                    value={item.data.created_by.civilian_id.phone}
+                    value={item.data.created_by.civilian_id.fullName}
+                />
+            </div>
+            <div class="grid md:grid-cols-2 md:gap-6">
+                <div class="mb-4">
+                    <Label for="no_hp" class="mb-2">No HP</Label>
+                    <Input
+                        id="no_hp"
+                        placeholder="No HP"
+                        readonly
+                        value={item.data.created_by.civilian_id.phone}
+                    />
+                </div>
+                <div class="mb-4">
+                    <Label for="address" class="mb-2">Alamat</Label>
+                    <div class="flex gap-2">
+                        <Input
+                            id="address"
+                            placeholder="Alamat"
+                            readonly
+                            value={item.data.created_by.civilian_id.address}
+                        />
+                        <div class="flex align-middle w-fit h-full py-2">
+                            <QuestionCircleSolid
+                                class="w-6 h-6 dark:fill-white"
+                                id="pass-hint"
+                            />
+                        </div>
+                    </div>
+
+                    <Popover
+                        class="w-64 text-sm text-black dark:text-white"
+                        title="Alamat"
+                        triggeredBy={`#pass-hint`}
+                    >
+                        {item.data.created_by.civilian_id.address}
+                    </Popover>
+                </div>
+            </div>
+            <div class="mb-4">
+                <Label for="timeUpload" class="mb-2">Waktu Dikirim</Label>
+                <Input
+                    id="timeUpload"
+                    placeholder="Waktu Dikirim"
+                    readonly
+                    value={new Date(item.data.created_at).toLocaleDateString()}
+                />
+            </div>
+
+            <div class="mb-4">
+                <Label for="desc" class="mb-2 text-lg">Permasalahan</Label>
+                <Textarea
+                    rows="2"
+                    id="desc"
+                    name="description"
+                    placeholder="Isi Pengumuman"
+                    readonly
+                    value={item.data.docs_id.description}
                 />
             </div>
             <div class="mb-4">
-                <Label for="address" class="mb-2">Alamat</Label>
-                <div class="flex gap-2">
-                    <Input
-                        id="address"
-                        placeholder="Alamat"
-                        readonly
-                        value={item.data.created_by.civilian_id.address}
-                    />
-                    <div class="flex align-middle w-fit h-full py-2">
-                        <QuestionCircleSolid
-                            class="w-6 h-6 dark:fill-white"
-                            id="pass-hint"
-                        />
-                    </div>
+                <img
+                    src={selectedImage
+                        ? selectedImage
+                        : `/storage/assets/uploads/${item.data.attachment}`}
+                    alt="Selected Image"
+                    class={item.data.attachment || selectedImage
+                        ? "w-full h-auto max-h-72 mb-3 rounded-lg border-2 border-gray-500"
+                        : "hidden"}
+                />
+            </div>
+
+            <div class="block flex">
+                <div class="ml-auto">
+                    <Button
+                        type="button"
+                        class="mr-3"
+                        color="red"
+                        on:click={async () => {
+                            data.complaintStatus = "Unresolved";
+                            await submitChange(data);
+                        }}>Tolak Pengaduan</Button
+                    >
+                    <Button
+                        type="button"
+                        name="complaintStatus"
+                        on:click={async () => {
+                            data.complaintStatus = "Resolved";
+                            await submitChange(data);
+                        }}>Proses Pengaduan</Button
+                    >
                 </div>
-
-                <Popover
-                    class="w-64 text-sm text-black dark:text-white"
-                    title="Alamat"
-                    triggeredBy={`#pass-hint`}
-                >
-                    {item.data.created_by.civilian_id.address}
-                </Popover>
             </div>
-        </div>
-        <div class="mb-4">
-            <Label for="timeUpload" class="mb-2">Waktu Dikirim</Label>
-            <Input
-                id="timeUpload"
-                placeholder="Waktu Dikirim"
-                readonly
-                value={new Date(item.data.created_at).toLocaleDateString()}
-            />
-        </div>
-
-        <div class="mb-4">
-            <Label for="desc" class="mb-2 text-lg">Permasalahan</Label>
-            <Textarea
-                rows="2"
-                id="desc"
-                name="description"
-                placeholder="Isi Pengumuman"
-                readonly
-                value={item.data.docs_id.description}
-            />
-        </div>
-        <div class="mb-4">
-            <img
-                src={selectedImage
-                    ? selectedImage
-                    : `/storage/assets/uploads/${item.data.attachment}`}
-                alt="Selected Image"
-                class={item.data.attachment || selectedImage
-                    ? "w-full h-auto max-h-72 mb-3 rounded-lg border-2 border-gray-500"
-                    : "hidden"}
-            />
-        </div>
-
-        <div class="block flex">
-            <div class="ml-auto">
-                <Button
-                    type="button"
-                    class="mr-3"
-                    color="red"
-                    on:click={async () => {
-                        data.complaintStatus = "Unresolved";
-                        await submitChange(data);
-                    }}>Tolak Pengaduan</Button
-                >
-                <Button
-                    type="button"
-                    name="complaintStatus"
-                    on:click={async () => {
-                        data.complaintStatus = "Resolved";
-                        await submitChange(data);
-                    }}>Proses Pengaduan</Button
-                >
-            </div>
-        </div>
+        {/if}
     {/await}
 </Modal>
 

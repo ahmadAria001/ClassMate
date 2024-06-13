@@ -840,7 +840,7 @@
         <set_empty_string>N</set_empty_string>
       </field>
     </fields>
-    <limit>2191</limit>
+    <limit>2556</limit>
     <never_ending>N</never_ending>
     <interval_in_ms>5000</interval_in_ms>
     <row_time_field>now</row_time_field>

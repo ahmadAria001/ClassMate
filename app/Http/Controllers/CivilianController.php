@@ -9,6 +9,8 @@ use App\Http\Requests\Resources\Civilian\Update;
 use App\Http\Requests\Resources\DeleteCiviliant;
 use App\Http\Requests\UpdateCivilianRequest;
 use App\Models\Civilian;
+use App\Models\User;
+use App\Utils\AccessToken;
 use Carbon\Carbon;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\JsonResponse;
@@ -58,7 +60,8 @@ class CivilianController extends Controller
     {
         $data = null;
         if ($filter) {
-            $data = Civilian::withoutTrashed()->with('rt_id')->where('id', '=', $filter)->orWhere('nik', '=', $filter)->orWhere('fullName', '=', $filter)->get()->first();
+            $data = Civilian::withoutTrashed()->with('rt_id')
+                ->where('id', '=', $filter)->orWhere('nik', '=', $filter)->orWhere('fullName', '=', $filter)->get()->first();
         } else {
             $data = Civilian::withoutTrashed()->with('rt_id')->where('status', '!=', 'pindah')->where('status', '!=', 'Meninggal')->get();
         }
@@ -100,29 +103,72 @@ class CivilianController extends Controller
         return Response()->json(['data' => $data], 200);
     }
 
-    public function getArchived($filter = null, $byRT = false): JsonResponse
+    public function getArchived(Request $req, $filter = null, $byRT = false, $page = 1): JsonResponse
     {
         $data = null;
         $filter = $filter == 'null' ? null : $filter;
         $byRT = filter_var($byRT, FILTER_VALIDATE_BOOLEAN);
 
+        $identity = AccessToken::getToken($req);
+
+        if (!$identity) abort(401);
+        $model = $identity->tokenable();
+        $user = User::withoutTrashed()->with('civilian_id.rt_id')->where('id', $model->get('id')[0]->id)->get()->first();
+
+        $take = 10;
+
         if (!$filter) {
-            $data = Civilian::withTrashed()->with('rt_id')->where('status', '!=', 'Aktif')->get();
+            if (!$byRT) {
+                $data = Civilian::withTrashed()
+                    ->with('rt_id')
+                    ->where('status', '!=', 'Aktif')
+                    ->skip($page > 1 ? ($page - 1) * $take : 0)
+                    ->take($take)
+                    ->get();
+
+                $length = Civilian::withTrashed()
+                    ->with('rt_id')
+                    ->where('status', '!=', 'Aktif')
+                    ->get()
+                    ->count();
+            } else {
+                $data = Civilian::withTrashed()
+                    ->where('rt_id', '=', $user->getRelation('civilian_id')->rt_id)
+                    ->where('status', '!=', 'Aktif')
+                    ->with('rt_id')
+                    ->skip($page > 1 ? ($page - 1) * $take : 0)
+                    ->take($take)
+                    ->get();
+                $length = Civilian::withTrashed()
+                    ->where('rt_id', '=', $user->getRelation('civilian_id')->rt_id)
+                    ->where('status', '!=', 'Aktif')
+                    ->with('rt_id')->get()->count();
+            }
         } else {
             if ($byRT) {
                 $data = Civilian::withTrashed()
                     ->with('rt_id')
                     ->where('status', '!=', 'Aktif')
-                    ->whereHas('rt_id', function ($query) use ($filter) {
-                        $query->where('id', $filter);
+                    ->whereHas('rt_id', function ($query) use ($user) {
+                        $query->where('id', $user->getRelation('civilian_id')->rt_id);
                     })
+                    ->whereAny(['fullName', 'id'], 'LIKE', "%$filter%")
+                    ->skip($page > 1 ? ($page - 1) * $take : 0)
+                    ->take($take)
                     ->get();
+                $length = $data->count();
             } else {
-                $data = Civilian::withTrashed()->with('rt_id')->where('status', '!=', 'Aktif')->where('id', $filter)->get()->first();
+                $data = Civilian::withTrashed()
+                    ->with('rt_id')
+                    ->where('status', '!=', 'Aktif')
+                    ->whereAny(['fullName', 'id'], 'LIKE', "%$filter%")
+                    ->get();
+
+                $length = $data->count();
             }
         }
 
-        return Response()->json($data, 200);
+        return Response()->json(['data' => $data, 'length' => $length], 200);
     }
 
     public function create(Create $req): JsonResponse

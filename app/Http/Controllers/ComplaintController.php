@@ -109,20 +109,46 @@ class ComplaintController extends Controller
 
         if ($filter && strlen($filter) > 0) {
             $data = Complaint::withoutTrashed()->with('docs_id', 'created_by.civilian_id', 'updated_by')
-                ->whereHas('created_by.civilian_id', function ($q) use ($filter) {
-                    $q->whereAny(['nik', 'fullName', 'birthplace', 'birthplace', 'birthplace', 'status', 'address', 'religion', 'job'], 'LIKE', "%$filter%");
-                    // $q->where('fullName', 'LIKE', "%$filter%");
-                })
-                ->orWhereAny(['id', 'complaintStatus'], 'LIKE', "%$filter%");
-
-            // dd($data);
+                ->where('id', $filter)->first();
         } else {
-            $data = Complaint::withoutTrashed()->with('docs_id', 'created_by.civilian_id', 'updated_by');
+            $data = Complaint::withoutTrashed()->with('docs_id', 'created_by.civilian_id', 'updated_by')->get();
         }
 
         $length = $data->count();
 
-        return Response()->json(['data' => $data->get(), 'length' => $length]);
+        return Response()->json(['data' => $data, 'length' => $length]);
+    }
+
+    public  function getLike($page = 1, $filter = null)
+    {
+        $data = null;
+        $take = 5;
+
+        if ($filter) {
+            $data = Complaint::withoutTrashed()->with('docs_id', 'created_by.civilian_id', 'updated_by')
+                ->whereHas('created_by.civilian_id', function ($q) use ($filter) {
+                    $q->whereAny(['fullName'], 'LIKE', "%$filter%");
+                })
+                ->skip($page > 1 ? ($page - 1) * $take : 0)
+                ->take($take)->get();
+
+            $length = Complaint::withoutTrashed()->with('docs_id', 'created_by.civilian_id', 'updated_by')
+                ->whereHas('created_by.civilian_id', function ($q) use ($filter) {
+                    $q->whereAny(['fullName'], 'LIKE', "%$filter%");
+                })->get()->count();
+        } else {
+            $data = Complaint::withoutTrashed()
+                ->with('docs_id', 'created_by.civilian_id', 'updated_by')
+                ->skip($page > 1 ? ($page - 1) * $take : 0)
+                ->take($take)->get();
+            $length = Complaint::withoutTrashed()
+                ->with('docs_id', 'created_by.civilian_id', 'updated_by')
+                ->get()
+                ->count();
+        }
+
+
+        return Response()->json(['data' => $data, 'length' => $length]);
     }
 
     public function getPaged($page = 1)
@@ -162,7 +188,16 @@ class ComplaintController extends Controller
             ->take($take)
             ->get();
 
-        $length = $data->count();
+        $length = Complaint::withoutTrashed()
+            ->with('docs_id', 'created_by.civilian_id', 'updated_by')
+            ->whereHas('created_by', function ($q) use ($user) {
+                $q->where(
+                    'id',
+                    $user->id
+                );
+            })
+            ->get()
+            ->count();
 
         return response()->json(['data' => $data, 'length' => $length]);
     }
@@ -225,13 +260,14 @@ class ComplaintController extends Controller
                     // public_path('storage') . DIRECTORY_SEPARATOR .
                     'public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR;
 
-                [$width, $height] = getimagesize($image->getFileInfo());
-                $loadedImg = Image::load($image->getRealPath());
-                $compressedImg = $loadedImg
-                    ->width($width > 1080 ? 1080 : $width)
-                    ->height($height > 1080 ? 1080 : $height)
-                    ->quality(20)
-                    ->save(Storage::path($path) . $name);
+                // [$width, $height] = getimagesize($image->getFileInfo());
+                // $loadedImg = Image::load($image->getRealPath());
+                // $compressedImg = $loadedImg
+                //     ->width($width > 1080 ? 1080 : $width)
+                //     ->height($height > 1080 ? 1080 : $height)
+                //     ->quality(20)
+                //     ->save(Storage::path($path) . $name);
+                $image->storePubliclyAs($path . $name);
             } else {
                 $data = Complaint::firstOrCreate([
                     'docs_id' => $docs->id,
@@ -299,8 +335,6 @@ class ComplaintController extends Controller
             $docs = Docs::withTrashed()
                 ->where('id', $data->docs_id)
                 ->first();
-            error_log($payload);
-            error_log($data);
 
             if ($data) {
                 //Handle Log Update
@@ -354,13 +388,14 @@ class ComplaintController extends Controller
                         // public_path('storage') . DIRECTORY_SEPARATOR .
                         'public' . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR;
 
-                    [$width, $height] = getimagesize($image->getFileInfo());
-                    $loadedImg = Image::load($image->getRealPath());
-                    $compressedImg = $loadedImg
-                        ->width($width > 1080 ? 1080 : $width)
-                        ->height($height > 1080 ? 1080 : $height)
-                        ->quality(20)
-                        ->save(Storage::path($path) . $name);
+                    // [$width, $height] = getimagesize($image->getFileInfo());
+                    // $loadedImg = Image::load($image->getRealPath());
+                    // $compressedImg = $loadedImg
+                    //     ->width($width > 1080 ? 1080 : $width)
+                    //     ->height($height > 1080 ? 1080 : $height)
+                    //     ->quality(20)
+                    //     ->save(Storage::path($path) . $name);
+                    $image->storePubliclyAs($path . $name);
 
                     $data->update(['attachment' => $name]);
                     $data->save();

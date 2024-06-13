@@ -225,7 +225,7 @@
                             <TableBodyCell class="flex items-center">
                                 <Avatar
                                     src={item.leader_id?.pict
-                                        ? `/assets/uploads/${item.leader_id?.pict}`
+                                        ? `/storage/assets/uploads/${item.leader_id?.pict}`
                                         : ""}
                                     class="mr-3"
                                 />

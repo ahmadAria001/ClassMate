@@ -19,6 +19,9 @@ Route::prefix('/user')->group(
 
         Route::get('/{column}/{operator}/{value}', [UserController::class, 'getCustom'])->middleware(GET::class),
 
+        Route::get('/dd', [UserController::class, 'getDD'])->middleware(GET::class),
+        Route::get('/ddrw', [UserController::class, 'getDDRW'])->middleware(GET::class),
+
         Route::get('/', [UserController::class, 'get'])->middleware(GET::class),
         Route::get('/{filter}', [UserController::class, 'get'])->middleware(GET::class),
 

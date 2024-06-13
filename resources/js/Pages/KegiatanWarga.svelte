@@ -30,7 +30,7 @@
     let builder = {};
 
     const rebuild = async () => {
-        await initData();
+        filteredData = data.data;
         builder = {};
     };
 
@@ -70,6 +70,19 @@
     const getRequestDocs = async (page = 1) => {
         const response = await axios.get(
             `/api/docs/activity/p/${encodeURIComponent(page)}`,
+        );
+
+        return response.data;
+    };
+
+    const searchEvent = async (filter: string = "") => {
+        const response = await axios.get(
+            `/api/docs/activity/like/${encodeURIComponent(currentPage)}/${encodeURIComponent(filter)}`,
+            {
+                headers: {
+                    Accept: "application/json",
+                },
+            },
         );
 
         return response.data;
@@ -173,12 +186,20 @@
     });
 
     let filteredData: any;
-    const handleSearch = (event: any) => {
+    const handleSearch = async (event: any) => {
         const searchValue = event.detail.value.toLowerCase();
         // console.log("Search value in handleSearch in use file:", searchValue);
+
+        currentPage = 1;
         if (searchValue == "") {
-            filteredData = [data.data];
+            await initData();
+            filteredData = [...data.data];
+            await rebuild();
+
+            return;
         }
+
+        data = await searchEvent(searchValue);
         filteredData = data.data.filter((d: any) =>
             d.name.toLowerCase().includes(searchValue),
         );
@@ -214,9 +235,9 @@
                             <TableBodyRow>
                                 <TableBodyCell>
                                     <div
-                                        class="flex justify-between align-middle gap-2"
+                                        class="flex justify-between align-middle gap-2 w-full"
                                     >
-                                        <span class="w-full truncate">
+                                        <span class="max-w-32 truncate">
                                             {item.name}
                                         </span>
                                         <QuestionCircleSolid
@@ -265,7 +286,8 @@
                                 title="Deskripsi"
                                 triggeredBy={`#title-${item.id}`}
                             >
-                                {item.docs_id.description}
+                                <!-- {item.docs_id.description} -->
+                                {item.name}
                             </Popover>
                         {/each}
                     {/if}
@@ -304,6 +326,7 @@
                         on:click={async () => {
                             currentPage--;
                             await initData();
+                            await rebuild();
                         }}><ChevronLeftOutline /></Button
                     >
                     <!-- {#each data.length as pageNumber} -->
@@ -314,6 +337,7 @@
                         on:click={async () => {
                             currentPage++;
                             await initData();
+                            await rebuild();
                         }}><ChevronRightOutline /></Button
                     >
                 </ButtonGroup>
