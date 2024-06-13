@@ -143,8 +143,6 @@ class DuesPaymentLogController extends Controller
     group by `month`
     order by `month` desc;';
 
-        error_log($query);
-
         $monthlyIncome = DB::select($query);
 
         return response()->json([
