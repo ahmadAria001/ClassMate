@@ -17,6 +17,7 @@
         Tabs,
         TabItem,
         Toast,
+        Popover,
     } from "flowbite-svelte";
     import {
         CheckCircleSolid,
@@ -24,6 +25,7 @@
         ChevronRightOutline,
         CloseCircleSolid,
         ImageOutline,
+        QuestionCircleSolid,
     } from "flowbite-svelte-icons";
     import TableSearch from "@C/General/TableSearch.svelte";
     import { page } from "@inertiajs/svelte";
@@ -366,11 +368,8 @@
                 nama: alt.nama,
                 status: alt.status,
                 nilai:
-                    jarakNegatif.length > 1
-                        ? jarakNegatif[index].jarak /
-                          (jarakNegatif[index].jarak +
-                              jarakPositif[index].jarak)
-                        : 1,
+                    jarakNegatif[index].jarak /
+                    (jarakNegatif[index].jarak + jarakPositif[index].jarak),
             };
         });
 
@@ -406,10 +405,8 @@
         if (role == "Warga") return;
 
         if (role == "RT") url = `/api/bansos/rt/${encodeURIComponent(page)}`;
-        if (role != "RT" && role != "Warga")
+        if (role != "RT" || role != "Warga")
             url = `/api/bansos/p/${encodeURIComponent(page)}`;
-
-        console.log(url);
 
         try {
             const response = await axios.get(url, {
@@ -667,7 +664,7 @@
                         >{data.length}</span
                     >
                 </span>
-                <!-- <ButtonGroup>
+                <ButtonGroup>
                     <Button
                         disabled={currentPage < 2}
                         on:click={async () => {
@@ -675,7 +672,9 @@
                             await initData();
                         }}><ChevronLeftOutline /></Button
                     >
+                    <!-- {#each data.length as pageNumber} -->
                     <Button disabled>{currentPage}</Button>
+                    <!-- {/each} -->
                     <Button
                         disabled={data.data.length < 5}
                         on:click={async () => {
@@ -683,7 +682,7 @@
                             await initData();
                         }}><ChevronRightOutline /></Button
                     >
-                </ButtonGroup> -->
+                </ButtonGroup>
             {/if}
         </div>
     </TableSearch>
@@ -730,10 +729,19 @@
             </Table>
 
             <h2
-                class="text-xl font-semibold mt-6 mb-2 text-black dark:text-white"
+                class="flex items-center text-xl font-semibold mt-6 mb-2 text-black dark:text-white"
             >
                 Hasil Normalisasi
+                <QuestionCircleSolid class="ml-2" id="normalisasi-saw" />
             </h2>
+            <Popover
+                class="w-64 text-sm text-black dark:text-white z-50"
+                title="Rumus Normalisasi"
+                triggeredBy="#normalisasi-saw"
+            >
+                <!-- {item.docs_id.description} -->
+                <img src="/assets/images/normalisasiSAW.png" alt="" />
+            </Popover>
             <Table>
                 <TableHead>
                     <TableHeadCell>Alternatif</TableHeadCell>
@@ -755,10 +763,19 @@
             </Table>
 
             <h2
-                class="text-xl font-semibold mt-6 mb-2 text-black dark:text-white"
+                class="flex items-center text-xl font-semibold mt-6 mb-2 text-black dark:text-white"
             >
                 Hasil Akhir
+                <QuestionCircleSolid class="ml-2" id="prefrensi-saw" />
             </h2>
+            <Popover
+                class="w-64 text-sm text-black dark:text-white z-50"
+                title="Rumus Prefrensi"
+                triggeredBy="#prefrensi-saw"
+            >
+                <!-- {item.docs_id.description} -->
+                <img src="/assets/images/prefrensiSAW.png" alt="" />
+            </Popover>
             <Table>
                 <TableHead>
                     <TableHeadCell>Alternatif</TableHeadCell>
@@ -811,10 +828,19 @@
             </Table>
 
             <h2
-                class="text-xl font-semibold mt-6 mb-2 text-black dark:text-white"
+                class="flex items-center text-xl font-semibold mt-6 mb-2 text-black dark:text-white"
             >
                 Matrik Normalisasi (R)
+                <QuestionCircleSolid class="ml-2" id="prefrensi-topsis" />
             </h2>
+            <Popover
+                class="w-64 text-sm text-black dark:text-white z-50"
+                title="Rumus Normalisasi"
+                triggeredBy="#prefrensi-topsis"
+            >
+                <!-- {item.docs_id.description} -->
+                <img src="/assets/images/normalisasiTOP.png" alt="" />
+            </Popover>
             <Table>
                 <TableHead>
                     <TableHeadCell>Alternatif</TableHeadCell>
@@ -839,10 +865,19 @@
             </Table>
 
             <h2
-                class="text-xl font-semibold mt-6 mb-2 text-black dark:text-white"
+                class="flex items-center text-xl font-semibold mt-6 mb-2 text-black dark:text-white"
             >
                 Matrik Normalisasi Berbobot (Y)
+                <QuestionCircleSolid class="ml-2" id="normalisasi-y-topsis" />
             </h2>
+            <Popover
+                class="w-64 text-sm text-black dark:text-white z-50"
+                title="Rumus Normalisasi Y Berbobot"
+                triggeredBy="#normalisasi-y-topsis"
+            >
+                <!-- {item.docs_id.description} -->
+                <img src="/assets/images/keputusanYTOP.png" alt="" />
+            </Popover>
             <Table>
                 <TableHead>
                     <TableHeadCell>Alternatif</TableHeadCell>
@@ -867,12 +902,21 @@
             </Table>
 
             <h2
-                class="text-xl font-semibold mt-6 mb-2 text-black dark:text-white"
+                class="flex items-center text-xl font-semibold mt-6 mb-2 text-black dark:text-white"
             >
                 Solusi Ideal Positif (A<sup>+</sup>) dan Solusi Ideal Negatif (A<sup
                     >-</sup
                 >)
+                <QuestionCircleSolid class="ml-2" id="solusi-ideal-a" />
             </h2>
+            <Popover
+                class="w-64 text-sm text-black dark:text-white z-50"
+                title="Rumus Solusi Ideal (A)"
+                triggeredBy="#solusi-ideal-a"
+            >
+                <!-- {item.docs_id.description} -->
+                <img src="/assets/images/p_solusi ideal.png" alt="" />
+            </Popover>
             <Table>
                 <TableHead>
                     <TableHeadCell>Kriteria</TableHeadCell>
@@ -907,11 +951,20 @@
             </Table>
 
             <h2
-                class="text-xl font-semibold mt-6 mb-2 text-black dark:text-white"
+                class="flex items-center text-xl font-semibold mt-6 mb-2 text-black dark:text-white"
             >
                 Jarak Solusi Ideal Positif (D<sup>+</sup>) dan Jarak Solusi
                 Ideal Negatif (D<sup>-</sup>)
+                <QuestionCircleSolid class="ml-2" id="jarak-solusi-ideal-d" />
             </h2>
+            <Popover
+                class="w-64 text-sm text-black dark:text-white z-50"
+                title="Rumus Jarak Solusi Ideal (D)"
+                triggeredBy="#jarak-solusi-ideal-d"
+            >
+                <!-- {item.docs_id.description} -->
+                <img src="/assets/images/p_jarak-solusi-ideal.png" alt="" />
+            </Popover>
             <Table>
                 <TableHead>
                     <TableHeadCell>Alternatif</TableHeadCell>
@@ -936,10 +989,19 @@
             </Table>
 
             <h2
-                class="text-xl font-semibold mt-6 mb-2 text-black dark:text-white"
+                class="flex items-center text-xl font-semibold mt-6 mb-2 text-black dark:text-white"
             >
                 Nilai Preferensi (V)
+                <QuestionCircleSolid class="ml-2" id="preferensiTOP" />
             </h2>
+            <Popover
+                class="w-64 text-sm text-black dark:text-white z-50"
+                title="Rumus Preferensi"
+                triggeredBy="#preferensiTOP"
+            >
+                <!-- {item.docs_id.description} -->
+                <img src="/assets/images/prefrensiTOP.png" alt="" />
+            </Popover>
             <Table>
                 <TableHead>
                     <TableBodyCell>Alternatif</TableBodyCell>

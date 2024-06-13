@@ -750,7 +750,8 @@
                                             <TableHeadCell
                                                 >Tagihan</TableHeadCell
                                             >
-                                            <TableHeadCell>Status</TableHeadCell
+                                            <TableHeadCell class="text-center"
+                                                >Status</TableHeadCell
                                             >
                                             <!-- <TableHeadCell class="text-center"
                                     >Bayar</TableHeadCell
