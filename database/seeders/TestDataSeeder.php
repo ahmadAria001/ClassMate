@@ -299,12 +299,12 @@ class TestDataSeeder extends Seeder
         ]);
 
         $spendingCategory = ['Event', 'Administration', 'Infrastructure'];
-        for ($i = 0; $i < 3; $i++) {
+        for ($i = 0; $i < 200; $i++) {
             Spending::create([
-                'category' => $spendingCategory[$i],
+                'category' => $faker->randomElement($spendingCategory),
                 'desc' => implode($faker->sentences(5)),
-                'amount' => $faker->numberBetween(100000, 1000000),
-                'created_at' => Carbon::createFromDate($faker->dateTime('-1 year'))->getTimestamp(),
+                'amount' => $faker->numberBetween(5000, 6000),
+                'created_at' => Carbon::createFromDate($faker->dateTimeBetween('-5 years', '-1 years'))->getTimestamp(),
                 'created_by' => 9,
             ]);
         }

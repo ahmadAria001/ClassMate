@@ -71,8 +71,7 @@ class SpendingController extends Controller
         $isRT = $user->role == "RT";
 
         $currentDate = Carbon::now();
-
-        $sixMonthsAgo = $currentDate->copy()->subMonths(6)->setDay(1);
+        $sixMonthsAgo = $currentDate->copy()->setMonth(12)->setDay(1)->setYear(2021)->subYear(1)->subMonths(12);
 
         // ngambil data pengeluaran dalam 6 bulan terakhir dan menjumlahkan perbulan
         $query = !$isRT ? 'select

@@ -467,14 +467,15 @@
     const defineFinancesChart = () => {
         const dates: any[] = [];
 
-        for (let index = 6; index >= 0; index--) {
+        for (let index = 12 * 2; index >= 0; index--) {
             let date = new Date();
-            date = new Date(date.setMonth(date.getMonth() - index));
+            date = new Date(date.setFullYear(2021));
+            date = new Date(date.setMonth(12 - index));
             date = new Date(date.setDate(new Date().getDate()));
 
             const year = date.getFullYear();
             const month =
-                date.getMonth() + 1 < 9
+                date.getMonth() + 1 < 10
                     ? `0${date.getMonth() + 1}`
                     : date.getMonth() + 1;
 
@@ -636,7 +637,7 @@
         </div>
 
         <div class="chart-section">
-            <div class="flex gap-4 w-full">
+            <div class="max-md:block flex gap-4 w-full">
                 <CustomCard>
                     <div class="flex justify-between items-start w-full">
                         <div class="flex-col items-center">
@@ -653,7 +654,7 @@
 
                     <Chart {options} class="py-6 dark:text-white" />
                 </CustomCard>
-                <CustomCard divclass="flex-grow">
+                <CustomCard divclass="flex-grow max-md:mt-2">
                     <div class="flex justify-between items-center w-full mb-2">
                         <div class="flex justify-center">
                             <h5
